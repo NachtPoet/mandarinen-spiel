@@ -1184,13 +1184,12 @@
       }
 
       setMusicForLevel(levelIndex) {
-        let levelNum = (levelIndex + 1).toString().padStart(2, '0');
-        this.bgMusic.src = `Mandarinen_Game_${levelNum}.mp3`; // Relativer Pfad!
-        // **Entferne das sofortige .play() hier, um Autoplay-Probleme auf Mobilgeräten zu vermeiden.**
-        // if (this.musicEnabled) {
-        //   this.bgMusic.play().catch(err => console.log("Musik konnte nicht gestartet werden:", err));
-        // }
-      }
+  let levelNum = (levelIndex + 1).toString().padStart(2, '0');
+  this.bgMusic.src = `Mandarinen_Game_${levelNum}.mp3`; // Relativer Pfad!
+  if (this.musicEnabled) {
+    this.bgMusic.play().catch(err => console.log("Musik konnte nicht gestartet werden:", err));
+  }
+}
 
       playSound(name) {
         if (this.soundEnabled && this.soundEffects[name]) {
@@ -1438,8 +1437,8 @@ Was wir haben wird nie vergehen`,
               cellBorder: "#00cc00",
               cellSelected: "#00cc00",
               cellFound: "#99ff99",
-              text-shadow: "0 0 5px #00cc00",
-              title-shadow: "0 0 10px #00cc00"
+              textShadow: "0 0 5px #00cc00",
+              titleShadow: "0 0 10px #00cc00"
             },
             targetWords: ["VERBUNDEN", "VERLOREN", "DUNKELSTEN", "VERGEHEN", "HABEN"],
             quote: "Wahre Verbindungen kennen keine Entfernung, keine Zeit und keine Grenzen."
@@ -1681,10 +1680,6 @@ Ich hab immer Mandarinen im Gepäck`,
         this.timerInterval = setInterval(() => this.updateTimer(), 1000);
         this.initLevel();
         this.saveGameProgress();
-        // **Starte die Musik hier, nach der Benutzerinteraktion, um Autoplay-Probleme auf Mobilgeräten zu vermeiden.**
-        if (this.audioManager.musicEnabled) {
-          this.audioManager.bgMusic.play().catch(err => console.log("Musik konnte nicht gestartet werden:", err));
-        }
       }
 
       startNewGame() {
@@ -1710,10 +1705,6 @@ Ich hab immer Mandarinen im Gepäck`,
 
         this.resetGameProgress();
         this.saveGameProgress();
-        // **Starte die Musik auch hier, nach der Benutzerinteraktion, um Autoplay-Probleme auf Mobilgeräten zu vermeiden.**
-        if (this.audioManager.musicEnabled) {
-          this.audioManager.bgMusic.play().catch(err => console.log("Musik konnte nicht gestartet werden:", err));
-        }
       }
 
       updateTimer() {
