@@ -405,6 +405,33 @@
       pointer-events: none;
     }
     
+    /* Hilfe-Dialog Optimierung */
+    .help-container {
+      max-height: 70vh;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cell-selected) rgba(0,0,0,0.3);
+    }
+    
+    .help-container::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .help-container::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+    }
+    
+    .help-container::-webkit-scrollbar-thumb {
+      background-color: var(--cell-selected);
+      border-radius: 10px;
+    }
+    
+    .help-section p {
+      font-size: 0.75rem;
+      line-height: 1.4;
+    }
+    
     /* Mobile-Optimierung */
     @media (max-width: 500px) {
       .cell {
@@ -992,138 +1019,6 @@
       10% { opacity: 0.7; }
       100% { opacity: 0; }
     }
-    
-    /* Rabatt-Code Styling */
-    .discount-reveal {
-      margin-top: 25px;
-      max-width: 450px;
-      background: rgba(255, 140, 0, 0.15);
-      border-radius: 12px;
-      padding: 15px;
-      text-align: center;
-      transform: scale(0.95);
-      opacity: 0;
-      display: none; /* Initial versteckt */
-      border: 1px solid rgba(255, 140, 0, 0.3);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .discount-reveal::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,140,0,0.1) 0%, transparent 70%);
-      animation: rotateGlow 15s infinite linear;
-    }
-
-    @keyframes rotateGlow {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @keyframes revealCode {
-      0% { transform: scale(0.95); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    .discount-code {
-      font-family: var(--main-font);
-      background: rgba(0, 0, 0, 0.7);
-      color: var(--cell-selected);
-      padding: 10px 20px;
-      border-radius: 6px;
-      display: inline-block;
-      margin: 10px 0;
-      font-size: 1.2rem;
-      letter-spacing: 2px;
-      box-shadow: 0 0 15px rgba(255, 140, 0, 0.4);
-      border: 1px dashed rgba(255, 140, 0, 0.5);
-      position: relative;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .discount-code:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(255, 140, 0, 0.6);
-    }
-
-    .discount-code::after {
-      content: '(Zum Kopieren klicken)';
-      position: absolute;
-      bottom: -18px;
-      left: 0;
-      right: 0;
-      font-size: 0.5rem;
-      opacity: 0.7;
-    }
-
-    .discount-message {
-      font-family: var(--lyric-font);
-      font-size: 0.9rem;
-      line-height: 1.5;
-      margin-bottom: 15px;
-    }
-
-    .shop-link {
-      display: inline-block;
-      margin-top: 15px;
-      padding: 8px 16px;
-      background: rgba(255, 140, 0, 0.7);
-      color: #fff;
-      text-decoration: none;
-      border-radius: 6px;
-      font-family: var(--main-font);
-      font-size: 0.7rem;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-      cursor: pointer;
-    }
-
-    .shop-link:hover {
-      transform: translateY(-2px);
-      background: rgba(255, 140, 0, 0.9);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    /* Modifikation des bestehenden End-Screens */
-    #endMessage {
-      margin-bottom: 5px;
-    }
-
-    /* Kopierbestätigung */
-    .copy-confirmation {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: rgba(255, 255, 255, 0.9);
-      color: #000;
-      padding: 5px;
-      font-size: 0.7rem;
-      transform: translateY(-100%);
-      transition: transform 0.3s ease;
-    }
-
-    .discount-code.copied .copy-confirmation {
-      transform: translateY(0);
-    }
-    
-    /* Für Mobile - Zusätzliche Rabattcode-Anpassungen */
-    @media (max-width: 500px) {
-      .discount-code {
-        font-size: 0.9rem;
-        padding: 8px 16px;
-      }
-      
-      .discount-message {
-        font-size: 0.8rem;
-      }
-    }
   </style>
 </head>
 <body>
@@ -1178,7 +1073,7 @@
     <button id="nextLevelButton" class="btn primary">Weiter in der Geschichte</button>
   </div>
   
-  <!-- Emotionaler Endscreen mit verbessertem Rabattcode -->
+  <!-- Emotionaler Endscreen -->
   <div id="endScreen" class="overlay hidden">
     <div class="mandarin-icon"></div>
     <h2>Reise vollendet</h2>
@@ -1186,24 +1081,6 @@
       In den Mandarinen liegen Erinnerungen und Verbundenheit –  
       du hast die Geschichte des Songs Stück für Stück entdeckt.
     </p>
-    
-    <!-- Rabattcode-Element (anfangs versteckt) -->
-    <div class="discount-reveal" id="discountReveal" style="display: none; opacity: 0;">
-      <div class="discount-message">
-        Nimm ein Stück dieser Reise mit nach Hause – wie eine Mandarine, 
-        die du noch lange nach der Rückkehr im Gepäck findest.
-      </div>
-      <div class="discount-code" id="discountCode">MANDARINEN10
-        <div class="copy-confirmation">Kopiert!</div>
-      </div>
-      <div class="discount-message">
-        Dein persönlicher Rabattcode für 10% auf alle Artikel in unserem Shop.
-        <br>
-        <span style="font-style: italic; opacity: 0.8;">Gültig bis zum Ende des Monats.</span>
-      </div>
-      <a href="https://shop.alexandrajanzen.de/" target="_blank" class="shop-link">Zum Shop</a>
-    </div>
-    
     <div class="reward-box" id="rewardBox"></div>
     <div class="button-container">
       <button id="restartButton" class="btn primary">Erneut spielen</button>
@@ -1212,36 +1089,36 @@
     <p class="save-notice">Die Erinnerungen bleiben - du kannst jederzeit mit einem anderen Schwierigkeitsgrad spielen.</p>
   </div>
   
-  <!-- Hilfebereich -->
+  <!-- Hilfe-Overlay -->
   <div id="helpOverlay" class="overlay hidden">
     <div class="help-container">
-      <h2 class="help-title">Spielanleitung</h2>
+      <div class="help-title">Spielanleitung</div>
       
       <div class="help-section">
-        <h3>Wie man spielt</h3>
-        <p>Finde alle versteckten Wörter im Buchstabenrätsel. Ziehe mit der Maus oder dem Finger über die Buchstaben, um ein Wort zu markieren.</p>
+        <h3>Spielziel</h3>
+        <p>Finde Wörter im Rätsel und entdecke die Geschichte hinter dem Lied über Erinnerungen, Trennung und Wiedersehen.</p>
+      </div>
+      
+      <div class="help-section">
+        <h3>Steuerung</h3>
+        <p>Ziehe über Buchstaben, um Wörter zu markieren (horizontal, vertikal, diagonal).</p>
       </div>
       
       <div class="help-section">
         <h3>Schwierigkeitsgrade</h3>
-        <p>
-          <strong>Leichtes Gepäck:</strong> Wörter verlaufen nur horizontal, vertikal nach unten oder diagonal nach rechts unten.<br><br>
-          <strong>Schweres Gepäck:</strong> Wörter können in alle acht Richtungen verlaufen.<br><br>
-          <strong>Loch in der Tasche:</strong> Wie Schweres Gepäck, aber du siehst nur den ersten Buchstaben jedes gesuchten Wortes.
-        </p>
+        <p>• <strong>Leichtes Gepäck</strong>: Nur horizontal/vertikal<br>
+        • <strong>Schweres Gepäck</strong>: Alle Richtungen<br>
+        • <strong>Loch in der Tasche</strong>: Nur Anfangsbuchstaben</p>
       </div>
       
       <div class="help-section">
-        <h3>Die Geschichte</h3>
-        <p>Mit jedem abgeschlossenen Level enthüllst du einen Teil des Songtextes. Folge der emotionalen Reise durch Erinnerungen, Zeit und Wiederbegegnungen.</p>
-      </div>
-      
-      <div class="help-section">
-        <h3>Tipp</h3>
-        <p>Brauchst du Hilfe? Drücke den TIPP-Knopf, um einen Hinweis zu erhalten. Die Anfangsbuchstaben eines gesuchten Wortes werden kurz aufleuchten.</p>
+        <h3>Tipps</h3>
+        <p>• Tipp-Button bei Bedarf nutzen<br>
+        • Farbwechsel zeigen Stimmung des Levels<br>
+        • Die Musik passt sich jedem Level an</p>
       </div>
     </div>
-    <button id="closeHelpButton" class="btn">Zurück zum Spiel</button>
+    <button id="closeHelpButton" class="btn">Zurück zur Reise</button>
   </div>
   
   <script>
@@ -1281,7 +1158,7 @@
       
       setMusicForLevel(levelIndex) {
         let levelNum = (levelIndex + 1).toString().padStart(2, '0');
-        this.bgMusic.src = `https://nachtpoet.github.io/mandarinen-spiel/Mandarinen_Game_${levelNum}.mp3?v2`;
+        this.bgMusic.src = `https://dnachtpoet.github.io/mandarinen-spiel/Mandarinen_Game_${levelNum}.mp3?v2`;
         if (this.musicEnabled) {
           this.bgMusic.play().catch(err => console.log("Musik konnte nicht gestartet werden:", err));
         }
@@ -1666,8 +1543,7 @@ Ich hab immer Mandarinen im Gepäck`,
           closeHelpButton: document.getElementById("closeHelpButton"),
           epicBadge: document.getElementById("epicBadge"),
           levelQuote: document.getElementById("levelQuote"),
-          rewardBox: document.getElementById("rewardBox"),
-          discountReveal: document.getElementById("discountReveal")
+          rewardBox: document.getElementById("rewardBox")
         };
       }
       
@@ -1708,21 +1584,10 @@ Ich hab immer Mandarinen im Gepäck`,
         this.triggerMemoryFlash();
         this.domElements.rewardBox.style.animation = 'none';
         
-        // Verstecke die Box
         setTimeout(() => {
           this.domElements.rewardBox.style.transform = 'scale(1.5) rotateY(180deg)';
           this.domElements.rewardBox.style.background = 'radial-gradient(circle, #ffdc00, #ff851b)';
           this.domElements.rewardBox.style.boxShadow = '0 0 50px rgba(255, 140, 0, 0.9)';
-          
-          // Zeige den Rabattcode mit Animation
-          const discountReveal = document.getElementById('discountReveal');
-          if (discountReveal) {
-            discountReveal.style.display = 'block';
-            setTimeout(() => {
-              discountReveal.style.animation = 'revealCode 1s ease-out forwards';
-              discountReveal.style.opacity = '1';
-            }, 100);
-          }
           
           setTimeout(() => {
             this.createConfetti(80);
@@ -2270,6 +2135,7 @@ Ich hab immer Mandarinen im Gepäck`,
         }
       }
       
+      // NEUE FUNKTION: Level-Abschluss-Anzeige ohne komplexe Statusprüfung
       showLevelComplete() {
         console.log("Zeige Level-Abschluss");
         this.audioManager.playSound('levelComplete');
@@ -2551,55 +2417,6 @@ Ich hab immer Mandarinen im Gepäck`,
           e.preventDefault();
         }
       }, { passive: false });
-      
-      // Setup für Reward Box
-      const rewardBox = document.getElementById('rewardBox');
-      if (rewardBox) {
-        rewardBox.addEventListener('click', function() {
-          if (window.gameInstance) {
-            window.gameInstance.openReward();
-          }
-        });
-      }
-      
-      // Setup für den Rabatt-Code-Kopierfunktion
-      const discountCode = document.getElementById('discountCode');
-      if (discountCode) {
-        discountCode.addEventListener('click', function() {
-          // Code in Zwischenablage kopieren
-          navigator.clipboard.writeText('MANDARINEN10').then(function() {
-            // Erfolgsmeldung anzeigen
-            discountCode.classList.add('copied');
-            
-            // Nach 2 Sekunden zurücksetzen
-            setTimeout(function() {
-              discountCode.classList.remove('copied');
-            }, 2000);
-            
-            // Sound für Feedback
-            if (window.gameInstance && window.gameInstance.audioManager) {
-              window.gameInstance.audioManager.playSound('click');
-            }
-          }).catch(function(err) {
-            console.error('Konnte nicht in die Zwischenablage kopieren: ', err);
-            alert('Der Code wurde kopiert: MANDARINEN10');
-          });
-        });
-      }
-      
-      // Sicherstellen, dass Shop-Links funktionieren
-      const shopLinks = document.querySelectorAll('.shop-link');
-      shopLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-          // Sound für Feedback
-          if (window.gameInstance && window.gameInstance.audioManager) {
-            window.gameInstance.audioManager.playSound('click');
-          }
-          
-          // Neues Fenster mit dem Shop-Link öffnen
-          window.open('https://shop.alexandrajanzen.de/', '_blank');
-        });
-      });
     });
   </script>
 </body>
