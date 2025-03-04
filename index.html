@@ -1158,7 +1158,7 @@
       
       setMusicForLevel(levelIndex) {
         let levelNum = (levelIndex + 1).toString().padStart(2, '0');
-        this.bgMusic.src = `https://nachtpoet.github.io/Mandarinen_Game_${levelNum}.mp3`;
+        this.bgMusic.src = `https://nachtpoet.github.io/Mandarinen_Game_${levelNum}.mp3?v2`;
         if (this.musicEnabled) {
           this.bgMusic.play().catch(err => console.log("Musik konnte nicht gestartet werden:", err));
         }
@@ -2174,21 +2174,15 @@ Ich hab immer Mandarinen im Gepäck`,
           else if (this.hintsUsed <= 3) qualityRating = "beeindruckende";
           
           this.domElements.endMessage.innerHTML = `
-  <p style="margin-bottom: 15px;">In den Mandarinen liegen Erinnerungen und Verbundenheit – 
-  du hast die Geschichte des Songs Stück für Stück entdeckt.</p>
-  
-  <p style="margin-bottom: 25px;">Durch Kindheitserinnerungen, Jahre der Trennung und 
-  bis zum Wiedersehen hast du den roten Faden der Geschichte verfolgt.</p>
-  
-  <p>Deine ${qualityRating} Reise dauerte ${minutes}:${seconds < 10 ? "0" : ""}${seconds} Minuten.<br>
-  Du hast ${this.hintsUsed} Tipps genutzt.</p>
-  
-  <div style="margin-top: 30px; padding: 15px; background: rgba(255, 140, 0, 0.2); border: 2px solid var(--cell-selected); border-radius: 10px; box-shadow: 0 0 20px rgba(255, 140, 0, 0.4);">
-    <p style="font-size: 0.9rem; margin-bottom: 10px;">Als Dankeschön für deine Unterstützung erhältst du einen exklusiven Rabatt:</p>
-    <div style="font-size: 1.2rem; font-weight: bold; background: rgba(0, 0, 0, 0.6); padding: 12px; margin: 10px 0; border-radius: 5px; letter-spacing: 3px; text-shadow: 0 0 10px var(--cell-selected);">MANDARINEN10</div>
-    <p style="font-size: 0.8rem; margin-top: 10px;">Besuche <a href="https://shop.alexandrajanzen.de/" target="_blank" style="color: var(--cell-selected); text-decoration: underline; font-weight: bold;">shop.alexandrajanzen.de</a> und gib diesen Code an der Kasse ein!</p>
-  </div>
-`;
+            <p style="margin-bottom: 15px;">In den Mandarinen liegen Erinnerungen und Verbundenheit – 
+            du hast die Geschichte des Songs Stück für Stück entdeckt.</p>
+            
+            <p style="margin-bottom: 25px;">Durch Kindheitserinnerungen, Jahre der Trennung und 
+            bis zum Wiedersehen hast du den roten Faden der Geschichte verfolgt.</p>
+            
+            <p>Deine ${qualityRating} Reise dauerte ${minutes}:${seconds < 10 ? "0" : ""}${seconds} Minuten.<br>
+            Du hast ${this.hintsUsed} Tipps genutzt.</p>
+          `;
           
           this.domElements.endScreen.classList.remove("hidden");
           this.audioManager.playSound('gameComplete');
