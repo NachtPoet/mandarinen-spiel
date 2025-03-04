@@ -1184,12 +1184,12 @@
       }
 
       setMusicForLevel(levelIndex) {
-        let levelNum = (levelIndex + 1).toString().padStart(2, '0');
-        this.bgMusic.src = `https://mandarinenspiel.alexandrajanzen.de/Mandarinen_Game_${levelNum}.mp3`;
-        if (this.musicEnabled) {
-          this.bgMusic.play().catch(err => console.log("Musik konnte nicht gestartet werden:", err));
-        }
-      }
+  let levelNum = (levelIndex + 1).toString().padStart(2, '0');
+  this.bgMusic.src = `Mandarinen_Game_${levelNum}.mp3`; // Relativer Pfad!
+  if (this.musicEnabled) {
+    this.bgMusic.play().catch(err => console.log("Musik konnte nicht gestartet werden:", err));
+  }
+}
 
       playSound(name) {
         if (this.soundEnabled && this.soundEffects[name]) {
