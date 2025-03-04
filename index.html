@@ -1158,7 +1158,7 @@
       
       setMusicForLevel(levelIndex) {
         let levelNum = (levelIndex + 1).toString().padStart(2, '0');
-        this.bgMusic.src = `https://cdn.glitch.global/8f972b2b-e55b-4774-9848-03e3007ed417/Mandarinen_Game_${levelNum}.mp3?v2`;
+        this.bgMusic.src = `Mandarinen_Game_${levelNum}.mp3?v2`;
         if (this.musicEnabled) {
           this.bgMusic.play().catch(err => console.log("Musik konnte nicht gestartet werden:", err));
         }
