@@ -1158,7 +1158,7 @@
       
       setMusicForLevel(levelIndex) {
         let levelNum = (levelIndex + 1).toString().padStart(2, '0');
-        this.bgMusic.src = `Mandarinen_Game_${levelNum}.mp3?v2`;
+        this.bgMusic.src = `https://nachtpoet.github.io/mandarinen-spiel/Mandarinen_Game_${levelNum}.mp3`;
         if (this.musicEnabled) {
           this.bgMusic.play().catch(err => console.log("Musik konnte nicht gestartet werden:", err));
         }
