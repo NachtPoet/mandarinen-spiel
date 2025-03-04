@@ -42,7 +42,2429 @@
       font-family: var(--main-font);
       display: flex;
       flex-direction: column;
+      align-items: center;<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mandarinen: Erinnerungen im Gepäck</title>
+  <!-- Retro Pixel-Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <!-- Ergänzende Schriftart für Lyrics -->
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #000;
+      --bg-gradient-start: #0a1721;
+      --bg-gradient-end: #1a2a3a;
+      --cell-bg: #111;
+      --cell-border: #333;
+      --cell-text: #fff;
+      --cell-selected: #ff8c00;
+      --cell-found: #0f0;
+      --text-shadow: 0 0 5px #0ff;
+      --title-shadow: 0 0 10px #ff00ff;
+      --overlay-bg: rgba(10, 23, 33, 0.95);
+      --btn-hover: rgba(255, 255, 255, 0.3);
+      --transition-speed: 0.3s;
+      --main-font: 'Press Start 2P', cursive;
+      --lyric-font: 'Source Sans Pro', sans-serif;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      background-attachment: fixed;
+      color: var(--cell-text);
+      font-family: var(--main-font);
+      display: flex;
+      flex-direction: column;
       align-items: center;
+      min-height: 100vh;
+      position: relative;
+      line-height: 1.4;
+      overflow-x: hidden;
+    }
+    
+    /* Ambient stars background */
+    #star-field {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    
+    .star {
+      position: absolute;
+      background-color: rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      animation: twinkle var(--twinkle-duration, 4s) infinite ease-in-out;
+    }
+    
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 1; }
+    }
+    
+    h1 {
+      margin: 20px 0 10px;
+      text-shadow: var(--title-shadow);
+      font-size: 1.3rem;
+      letter-spacing: 1px;
+      text-align: center;
+      animation: glow 2s infinite alternate;
+      padding: 15px;
+    }
+    
+    @keyframes glow {
+      from { text-shadow: 0 0 5px var(--title-shadow); }
+      to { text-shadow: 0 0 15px var(--title-shadow), 0 0 20px var(--title-shadow); }
+    }
+    
+    p {
+      margin: 0.5rem 0;
+      line-height: 1.5;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      position: relative;
+      width: 100%;
+      max-width: 550px;
+    }
+    
+    /* Timer-Anzeige im Spielbereich */
+    #timer {
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 8px 15px;
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(255, 140, 0, 0.5);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #timer::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      animation: shine 3s infinite linear;
+    }
+    
+    @keyframes shine {
+      to { left: 100%; }
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 5px;
+      margin: 20px 0;
+      user-select: none;
+      touch-action: none;
+      box-shadow: 0 6px 22px rgba(0,0,0,0.7);
+      padding: 10px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.4);
+      transition: transform var(--transition-speed);
+      position: relative;
+    }
+    
+    .grid::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, var(--cell-selected), transparent, var(--cell-selected));
+      z-index: -1;
+      border-radius: 12px;
+      opacity: 0.3;
+      animation: borderGlow 4s infinite alternate;
+    }
+    
+    @keyframes borderGlow {
+      0% { opacity: 0.1; }
+      100% { opacity: 0.4; }
+    }
+    
+    .grid:hover {
+      transform: translateY(-3px);
+    }
+    
+    .cell {
+      width: 36px;
+      height: 36px;
+      background: var(--cell-bg);
+      border: 1px solid var(--cell-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: var(--cell-text);
+      text-shadow: var(--text-shadow);
+      cursor: pointer;
+      transition: all var(--transition-speed);
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .cell::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .cell:hover {
+      transform: scale(1.05);
+      z-index: 2;
+    }
+    
+    .cell:hover::after {
+      opacity: 1;
+    }
+    
+    .cell.selected {
+      background: var(--cell-selected);
+      color: #000;
+      transform: scale(1.1);
+      z-index: 3;
+      box-shadow: 0 0 10px var(--cell-selected);
+    }
+    
+    .cell.found {
+      background: var(--cell-found);
+      color: #000;
+      animation: pulse 1s ease-in-out;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); box-shadow: 0 0 20px var(--cell-found); }
+      100% { transform: scale(1); }
+    }
+    
+    .word-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      max-width: 90%;
+      margin-top: 20px;
+    }
+    
+    .word {
+      padding: 8px 12px;
+      border: 2px solid var(--cell-selected);
+      border-radius: 8px;
+      text-shadow: var(--text-shadow);
+      font-size: 0.7rem;
+      transition: all var(--transition-speed);
+      background: rgba(0, 0, 0, 0.5);
+    }
+    
+    .word:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+    }
+    
+    .word.found {
+      text-decoration: line-through;
+      opacity: 0.7;
+      background: rgba(255,255,255,0.1);
+      animation: wordFound 0.5s ease-in-out;
+      border-color: var(--cell-found);
+    }
+    
+    @keyframes wordFound {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); background: var(--cell-found); color: #000; }
+      100% { transform: scale(1); }
+    }
+    
+    /* Overlays */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--overlay-bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      line-height: 1.5;
+      border-radius: 8px;
+      animation: fadeIn 0.6s ease-out;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    
+    .overlay.hidden {
+      display: none !important;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    /* Verbesserte Buttons mit Hover-Effekten */
+    .btn {
+      margin-top: 25px;
+      padding: 12px 24px;
+      border: 2px solid #fff;
+      background: transparent;
+      color: #fff;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: var(--main-font);
+      border-radius: 5px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 100%;
+      background: var(--btn-hover);
+      transition: all 0.3s ease;
+      z-index: -1;
+    }
+    
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(255, 255, 255, 0.4);
+    }
+    
+    .btn:hover::before {
+      width: 100%;
+    }
+    
+    .btn:active {
+      transform: translateY(1px);
+    }
+    
+    /* Varianten für verschiedene Button-Typen */
+    .btn.primary {
+      background-color: rgba(255, 140, 0, 0.3);
+      border-color: var(--cell-selected);
+    }
+    
+    .btn.secondary {
+      background-color: rgba(0, 120, 255, 0.3);
+      border-color: #0074D9;
+    }
+    
+    label, select {
+      font-family: var(--main-font);
+      color: #fff;
+      margin-top: 15px;
+      font-size: 0.8rem;
+    }
+    
+    select {
+      background-color: rgba(168, 230, 207, 0.8);
+      color: #000;
+      padding: 8px 12px;
+      border: 2px solid #fff;
+      border-radius: 5px;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-align: center;
+      margin: 15px 0;
+      position: relative;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+    
+    select:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 255, 255, 0.4);
+    }
+    
+    select:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+    }
+    
+    /* Custom select arrow */
+    .select-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .select-wrapper::after {
+      content: '▼';
+      font-size: 0.7rem;
+      color: #000;
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+    
+    /* Hilfe-Dialog Optimierung */
+    .help-container {
+      max-height: 70vh;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cell-selected) rgba(0,0,0,0.3);
+    }
+    
+    .help-container::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .help-container::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+    }
+    
+    .help-container::-webkit-scrollbar-thumb {
+      background-color: var(--cell-selected);
+      border-radius: 10px;
+    }
+    
+    .help-section p {
+      font-size: 0.75rem;
+      line-height: 1.4;
+    }
+    
+    /* Mobile-Optimierung */
+    @media (max-width: 500px) {
+      .cell {
+        width: 26px;
+        height: 26px;
+        font-size: 0.65rem;
+      }
+      
+      h1 { 
+        font-size: 0.85rem; 
+        padding: 0 10px;
+        margin-bottom: 30px;
+      }
+      
+      #timer {
+        font-size: 0.75rem;
+        margin-bottom: 10px;
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        width: auto;
+        min-width: 80px;
+        text-align: left;
+        padding: 4px 10px;
+      }
+      
+      #levelIndicator {
+        top: 10px;
+        right: 10px;
+        font-size: 0.65rem;
+        padding: 4px 8px;
+        margin-bottom: 15px;
+      }
+      
+      .word {
+        padding: 4px 6px;
+        font-size: 0.55rem;
+      }
+      
+      .overlay {
+        padding: 12px;
+      }
+      
+      p {
+        font-size: 0.65rem;
+      }
+      
+      /* Anpassung der Button-Positionen im Spielbereich */
+      #musicToggle, #soundToggle, #hintButton {
+        position: fixed !important;
+        bottom: 15px !important;
+      }
+      
+      #musicToggle {
+        right: 20px !important;
+      }
+      
+      #soundToggle {
+        right: 70px !important;
+      }
+      
+      #hintButton {
+        left: 20px !important;
+      }
+      
+      /* Abstand zwischen Spielfeld und Level-Anzeige */
+      .grid {
+        margin-top: 35px;
+      }
+      
+      /* Kleinere Zellengröße für sehr kleine Geräte */
+      @media (max-width: 360px) {
+        .cell {
+          width: 22px;
+          height: 22px;
+          font-size: 0.6rem;
+        }
+        
+        .word-list {
+          gap: 6px;
+        }
+      }
+      
+      /* Anpassungen für die Hilfeanzeige */
+      .help-container {
+        padding: 15px;
+        max-height: 70vh;
+        width: 90%;
+        max-width: 300px;
+      }
+      
+      .help-title {
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+      }
+      
+      .help-section {
+        margin-bottom: 12px;
+      }
+      
+      .help-section h3 {
+        font-size: 0.7rem;
+        margin-bottom: 5px;
+      }
+      
+      .help-section p {
+        font-size: 0.65rem;
+        margin: 0;
+      }
+      
+      /* Verbesserte Textdarstellung in der Lyricanzeige */
+      #lyricDisplay {
+        font-size: 0.85rem;
+        padding: 15px;
+        max-width: 90%;
+      }
+      
+      .level-quote {
+        font-size: 0.75rem;
+        padding: 0 10px;
+        max-width: 90%;
+      }
+      
+      /* Epic Badge verschieben */
+      .epic-badge {
+        top: auto;
+        bottom: 100px;
+        left: 10px;
+        font-size: 0.55rem;
+      }
+    }
+    
+    /* Musik-Button mit Animation */
+    #musicToggle {
+      position: absolute;
+      bottom: -50px;
+      right: 15px;
+      z-index: 101;
+      padding: 8px;
+      border: none;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    #musicToggle:hover {
+      transform: scale(1.1) rotate(5deg);
+      filter: drop-shadow(0 0 8px var(--cell-selected));
+      background: rgba(255, 140, 0, 0.2);
+    }
+    
+    #musicToggle svg {
+      width: 28px;
+      height: 28px;
+      filter: drop-shadow(0 0 5px var(--cell-selected));
+    }
+    
+    /* Hinzugefügte Hilfefunktion */
+    #hintButton {
+      position: absolute;
+      bottom: -50px;
+      left: 15px;
+      border: none;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      font-family: var(--main-font);
+      font-size: 0.7rem;
+      cursor: pointer;
+      padding: 5px 10px;
+      z-index: 101;
+      text-shadow: 0 0 5px var(--cell-selected);
+      transition: all 0.3s ease;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 140, 0, 0.4);
+      white-space: nowrap;
+    }
+    
+    #hintButton:hover {
+      transform: scale(1.1);
+      text-shadow: 0 0 8px var(--cell-selected);
+      background: rgba(255, 140, 0, 0.2);
+    }
+    
+    /* Fortschrittsanzeige */
+    #progress {
+      width: 100%;
+      max-width: 420px;
+      height: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 5px;
+      margin-top: 10px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    #progressBar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cell-selected), #ffb74d);
+      transition: width 0.5s ease;
+      width: 0;
+      box-shadow: 0 0 10px var(--cell-selected);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #progressBar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: progressShine 2s infinite;
+    }
+    
+    @keyframes progressShine {
+      to { left: 150%; }
+    }
+    
+    /* Verbesserte Lyric Display */
+    #lyricDisplay {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 25px;
+      border-radius: 10px;
+      border: 1px solid var(--cell-selected);
+      box-shadow: 0 0 25px rgba(255, 140, 0, 0.4);
+      max-width: 600px;
+      white-space: pre-wrap;
+      margin-bottom: 20px;
+      animation: fadeInUp 1s ease-out;
+      font-family: var(--lyric-font);
+      line-height: 1.6;
+      font-weight: 300;
+      font-size: 1.1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #lyricDisplay::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cell-selected), transparent);
+      animation: lineSweep 4s infinite alternate;
+    }
+    
+    #lyricDisplay::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cell-selected), transparent);
+      animation: lineSweep 4s infinite alternate-reverse;
+    }
+    
+    @keyframes lineSweep {
+      0% { opacity: 0.2; }
+      100% { opacity: 1; }
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Farbige Hervorhebung für Lyrics */
+    .highlight {
+      color: var(--cell-selected);
+      font-weight: bold;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 2px 5px;
+      border-radius: 3px;
+      box-shadow: 0 0 8px var(--cell-selected);
+      display: inline-block;
+      animation: glow-text 1.5s infinite alternate;
+    }
+    
+    @keyframes glow-text {
+      from { text-shadow: 0 0 2px var(--cell-selected); }
+      to { text-shadow: 0 0 8px var(--cell-selected), 0 0 10px var(--cell-selected); }
+    }
+    
+    /* Konfetti-Animation für Level-Abschluss */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #f00;
+      opacity: 0;
+      z-index: 99;
+      animation: confetti 5s ease-in forwards;
+      pointer-events: none;
+    }
+    
+    @keyframes confetti {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(1080deg); opacity: 0; }
+    }
+    
+    /* Level-Anzeige */
+    #levelIndicator {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 0.7rem;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 7px 12px;
+      border-radius: 15px;
+      box-shadow: 0 0 8px rgba(255, 140, 0, 0.4);
+      border: 1px solid rgba(255, 140, 0, 0.3);
+    }
+    
+    /* Sound-Effekte Button */
+    #soundToggle {
+      position: absolute;
+      bottom: -50px;
+      right: 70px;
+      z-index: 101;
+      padding: 8px;
+      border: none;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    #soundToggle:hover {
+      transform: scale(1.1) rotate(-5deg);
+      filter: drop-shadow(0 0 8px var(--cell-selected));
+      background: rgba(255, 140, 0, 0.2);
+    }
+    
+    #soundToggle svg {
+      width: 24px;
+      height: 24px;
+      filter: drop-shadow(0 0 5px var(--cell-selected));
+    }
+    
+    /* Hilfedialog */
+    #helpOverlay {
+      background: var(--overlay-bg);
+      z-index: 102;
+    }
+    
+    .help-container {
+      max-width: 500px;
+      width: 90%;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid var(--cell-selected);
+      position: relative;
+      overflow: auto;
+      max-height: 60vh;
+      scrollbar-width: thin;
+      scrollbar-color: var(--cell-selected) rgba(0,0,0,0.3);
+    }
+    
+    .help-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .help-container::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+    }
+    
+    .help-container::-webkit-scrollbar-thumb {
+      background-color: var(--cell-selected);
+      border-radius: 10px;
+    }
+    
+    .help-container::before,
+    .help-container::after {
+      content: '';
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle, var(--cell-selected), transparent 70%);
+      border-radius: 50%;
+      opacity: 0.1;
+      animation: moveGlow 10s infinite alternate ease-in-out;
+    }
+    
+    .help-container::before {
+      top: -50px;
+      left: -50px;
+      animation-delay: 0s;
+    }
+    
+    .help-container::after {
+      bottom: -50px;
+      right: -50px;
+      animation-delay: 5s;
+    }
+    
+    @keyframes moveGlow {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(40px, 40px); }
+    }
+    
+    .help-title {
+      color: var(--cell-selected);
+      margin-bottom: 20px;
+      font-size: 1.1rem;
+      text-shadow: 0 0 5px rgba(255, 140, 0, 0.5);
+    }
+    
+    .help-section {
+      margin-bottom: 20px;
+      text-align: left;
+      position: relative;
+      padding-left: 15px;
+    }
+    
+    .help-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 100%;
+      background: linear-gradient(180deg, transparent, var(--cell-selected), transparent);
+      opacity: 0.5;
+    }
+    
+    .help-section h3 {
+      color: var(--cell-selected);
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+    }
+    
+    /* Speicherhinweis */
+    .save-notice {
+      font-size: 0.6rem;
+      opacity: 0.7;
+      margin-top: 15px;
+      max-width: 400px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 8px;
+      border-radius: 5px;
+    }
+    
+    /* Button Container für die Startseite */
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 25px;
+    }
+    
+    /* Epic Mode Badge */
+    .epic-badge {
+      position: absolute;
+      top: 10px;
+      left: 15px;
+      font-size: 0.6rem;
+      background: linear-gradient(45deg, #ff8c00, #ff5722);
+      padding: 5px 10px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(255, 140, 0, 0.6);
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .epic-badge.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Level completion quotes */
+    .level-quote {
+      font-family: var(--lyric-font);
+      font-size: 1rem;
+      font-style: italic;
+      margin-top: 15px;
+      opacity: 0.9;
+      max-width: 500px;
+      line-height: 1.4;
+    }
+    
+    /* Loot box style reward */
+    .reward-box {
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle, #ffbc40, #ff8c00);
+      border-radius: 10px;
+      margin: 20px auto;
+      cursor: pointer;
+      position: relative;
+      box-shadow: 0 0 30px rgba(255, 140, 0, 0.7);
+      transition: all 0.3s ease;
+      animation: float 3s infinite ease-in-out;
+      transform-style: preserve-3d;
+    }
+    
+    .reward-box:hover {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 0 40px rgba(255, 140, 0, 0.9);
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0); }
+      50% { transform: translateY(-10px) rotate(5deg); }
+    }
+    
+    .reward-box::before,
+    .reward-box::after {
+      content: '';
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .reward-box::before {
+      width: 20px;
+      height: 100%;
+      left: 40px;
+      top: 0;
+    }
+    
+    .reward-box::after {
+      width: 100%;
+      height: 20px;
+      left: 0;
+      top: 40px;
+    }
+    
+    /* Mandarin icon */
+    .mandarin-icon {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: #ff6d00;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 0 15px rgba(255, 109, 0, 0.7);
+      z-index: 105;
+      top: -15px;
+      right: -15px;
+      transform: rotate(-15deg);
+      transition: all 0.3s ease;
+    }
+    
+    .mandarin-icon:hover {
+      transform: rotate(15deg) scale(1.1);
+    }
+    
+    .mandarin-icon::before {
+      content: '';
+      position: absolute;
+      top: -7px;
+      left: 15px;
+      width: 10px;
+      height: 15px;
+      background: #2e7d32;
+      border-radius: 40% 40% 0 0;
+      transform: rotate(-30deg);
+    }
+    
+    /* Memory flash effect */
+    .memory-flash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      opacity: 0;
+      z-index: 200;
+      pointer-events: none;
+    }
+    
+    @keyframes flash {
+      0% { opacity: 0; }
+      10% { opacity: 0.7; }
+      100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div id="star-field"></div>
+  <div class="memory-flash"></div>
+  
+  <h1>Mandarinen: Erinnerungen im Gepäck</h1>
+  
+  <!-- Startbildschirm inkl. Schwierigkeitsauswahl -->
+  <div id="startScreen" class="overlay">
+    <div class="mandarin-icon"></div>
+    <h2>Willkommen zurück!</h2>
+    <p>
+      Tauche ein in die Welt der Mandarinen und entdecke verschüttete Erinnerungen. Jedes gefundene Wort
+      enthüllt einen Teil eines besonderen Liedes.<br>
+      Folge der Geschichte durch die Zeit - von der Kindheit bis zum Wiedersehen.
+    </p>
+    <div class="select-wrapper">
+      <label for="difficultySelect">Schwierigkeitsgrad:</label>
+      <select id="difficultySelect">
+        <option value="easy" selected>Leichtes Gepäck</option>
+        <option value="hard">Schweres Gepäck</option>
+        <option value="loose">Loch in der Tasche</option>
+      </select>
+    </div>
+    <div class="button-container">
+      <button id="startButton" class="btn primary">Spiel fortsetzen</button>
+      <button id="startNewButton" class="btn secondary">Neue Reise beginnen</button>
+      <button id="helpButton" class="btn">Spielanleitung</button>
+    </div>
+    <p class="save-notice">Dein Fortschritt und deine Erinnerungen werden automatisch gespeichert.</p>
+  </div>
+  
+  <!-- Spielbereich -->
+  <div id="gameContainer" class="container" style="display:none;">
+    <div id="epicBadge" class="epic-badge">Perfekte Runde!</div>
+    <div id="levelIndicator">Level: 1/10</div>
+    <div id="timer">Zeit: 0:00</div>
+    <div id="grid" class="grid"></div>
+    <div id="progress"><div id="progressBar"></div></div>
+    <div id="wordList" class="word-list"></div>
+    <!-- Musik-Toggle-Button innerhalb des Containers -->
+    <button id="musicToggle"></button>
+    <button id="soundToggle"></button>
+    <button id="hintButton">TIPP</button>
+  </div>
+  
+  <!-- Overlay für Level-Belohnung -->
+  <div id="levelOverlay" class="overlay hidden">
+    <div id="lyricDisplay" style="white-space: pre-wrap;"></div>
+    <div class="level-quote" id="levelQuote"></div>
+    <button id="nextLevelButton" class="btn primary">Weiter in der Geschichte</button>
+  </div>
+  
+  <!-- Emotionaler Endscreen -->
+  <div id="endScreen" class="overlay hidden">
+    <div class="mandarin-icon"></div>
+    <h2>Reise vollendet</h2>
+    <p id="endMessage">
+      In den Mandarinen liegen Erinnerungen und Verbundenheit –  
+      du hast die Geschichte des Songs Stück für Stück entdeckt.
+    </p>
+    <div class="reward-box" id="rewardBox"></div>
+    <div class="button-container">
+      <button id="restartButton" class="btn primary">Erneut spielen</button>
+      <button id="restartNewButton" class="btn secondary">Neue Reise beginnen</button>
+    </div>
+    <p class="save-notice">Die Erinnerungen bleiben - du kannst jederzeit mit einem anderen Schwierigkeitsgrad spielen.</p>
+  </div>
+  
+  <!-- Hilfe-Overlay -->
+  <div id="helpOverlay" class="overlay hidden">
+    <div class="help-container">
+      <div class="help-title">Spielanleitung</div>
+      
+      <div class="help-section">
+        <h3>Spielziel</h3>
+        <p>Finde Wörter im Rätsel und entdecke die Geschichte hinter dem Lied über Erinnerungen, Trennung und Wiedersehen.</p>
+      </div>
+      
+      <div class="help-section">
+        <h3>Steuerung</h3>
+        <p>Ziehe über Buchstaben, um Wörter zu markieren (horizontal, vertikal, diagonal).</p>
+      </div>
+      
+      <div class="help-section">
+        <h3>Schwierigkeitsgrade</h3>
+        <p>• <strong>Leichtes Gepäck</strong>: Nur horizontal/vertikal<br>
+        • <strong>Schweres Gepäck</strong>: Alle Richtungen<br>
+        • <strong>Loch in der Tasche</strong>: Nur Anfangsbuchstaben</p>
+      </div>
+      
+      <div class="help-section">
+        <h3>Tipps</h3>
+        <p>• Tipp-Button bei Bedarf nutzen<br>
+        • Farbwechsel zeigen Stimmung des Levels<br>
+        • Die Musik passt sich jedem Level an</p>
+      </div>
+    </div>
+    <button id="closeHelpButton" class="btn">Zurück zur Reise</button>
+  </div>
+  
+  <script>
+    // Verbesserte Audio-Funktionalität
+    class AudioManager {
+      constructor() {
+        this.bgMusic = document.createElement("audio");
+        this.bgMusic.loop = true;
+        this.bgMusic.volume = 0.4;
+        
+        this.soundEffects = {
+          wordFound: document.createElement("audio"),
+          levelComplete: document.createElement("audio"),
+          gameComplete: document.createElement("audio"),
+          click: document.createElement("audio"),
+          hint: document.createElement("audio"),
+          flash: document.createElement("audio")
+        };
+        
+        // Tatsächlich funktionierende URLs für Soundeffekte
+        this.soundEffects.wordFound.src = "https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3";
+        this.soundEffects.levelComplete.src = "https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3";
+        this.soundEffects.gameComplete.src = "https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3";
+        this.soundEffects.click.src = "https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3";
+        this.soundEffects.hint.src = "https://assets.mixkit.co/sfx/preview/mixkit-magic-sweep-game-trophy-257.mp3";
+        this.soundEffects.flash.src = "https://assets.mixkit.co/sfx/preview/mixkit-fast-small-sweep-transition-166.mp3";
+        
+        // Preload der Soundeffekte
+        Object.values(this.soundEffects).forEach(audio => {
+          audio.volume = 0.3;
+          audio.preload = "auto";
+        });
+        
+        this.musicEnabled = true;
+        this.soundEnabled = true;
+      }
+      
+      setMusicForLevel(levelIndex) {
+        let levelNum = (levelIndex + 1).toString().padStart(2, '0');
+        this.bgMusic.src = `https://nachtpoet.github.io/Mandarinen_Game_${levelNum}.mp3?v2`;
+        if (this.musicEnabled) {
+          this.bgMusic.play().catch(err => console.log("Musik konnte nicht gestartet werden:", err));
+        }
+      }
+      
+      playSound(name) {
+        if (this.soundEnabled && this.soundEffects[name]) {
+          try {
+            // Sound von Anfang abspielen, auch wenn er bereits läuft
+            this.soundEffects[name].currentTime = 0;
+            
+            // Promise-basierte Wiedergabe mit Fehlerbehandlung
+            const playPromise = this.soundEffects[name].play();
+            
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  // Wiedergabe erfolgreich gestartet
+                  console.log(`Sound ${name} wird abgespielt`);
+                })
+                .catch(err => {
+                  // Auto-play wurde möglicherweise verhindert
+                  console.log(`Sound ${name} konnte nicht abgespielt werden:`, err);
+                  
+                  // Versuche es erneut nach einer Benutzerinteraktion
+                  document.addEventListener('click', () => {
+                    this.soundEffects[name].play().catch(e => console.log('Wiedergabeversuch fehlgeschlagen:', e));
+                  }, { once: true });
+                });
+            }
+          } catch (err) {
+            console.log(`Fehler beim Abspielen von Sound ${name}:`, err);
+          }
+        }
+      }
+      
+      toggleMusic() {
+        this.musicEnabled = !this.musicEnabled;
+        
+        if (this.musicEnabled) {
+          this.bgMusic.play().catch(err => console.log("Musik konnte nicht gestartet werden:", err));
+        } else {
+          this.bgMusic.pause();
+        }
+        
+        return this.musicEnabled;
+      }
+      
+      toggleSound() {
+        this.soundEnabled = !this.soundEnabled;
+        return this.soundEnabled;
+      }
+    }
+    
+    // SVG Icons
+    const musicOnIcon = `
+      <svg viewBox="0 0 24 24" style="stroke: var(--cell-selected); stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round;">
+        <path d="M3 9v6h4l5 5V4L7 9H3z" fill="var(--cell-selected)" />
+        <path d="M16.5 7.5a5 5 0 0 1 0 9" />
+        <path d="M18.5 5.5a8 8 0 0 1 0 13" />
+      </svg>
+    `;
+    
+    const musicOffIcon = `
+      <svg viewBox="0 0 24 24" style="stroke: #888; stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round;">
+        <path d="M3 9v6h4l5 5V4L7 9H3z" fill="#888" />
+        <line x1="23" y1="9" x2="17" y2="15" />
+        <line x1="17" y1="9" x2="23" y2="15" />
+      </svg>
+    `;
+    
+    const soundOnIcon = `
+      <svg viewBox="0 0 24 24" style="stroke: var(--cell-selected); stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round;">
+        <path d="M2 6h4l4-4v16l-4-4H2z" fill="var(--cell-selected)" />
+        <path d="M15 8l3 3m0-3l-3 3" />
+      </svg>
+    `;
+    
+    const soundOffIcon = `
+      <svg viewBox="0 0 24 24" style="stroke: #888; stroke-width: 1.5; fill: none; stroke-linecap: round; stroke-linejoin: round;">
+        <path d="M2 6h4l4-4v16l-4-4H2z" fill="#888" />
+        <line x1="18" y1="6" x2="12" y2="12" />
+        <line x1="12" y1="6" x2="18" y2="12" />
+      </svg>
+    `;
+    
+    // Game Manager - Hauptklasse für das Spiel
+    class GameManager {
+      constructor() {
+        // Spieldaten
+        this.levels = [
+          { 
+            lyric: `Ich versteck mich
+Und du zählst bis zehn
+Mein Kinderlachen
+Durch die Gardinen zu sehen
+Reißt alle Schränke auf
+Nur Liebe hier im Haus
+Wir sehen glücklich aus`, 
+            colorScheme: { 
+              bg: "#0a1721", 
+              cellBg: "#152736", 
+              cellBorder: "#ff8c00", 
+              cellSelected: "#ff8c00", 
+              cellFound: "#ffd700", 
+              textShadow: "0 0 5px #ff8c00", 
+              titleShadow: "0 0 10px #ff8c00" 
+            },
+            targetWords: ["VERSTECK", "KINDER", "GARDINEN", "SCHRÄNKE", "GLÜCKLICH"],
+            quote: "Kindheit ist wie eine Mandarinenschale - ihr Duft bleibt ein Leben lang in Erinnerung."
+          },
+          { 
+            lyric: `Du spielst Gitarre
+Und wir singen "Let It Be"
+Wir bauen Burgen
+Sofakissen-Fantasien
+Und wenn wir Abschied nehmen
+Gibst du mir Mandarinen
+Bis wir uns wiedersehen`, 
+            colorScheme: { 
+              bg: "#001f3f", 
+              cellBg: "#002f4b", 
+              cellBorder: "#0074D9", 
+              cellSelected: "#0074D9", 
+              cellFound: "#7FDBFF", 
+              textShadow: "0 0 5px #0074D9", 
+              titleShadow: "0 0 10px #0074D9" 
+            },
+            targetWords: ["GITARRE", "BURGEN", "FANTASIEN", "ABSCHIED", "MANDARINEN"],
+            quote: "In jedem Abschied liegt der Keim eines Wiedersehens, in jeder Mandarine die Süße der Erinnerung."
+          },
+          { 
+            lyric: `Doch aus Tagen wurden Jahre
+Zwischen uns wurden Mauern gebaut
+Hast mir gefehlt, so viele Male
+Und ich dir auch`, 
+            colorScheme: { 
+              bg: "#2e003e", 
+              cellBg: "#3a0f4a", 
+              cellBorder: "#b10dc9", 
+              cellSelected: "#b10dc9", 
+              cellFound: "#e4a1f7", 
+              textShadow: "0 0 5px #b10dc9", 
+              titleShadow: "0 0 10px #b10dc9" 
+            },
+            targetWords: ["TAGEN", "JAHRE", "MAUERN", "FEHLT", "VIELE"],
+            quote: "Zeit baut manchmal Mauern, doch wahre Verbindungen finden immer einen Weg hindurch."
+          },
+          { 
+            lyric: `Wir sind immer miteinander verbunden
+Können uns nie verloren gehen
+Auch getrennt in den dunkelsten Stunden
+Was wir haben wird nie vergehen`, 
+            colorScheme: { 
+              bg: "#003300", 
+              cellBg: "#004d00", 
+              cellBorder: "#00cc00", 
+              cellSelected: "#00cc00", 
+              cellFound: "#99ff99", 
+              textShadow: "0 0 5px #00cc00", 
+              titleShadow: "0 0 10px #00cc00" 
+            },
+            targetWords: ["VERBUNDEN", "VERLOREN", "DUNKELSTEN", "VERGEHEN", "HABEN"],
+            quote: "Selbst in den dunkelsten Stunden leuchten die hellsten Erinnerungen am stärksten."
+          },
+          { 
+            lyric: `Durch alle Kurven, Serpentinen
+An Regentagen Fehler verzieh'n
+Du warst so viele Jahre nicht da
+Aber nie weg
+Ich hab immer Mandarinen im Gepäck`, 
+            colorScheme: { 
+              bg: "#3e1f0f", 
+              cellBg: "#4a2f1b", 
+              cellBorder: "#ff851b", 
+              cellSelected: "#ff8c00", 
+              cellFound: "#ffdc00", 
+              textShadow: "0 0 5px #ff851b", 
+              titleShadow: "0 0 10px #ff851b" 
+            },
+            targetWords: ["KURVEN", "SERPENTINEN", "REGENTAGEN", "FEHLER", "MANDARINEN"],
+            quote: "Auf kurvenreichen Wegen des Lebens sind es die kleinen Symbole, die uns Halt geben."
+          },
+          { 
+            lyric: `Gedanken zittern
+Klopf an deine Tür
+Entspannte Schritte
+Und dann stehst du vor mir
+In deinen Armen
+Das letzte Puzzleteil
+So viele Wunden heilen`, 
+            colorScheme: { 
+              bg: "#330033", 
+              cellBg: "#440044", 
+              cellBorder: "#cc33ff", 
+              cellSelected: "#cc33ff", 
+              cellFound: "#e6b3ff", 
+              textShadow: "0 0 5px #cc33ff", 
+              titleShadow: "0 0 10px #cc33ff" 
+            },
+            targetWords: ["ZITTERN", "TÜR", "SCHRITTE", "PUZZLETEIL", "WUNDEN"],
+            quote: "Manchmal heilen alte Wunden erst, wenn wir den Mut finden, an vergessene Türen zu klopfen."
+          },
+          { 
+            lyric: `Die Haare grau doch
+Ein vertrauter Blick
+Wir beide lachen
+Verlorene Zeit zurück
+Vergilbte Bilder
+In alten Holzvitrinen
+Und da zwei Mandarinen`, 
+            colorScheme: { 
+              bg: "#222222", 
+              cellBg: "#333333", 
+              cellBorder: "#aaaaaa", 
+              cellSelected: "#aaaaaa", 
+              cellFound: "#dddddd", 
+              textShadow: "0 0 5px #aaaaaa", 
+              titleShadow: "0 0 10px #aaaaaa" 
+            },
+            targetWords: ["HAARE", "BLICK", "LACHEN", "BILDER", "VITRINEN"],
+            quote: "In einem vertrauten Blick liegt mehr Geschichte als in tausend Bildern."
+          },
+          { 
+            lyric: `Und aus Jahren wurden Tage
+Aus Mauersteinen bauten wir einen Weg
+All die verpassten ersten Male
+Tun nicht mehr so weh`, 
+            colorScheme: { 
+              bg: "#1a1a1a", 
+              cellBg: "#2a2a2a", 
+              cellBorder: "#ff6600", 
+              cellSelected: "#ff6600", 
+              cellFound: "#ffcc00", 
+              textShadow: "0 0 5px #ff6600", 
+              titleShadow: "0 0 10px #ff6600" 
+            },
+            targetWords: ["TAGE", "MAUERSTEINE", "ERSTEN", "MALE", "WEH"],
+            quote: "Aus den Steinen, die uns einst trennten, bauen wir heute die Brücken, die uns verbinden."
+          },
+          { 
+            lyric: `Wir sind immer miteinander verbunden
+Können uns nie verloren gehen
+Auch getrennt in den dunkelsten Stunden
+Was wir haben wird nie vergehen`, 
+            colorScheme: { 
+              bg: "#003300", 
+              cellBg: "#004d00", 
+              cellBorder: "#00cc00", 
+              cellSelected: "#00cc00", 
+              cellFound: "#99ff99", 
+              textShadow: "0 0 5px #00cc00", 
+              titleShadow: "0 0 10px #00cc00" 
+            },
+            targetWords: ["VERBUNDEN", "VERLOREN", "DUNKELSTEN", "VERGEHEN", "HABEN"],
+            quote: "Wahre Verbindungen kennen keine Entfernung, keine Zeit und keine Grenzen."
+          },
+          { 
+            lyric: `Durch alle Kurven, Serpentinen
+An Regentagen Fehler verzieh'n
+Du warst so viele Jahre nicht da
+Aber nie weg
+Ich hab immer Mandarinen im Gepäck`, 
+            colorScheme: { 
+              bg: "#3e1f0f", 
+              cellBg: "#4a2f1b", 
+              cellBorder: "#ff851b", 
+              cellSelected: "#ff851b", 
+              cellFound: "#ffdc00", 
+              textShadow: "0 0 5px #ff851b", 
+              titleShadow: "0 0 10px #ff851b" 
+            },
+            targetWords: ["KURVEN", "SERPENTINEN", "REGENTAGEN", "FEHLER", "MANDARINEN"],
+            quote: "Am Ende jeder Reise steht die Erkenntnis: Es sind nicht die Orte, die wir besuchen, sondern die Menschen, die wir mitnehmen."
+          }
+        ];
+        
+        this.audioManager = new AudioManager();
+        this.currentLevelIndex = 0;
+        this.currentLevel = null;
+        this.gridSize = 12;
+        this.grid = [];
+        this.targetWords = [];
+        this.foundWords = new Set();
+        this.selectedCells = [];
+        this.startCell = null;
+        this.isDragging = false;
+        
+        // KRITISCHE ÄNDERUNG: Neue Variablen für besseres Level-Übergangs-Tracking
+        this.levelPending = false;  // Neues Flag zu Erkennung von Zustandsübergängen
+        
+        this.currentDifficulty = "easy";
+        this.allowedDirections = [];
+        this.hintsUsed = 0;
+        
+        // Timer-Variablen
+        this.startTime = 0;
+        this.timerInterval = null;
+        
+        // LocalStorage Key für Spielstand
+        this.storageKey = 'mandarinenGameProgress';
+        
+        // DOM-Elemente referenzieren
+        this.domElements = this.getDomElements();
+        
+        // Icons initialisieren
+        this.domElements.musicToggle.innerHTML = musicOnIcon;
+        this.domElements.soundToggle.innerHTML = soundOnIcon;
+        
+        // Spielstand laden
+        this.loadGameProgress();
+        
+        // Event-Listener initialisieren
+        this.initEventListeners();
+        
+        // Element für DOM-Zugriffe während des Spiels
+        document.body.appendChild(this.audioManager.bgMusic);
+        
+        // Sternenfeld initialisieren
+        this.initStarField();
+      }
+      
+      // Sternenfeld für ambientes Hintergrundlicht
+      initStarField() {
+        const starField = document.getElementById('star-field');
+        const starCount = 100;
+        
+        for (let i = 0; i < starCount; i++) {
+          const star = document.createElement('div');
+          star.classList.add('star');
+          
+          // Zufällige Größe, Position und Animation
+          const size = Math.random() * 3;
+          star.style.width = `${size}px`;
+          star.style.height = `${size}px`;
+          star.style.left = `${Math.random() * 100}%`;
+          star.style.top = `${Math.random() * 100}%`;
+          star.style.setProperty('--twinkle-duration', `${3 + Math.random() * 5}s`);
+          star.style.animationDelay = `${Math.random() * 5}s`;
+          
+          starField.appendChild(star);
+        }
+      }
+      
+      // Memory-Flash-Effekt
+      triggerMemoryFlash() {
+        const flash = document.querySelector('.memory-flash');
+        flash.style.animation = 'none';
+        
+        // Trick, um Animation zu resetten
+        setTimeout(() => {
+          flash.style.animation = 'flash 1.5s forwards';
+          this.audioManager.playSound('flash');
+        }, 10);
+      }
+      
+      // DOM-Elemente für einfachen Zugriff sammeln
+      getDomElements() {
+        return {
+          gameContainer: document.getElementById("gameContainer"),
+          grid: document.getElementById("grid"),
+          wordList: document.getElementById("wordList"),
+          timer: document.getElementById("timer"),
+          progressBar: document.getElementById("progressBar"),
+          startScreen: document.getElementById("startScreen"),
+          levelOverlay: document.getElementById("levelOverlay"),
+          endScreen: document.getElementById("endScreen"),
+          lyricDisplay: document.getElementById("lyricDisplay"),
+          endMessage: document.getElementById("endMessage"),
+          difficultySelect: document.getElementById("difficultySelect"),
+          startButton: document.getElementById("startButton"),
+          startNewButton: document.getElementById("startNewButton"), // Neuer Button
+          nextLevelButton: document.getElementById("nextLevelButton"),
+          restartButton: document.getElementById("restartButton"),
+          restartNewButton: document.getElementById("restartNewButton"), // Neuer Button
+          musicToggle: document.getElementById("musicToggle"),
+          soundToggle: document.getElementById("soundToggle"),
+          hintButton: document.getElementById("hintButton"),
+          levelIndicator: document.getElementById("levelIndicator"),
+          helpOverlay: document.getElementById("helpOverlay"),
+          helpButton: document.getElementById("helpButton"),
+          closeHelpButton: document.getElementById("closeHelpButton"),
+          epicBadge: document.getElementById("epicBadge"),
+          levelQuote: document.getElementById("levelQuote"),
+          rewardBox: document.getElementById("rewardBox")
+        };
+      }
+      
+      // Event-Listener für alle Spielelemente
+      initEventListeners() {
+        // Hauptbuttons
+        this.domElements.startButton.addEventListener("click", () => this.startGame());
+        this.domElements.startNewButton.addEventListener("click", () => this.startNewGame());
+        this.domElements.nextLevelButton.addEventListener("click", () => this.nextLevel());
+        this.domElements.restartButton.addEventListener("click", () => this.restartGame());
+        this.domElements.restartNewButton.addEventListener("click", () => this.startNewGame());
+        
+        // Andere UI-Elemente
+        this.domElements.musicToggle.addEventListener("click", () => this.toggleMusic());
+        this.domElements.soundToggle.addEventListener("click", () => this.toggleSound());
+        this.domElements.hintButton.addEventListener("click", () => this.giveHint());
+        this.domElements.difficultySelect.addEventListener("change", () => this.updateDifficultyVisual());
+        this.domElements.helpButton.addEventListener("click", () => this.showHelp());
+        this.domElements.closeHelpButton.addEventListener("click", () => this.hideHelp());
+        
+        // Reward Box
+        if (this.domElements.rewardBox) {
+          this.domElements.rewardBox.addEventListener("click", () => this.openReward());
+        }
+        
+        // Debug-Modus: Mit Shift+L Level überspringen
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "L" && e.shiftKey) {
+            e.preventDefault();
+            this.nextLevel();
+          }
+        });
+      }
+
+      // Belohnungsbox-Animation
+      openReward() {
+        this.audioManager.playSound('levelComplete');
+        this.triggerMemoryFlash();
+        this.domElements.rewardBox.style.animation = 'none';
+        
+        setTimeout(() => {
+          this.domElements.rewardBox.style.transform = 'scale(1.5) rotateY(180deg)';
+          this.domElements.rewardBox.style.background = 'radial-gradient(circle, #ffdc00, #ff851b)';
+          this.domElements.rewardBox.style.boxShadow = '0 0 50px rgba(255, 140, 0, 0.9)';
+          
+          setTimeout(() => {
+            this.createConfetti(80);
+          }, 300);
+        }, 100);
+      }
+      
+      // Spielstand im LocalStorage speichern
+      saveGameProgress() {
+        const progress = {
+          currentLevelIndex: this.currentLevelIndex,
+          difficulty: this.currentDifficulty,
+          hintsUsed: this.hintsUsed,
+          musicEnabled: this.audioManager.musicEnabled,
+          soundEnabled: this.audioManager.soundEnabled
+        };
+        
+        try {
+          localStorage.setItem(this.storageKey, JSON.stringify(progress));
+        } catch (e) {
+          console.warn("Spielstand konnte nicht gespeichert werden:", e);
+        }
+      }
+      
+      // Spielstand aus LocalStorage laden
+      loadGameProgress() {
+        try {
+          const savedProgress = localStorage.getItem(this.storageKey);
+          
+          if (savedProgress) {
+            const progress = JSON.parse(savedProgress);
+            
+            // Spielfortschritt wiederherstellen, aber nur wenn der Level gültig ist
+            this.currentLevelIndex = Math.min(progress.currentLevelIndex || 0, this.levels.length - 1);
+            this.currentDifficulty = progress.difficulty || "easy";
+            this.hintsUsed = progress.hintsUsed || 0;
+            
+            // Audio-Einstellungen wiederherstellen
+            if (progress.musicEnabled === false) {
+              this.audioManager.musicEnabled = false;
+              this.domElements.musicToggle.innerHTML = musicOffIcon;
+            }
+            
+            if (progress.soundEnabled === false) {
+              this.audioManager.soundEnabled = false;
+              this.domElements.soundToggle.innerHTML = soundOffIcon;
+            }
+            
+            // Schwierigkeitsgrad im Auswahlfeld setzen
+            this.domElements.difficultySelect.value = this.currentDifficulty;
+            this.updateDifficultyVisual();
+          }
+        } catch (e) {
+          console.warn("Spielstand konnte nicht geladen werden:", e);
+        }
+      }
+      
+      // Spielstand zurücksetzen
+      resetGameProgress() {
+        try {
+          localStorage.removeItem(this.storageKey);
+        } catch (e) {
+          console.warn("Spielstand konnte nicht zurückgesetzt werden:", e);
+        }
+      }
+      
+      // Spiel starten (vom gespeicherten Fortschritt)
+      startGame() {
+        this.audioManager.playSound('click');
+        this.currentDifficulty = this.domElements.difficultySelect.value;
+        this.updateDifficultyVisual();
+        this.domElements.startScreen.classList.add("hidden");
+        this.domElements.gameContainer.style.display = "flex";
+        this.startTime = Date.now();
+        this.updateTimer();
+        clearInterval(this.timerInterval);  // Sicherstellen, dass kein Timer läuft
+        this.timerInterval = setInterval(() => this.updateTimer(), 1000);
+        this.initLevel();
+        this.saveGameProgress();
+      }
+      
+      // Neues Spiel starten (von Level 1)
+      startNewGame() {
+        this.audioManager.playSound('click');
+        
+        // Zurücksetzen auf Level 1 und alle Statistiken
+        this.currentLevelIndex = 0;
+        this.hintsUsed = 0;
+        this.currentDifficulty = this.domElements.difficultySelect.value;
+        this.updateDifficultyVisual();
+        this.levelPending = false;  // Wichtig: Zurücksetzen des Übergangs-Flags
+        
+        // UI-Aktualisierung
+        this.domElements.startScreen.classList.add("hidden");
+        this.domElements.endScreen.classList.add("hidden");
+        this.domElements.levelOverlay.classList.add("hidden");
+        this.domElements.gameContainer.style.display = "flex";
+        
+        // Zeit neu starten
+        this.startTime = Date.now();
+        this.updateTimer();
+        clearInterval(this.timerInterval);
+        this.timerInterval = setInterval(() => this.updateTimer(), 1000);
+        
+        // Level initialisieren
+        this.initLevel();
+        
+        // Spielstand neu speichern
+        this.resetGameProgress();
+        this.saveGameProgress();
+      }
+      
+      // Timer aktualisieren
+      updateTimer() {
+        let elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+        let minutes = Math.floor(elapsed / 60);
+        let seconds = elapsed % 60;
+        this.domElements.timer.textContent = `Zeit: ${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+      }
+      
+      // Farbschema für aktuelles Level setzen
+      setColorScheme(scheme) {
+        document.documentElement.style.setProperty('--bg-gradient-start', scheme.bg);
+        document.documentElement.style.setProperty('--bg-gradient-end', this.darkenColor(scheme.bg, 20));
+        document.documentElement.style.setProperty('--cell-bg', scheme.cellBg);
+        document.documentElement.style.setProperty('--cell-border', scheme.cellBorder);
+        document.documentElement.style.setProperty('--cell-selected', scheme.cellSelected);
+        document.documentElement.style.setProperty('--cell-found', scheme.cellFound);
+        document.documentElement.style.setProperty('--text-shadow', scheme.textShadow);
+        document.documentElement.style.setProperty('--title-shadow', scheme.titleShadow);
+      }
+      
+      // Farbe abdunkeln (Hilfsfunktion)
+      darkenColor(hex, percent) {
+        // Entferne das führende # wenn vorhanden
+        hex = hex.replace('#', '');
+        
+        // Konvertiere zu RGB
+        let r = parseInt(hex.substring(0, 2), 16);
+        let g = parseInt(hex.substring(2, 4), 16);
+        let b = parseInt(hex.substring(4, 6), 16);
+        
+        // Verdunkle um den angegebenen Prozentsatz
+        r = Math.floor(r * (100 - percent) / 100);
+        g = Math.floor(g * (100 - percent) / 100);
+        b = Math.floor(b * (100 - percent) / 100);
+        
+        // Konvertiere zurück zu Hex
+        r = Math.min(255, Math.max(0, r)).toString(16);
+        g = Math.min(255, Math.max(0, g)).toString(16);
+        b = Math.min(255, Math.max(0, b)).toString(16);
+        
+        // Füge führende Nullen hinzu, falls nötig
+        if (r.length < 2) r = '0' + r;
+        if (g.length < 2) g = '0' + g;
+        if (b.length < 2) b = '0' + b;
+        
+        return '#' + r + g + b;
+      }
+      
+      // Level initialisieren
+      initLevel() {
+        // KRITISCHE ÄNDERUNG: Zurücksetzen des Level-Übergangs-Flags
+        this.levelPending = false;
+        
+        this.currentLevel = this.levels[this.currentLevelIndex];
+        this.setColorScheme(this.currentLevel.colorScheme);
+        this.targetWords = this.currentLevel.targetWords;
+        this.foundWords = new Set();
+        this.selectedCells = [];
+        this.startCell = null;
+        this.grid = Array.from({length: this.gridSize}, () => Array(this.gridSize).fill(""));
+        
+        // Epic Badge zurücksetzen
+        this.domElements.epicBadge.classList.remove('visible');
+        
+        // Fortschritt anzeigen
+        this.updateProgressBar();
+        this.domElements.levelIndicator.textContent = `Level: ${this.currentLevelIndex + 1}/${this.levels.length}`;
+        
+        // Richtungen basierend auf Schwierigkeitsgrad festlegen
+        if (this.currentDifficulty === "easy") {
+          this.allowedDirections = [
+            {dx: 1, dy: 0},  // horizontal nach rechts
+            {dx: 0, dy: 1},  // vertikal nach unten
+            {dx: 1, dy: 1}   // diagonal nach rechts unten
+          ];
+        } else {
+          this.allowedDirections = [
+            {dx: 1, dy: 0},   // horizontal nach rechts
+            {dx: -1, dy: 0},  // horizontal nach links
+            {dx: 0, dy: 1},   // vertikal nach unten
+            {dx: 0, dy: -1},  // vertikal nach oben
+            {dx: 1, dy: 1},   // diagonal nach rechts unten
+            {dx: -1, dy: -1}, // diagonal nach links oben
+            {dx: 1, dy: -1},  // diagonal nach rechts oben
+            {dx: -1, dy: 1}   // diagonal nach links unten
+          ];
+        }
+        
+        // Wörter platzieren
+        this.targetWords.forEach(word => { 
+          this.placeWord(word); 
+        });
+        
+        this.fillEmptyCells();
+        this.renderGrid();
+        this.renderWordList();
+        this.addCellListeners();
+        this.audioManager.setMusicForLevel(this.currentLevelIndex);
+        
+        // Memory Flash bei Levelwechsel
+        if (this.currentLevelIndex > 0) {
+          this.triggerMemoryFlash();
+        }
+      }
+      
+      // Wort im Gitter platzieren
+      placeWord(word) {
+        const len = word.length;
+        let maxAttempts = 100;
+        
+        // Erhöhte Versuche für lange Wörter
+        if (len > 8) maxAttempts = 150;
+        
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+          // Zufällige Richtung wählen
+          const dir = this.allowedDirections[Math.floor(Math.random() * this.allowedDirections.length)];
+          
+          // Berechne die gültigen Startpositionen basierend auf Wortlänge und Richtung
+          let startXMin = (dir.dx < 0) ? (len - 1) : 0;
+          let startXMax = (dir.dx > 0) ? (this.gridSize - (dir.dx * (len - 1))) : this.gridSize;
+          let startYMin = (dir.dy < 0) ? (len - 1) : 0;
+          let startYMax = (dir.dy > 0) ? (this.gridSize - (dir.dy * (len - 1))) : this.gridSize;
+          
+          // Überprüfen, ob wir gültige Grenzen haben
+          if (startXMax <= startXMin || startYMax <= startYMin) continue;
+          
+          // Zufällige Startposition wählen
+          const startX = Math.floor(Math.random() * (startXMax - startXMin)) + startXMin;
+          const startY = Math.floor(Math.random() * (startYMax - startYMin)) + startYMin;
+          
+          // Überprüfen, ob das Wort an der aktuellen Position platziert werden kann
+          let canPlace = true;
+          for (let i = 0; i < len; i++) {
+            const x = startX + dir.dx * i;
+            const y = startY + dir.dy * i;
+            
+            // Sicherstellen, dass die Position innerhalb des Gitters liegt
+            if (x < 0 || x >= this.gridSize || y < 0 || y >= this.gridSize) {
+              canPlace = false;
+              break;
+            }
+            
+            const current = this.grid[y][x];
+            if (current !== "" && current !== word[i]) { 
+              canPlace = false; 
+              break; 
+            }
+          }
+          
+          // Wenn Platzierung möglich ist, Wort eintragen
+          if (canPlace) {
+            for (let i = 0; i < len; i++) {
+              const x = startX + dir.dx * i;
+              const y = startY + dir.dy * i;
+              this.grid[y][x] = word[i];
+            }
+            return true;
+          }
+        }
+        
+        console.warn("Konnte Wort nicht platzieren:", word);
+        
+        // Notfallmechanismus: Falls Wort nach vielen Versuchen nicht platziert werden konnte,
+        // versuche es einfach horizontal zu platzieren
+        for (let row = 0; row < this.gridSize; row++) {
+          let emptyCount = 0;
+          for (let col = 0; col < this.gridSize; col++) {
+            if (this.grid[row][col] === "") emptyCount++;
+          }
+          
+          if (emptyCount >= word.length) {
+            let col = Math.floor(Math.random() * (this.gridSize - word.length + 1));
+            for (let i = 0; i < word.length; i++) {
+              this.grid[row][col + i] = word[i];
+            }
+            return true;
+          }
+        }
+        
+        return false;
+      }
+      
+      // Leere Zellen im Gitter mit zufälligen Buchstaben füllen
+      fillEmptyCells() {
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ";
+        for (let y = 0; y < this.gridSize; y++) {
+          for (let x = 0; x < this.gridSize; x++) {
+            if (this.grid[y][x] === "") {
+              this.grid[y][x] = letters[Math.floor(Math.random() * letters.length)];
+            }
+          }
+        }
+      }
+      
+      // Gitter rendern
+      renderGrid() {
+        const gridContainer = this.domElements.grid;
+        gridContainer.innerHTML = "";
+        
+        for (let y = 0; y < this.gridSize; y++) {
+          for (let x = 0; x < this.gridSize; x++) {
+            const cell = document.createElement("div");
+            cell.classList.add("cell");
+            cell.textContent = this.grid[y][x];
+            cell.dataset.row = y;
+            cell.dataset.col = x;
+            gridContainer.appendChild(cell);
+          }
+        }
+      }
+      
+      // Wörterliste rendern
+      renderWordList() {
+        const wordListDiv = this.domElements.wordList;
+        wordListDiv.innerHTML = "";
+        
+        this.targetWords.forEach(word => {
+          const span = document.createElement("span");
+          span.classList.add("word");
+          span.id = "word-" + word;
+          
+          // Bei Schwierigkeit "Loch in der Tasche" nur den ersten Buchstaben anzeigen
+          if (this.currentDifficulty === "loose") {
+            span.textContent = word[0] + "-".repeat(word.length - 1);
+          } else {
+            span.textContent = word;
+          }
+          
+          wordListDiv.appendChild(span);
+        });
+      }
+      
+      // Zellen-Event-Listener hinzufügen
+      addCellListeners() {
+        const cells = document.querySelectorAll(".cell");
+        
+        cells.forEach(cell => {
+          cell.addEventListener("pointerdown", (e) => this.pointerDown(e));
+          cell.addEventListener("pointermove", (e) => this.pointerMove(e));
+          cell.addEventListener("pointerup", (e) => this.pointerUp(e));
+        });
+        
+        this.domElements.grid.addEventListener("pointermove", (e) => this.pointerMove(e));
+        document.addEventListener("pointercancel", (e) => this.pointerUp(e));
+        document.addEventListener("pointerup", (e) => this.pointerUp(e));
+      }
+      
+      // Pointer-Event-Handler
+      pointerDown(e) {
+        // KRITISCHE ÄNDERUNG: Keine Interaktion wenn Level-Übergang ansteht
+        if (this.levelPending) return;
+        
+        e.preventDefault();
+        if (!e.target.classList.contains("cell")) return;
+        
+        this.isDragging = true;
+        this.clearSelection();
+        
+        let cellEl = e.target;
+        this.startCell = {
+          row: parseInt(cellEl.dataset.row),
+          col: parseInt(cellEl.dataset.col),
+          el: cellEl,
+          letter: cellEl.textContent
+        };
+        
+        this.selectedCells = [this.startCell];
+        cellEl.classList.add("selected");
+      }
+      
+      pointerMove(e) {
+        // KRITISCHE ÄNDERUNG: Keine Interaktion wenn Level-Übergang ansteht
+        if (this.levelPending) return;
+        
+        e.preventDefault();
+        if (!this.isDragging || !this.startCell) return;
+        
+        let cellEl = document.elementFromPoint(e.clientX, e.clientY);
+        
+        // Wenn kein Element gefunden wurde oder es keine Zelle ist, suche nach der nächsten Zelle
+        if (!cellEl || !cellEl.classList.contains("cell")) {
+          cellEl = this.getNearestCell(e.clientX, e.clientY, 40);
+          if (!cellEl) return;
+        }
+        
+        let currentRow = parseInt(cellEl.dataset.row);
+        let currentCol = parseInt(cellEl.dataset.col);
+        
+        // Bresenham-Algorithmus zur Berechnung der Linie vom Start- zum aktuellen Punkt
+        let line = this.bresenhamLine(this.startCell.row, this.startCell.col, currentRow, currentCol);
+        
+        this.clearSelection();
+        this.selectedCells = [];
+        
+        line.forEach(pt => {
+          let selCell = document.querySelector(`.cell[data-row='${pt.row}'][data-col='${pt.col}']`);
+          if (selCell) {
+            this.selectedCells.push({ 
+              row: pt.row, 
+              col: pt.col, 
+              el: selCell, 
+              letter: selCell.textContent 
+            });
+            selCell.classList.add("selected");
+          }
+        });
+      }
+      
+      pointerUp(e) {
+        // KRITISCHE ÄNDERUNG: Keine Interaktion wenn Level-Übergang ansteht
+        if (this.levelPending) return;
+        
+        e.preventDefault();
+        if (!this.isDragging) return;
+        
+        this.isDragging = false;
+        this.checkSelectedWord();
+        
+        // Kurze Verzögerung, um die Auswahl zu zeigen, bevor sie gelöscht wird
+        setTimeout(() => { 
+          this.clearSelection(); 
+          this.selectedCells = []; 
+          this.startCell = null; 
+        }, 150);
+      }
+      
+      // Findet die nächstgelegene Zelle zu den angegebenen Koordinaten
+      getNearestCell(x, y, threshold) {
+        let cells = document.querySelectorAll(".cell");
+        let nearest = null;
+        let minDist = Infinity;
+        
+        cells.forEach(cell => {
+          let rect = cell.getBoundingClientRect();
+          let cx = rect.left + rect.width / 2;
+          let cy = rect.top + rect.height / 2;
+          let dist = Math.hypot(x - cx, y - cy);
+          
+          if (dist < minDist) { 
+            minDist = dist; 
+            nearest = cell; 
+          }
+        });
+        
+        return (minDist <= threshold) ? nearest : null;
+      }
+      
+      // Bresenham-Algorithmus zur Berechnung einer Linie zwischen zwei Punkten
+      bresenhamLine(r0, c0, r1, c1) {
+        let points = [];
+        let dx = Math.abs(r1 - r0);
+        let dy = Math.abs(c1 - c0);
+        let sx = (r0 < r1) ? 1 : -1;
+        let sy = (c0 < c1) ? 1 : -1;
+        let err = dx - dy;
+        
+        while (true) {
+          points.push({ row: r0, col: c0 });
+          
+          if (r0 === r1 && c0 === c1) break;
+          
+          let e2 = 2 * err;
+          if (e2 > -dy) { err -= dy; r0 += sx; }
+          if (e2 < dx) { err += dx; c0 += sy; }
+        }
+        
+        return points;
+      }
+      
+      // Ausgewählte Zellen zurücksetzen
+      clearSelection() {
+        document.querySelectorAll(".cell.selected").forEach(cell => cell.classList.remove("selected"));
+      }
+      
+      // KRITISCH ÜBERARBEITET: Prüfen, ob ausgewählte Zellen ein gültiges Wort bilden
+      checkSelectedWord() {
+        if (this.selectedCells.length === 0 || this.levelPending) return;
+        
+        const word = this.selectedCells.map(c => c.letter).join("");
+        const reversed = this.selectedCells.map(c => c.letter).reverse().join("");
+        
+        if (this.targetWords.includes(word) || this.targetWords.includes(reversed)) {
+          const foundWord = this.targetWords.includes(word) ? word : reversed;
+          
+          if (!this.foundWords.has(foundWord)) {
+            this.foundWords.add(foundWord);
+            
+            // Zellen als gefunden markieren
+            this.selectedCells.forEach(c => c.el.classList.add("found"));
+            
+            // Animation für gefundene Zellen
+            this.selectedCells.forEach(c => {
+              c.el.style.animation = "none";
+              setTimeout(() => {
+                c.el.style.animation = "pulse 0.6s ease-in-out";
+              }, 5);
+            });
+            
+            // Wort in der Liste als gefunden markieren
+            let wordEl = document.getElementById("word-" + foundWord);
+            if (wordEl) {
+              wordEl.classList.add("found");
+              if (this.currentDifficulty === "loose") { 
+                wordEl.textContent = foundWord; 
+              }
+            }
+            
+            // Sound abspielen
+            this.audioManager.playSound('wordFound');
+            
+            // Konfetti-Effekt hinzufügen
+            this.createConfetti(5);
+            
+            // Fortschrittsbalken aktualisieren
+            this.updateProgressBar();
+            
+            // KRITISCHE ÄNDERUNG: Vereinfachte Prüfung für Level-Abschluss
+            if (this.foundWords.size === this.targetWords.length) {
+              console.log("Alle Wörter gefunden!");
+              
+              // Epic Badge für Level ohne Hinweise
+              if (this.hintsUsed === 0) {
+                this.domElements.epicBadge.classList.add('visible');
+              }
+              
+              // Setze levelPending auf true, um weitere Interaktionen zu verhindern
+              this.levelPending = true;
+              
+              // Direkter Aufruf von showLevelComplete ohne Statusabhängigkeit
+              setTimeout(() => this.showLevelComplete(), 800);
+            }
+          }
+        }
+      }
+      
+      // NEUE FUNKTION: Level-Abschluss-Anzeige ohne komplexe Statusprüfung
+      showLevelComplete() {
+        console.log("Zeige Level-Abschluss");
+        this.audioManager.playSound('levelComplete');
+        
+        // Große Konfetti-Explosion für Level-Abschluss
+        this.createConfetti(30);
+        
+        if (this.currentLevelIndex < this.levels.length - 1) {
+          // Lyrics hervorheben und anzeigen
+          let lyrics = this.currentLevel.lyric;
+          
+          // Einfache Hervorhebung verwenden
+          this.targetWords.forEach(word => {
+            const regex = new RegExp(word, 'gi');
+            lyrics = lyrics.replace(regex, match => `<span class="highlight">${match}</span>`);
+          });
+          
+          this.domElements.lyricDisplay.innerHTML = lyrics;
+          
+          // Level-Zitat anzeigen
+          this.domElements.levelQuote.textContent = `"${this.currentLevel.quote}"`;
+          
+          // Memory Flash für emotionale Wirkung
+          setTimeout(() => this.triggerMemoryFlash(), 500);
+          
+          this.domElements.levelOverlay.classList.remove("hidden");
+        } else {
+          // Endbildschirm anzeigen
+          clearInterval(this.timerInterval);
+          let totalTime = Math.floor((Date.now() - this.startTime) / 1000);
+          let minutes = Math.floor(totalTime / 60);
+          let seconds = totalTime % 60;
+          
+          let qualityRating = "normale";
+          if (this.hintsUsed === 0) qualityRating = "perfekte";
+          else if (this.hintsUsed <= 3) qualityRating = "beeindruckende";
+          
+          this.domElements.endMessage.innerHTML = `
+            <p style="margin-bottom: 15px;">In den Mandarinen liegen Erinnerungen und Verbundenheit – 
+            du hast die Geschichte des Songs Stück für Stück entdeckt.</p>
+            
+            <p style="margin-bottom: 25px;">Durch Kindheitserinnerungen, Jahre der Trennung und 
+            bis zum Wiedersehen hast du den roten Faden der Geschichte verfolgt.</p>
+            
+            <p>Deine ${qualityRating} Reise dauerte ${minutes}:${seconds < 10 ? "0" : ""}${seconds} Minuten.<br>
+            Du hast ${this.hintsUsed} Tipps genutzt.</p>
+          `;
+          
+          this.domElements.endScreen.classList.remove("hidden");
+          this.audioManager.playSound('gameComplete');
+          this.createConfetti(50);
+          
+          // Memory Flash für emotionale Wirkung
+          setTimeout(() => this.triggerMemoryFlash(), 1000);
+        }
+      }
+      
+      // Fortschrittsbalken aktualisieren
+      updateProgressBar() {
+        const progress = (this.foundWords.size / this.targetWords.length) * 100;
+        this.domElements.progressBar.style.width = `${progress}%`;
+      }
+      
+      // Konfetti-Effekt erstellen
+      createConfetti(count) {
+        const colors = ['#ff4136', '#0074D9', '#2ECC40', '#FFDC00', '#B10DC9', '#FF851B', '#ff8c00', '#7FDBFF'];
+        const container = document.createElement('div');
+        container.style.position = 'fixed';
+        container.style.top = '0';
+        container.style.left = '0';
+        container.style.width = '100%';
+        container.style.height = '100%';
+        container.style.overflow = 'hidden';
+        container.style.pointerEvents = 'none';
+        container.style.zIndex = '99';
+        document.body.appendChild(container);
+        
+        for (let i = 0; i < count; i++) {
+          const confetti = document.createElement('div');
+          confetti.classList.add('confetti');
+          
+          // Verschiedene Konfetti-Formen
+          const shapeTypes = ['circle', 'square', 'triangle'];
+          const shape = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
+          
+          if (shape === 'circle') {
+            confetti.style.borderRadius = '50%';
+          } else if (shape === 'triangle') {
+            confetti.style.width = '0';
+            confetti.style.height = '0';
+            confetti.style.borderLeft = `${Math.random() * 5 + 5}px solid transparent`;
+            confetti.style.borderRight = `${Math.random() * 5 + 5}px solid transparent`;
+            confetti.style.borderBottom = `${Math.random() * 10 + 10}px solid ${colors[Math.floor(Math.random() * colors.length)]}`;
+            confetti.style.backgroundColor = 'transparent';
+          } else {
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            // Manche Konfetti-Teile sind Mandarinen
+            if (Math.random() < 0.1) {
+              confetti.style.backgroundColor = '#ff8c00';
+              confetti.style.borderRadius = '50%';
+              confetti.style.boxShadow = '0 0 5px rgba(255,140,0,0.8)';
+            }
+          }
+          
+          confetti.style.left = `${Math.random() * 100}%`;
+          confetti.style.top = `${Math.random() * 20}%`; // Start at random position at top
+          confetti.style.width = `${Math.random() * 10 + 5}px`;
+          confetti.style.height = `${Math.random() * 10 + 5}px`;
+          confetti.style.opacity = Math.random();
+          confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
+          
+          container.appendChild(confetti);
+        }
+        
+        // Remove container after animations complete
+        setTimeout(() => {
+          if (document.body.contains(container)) {
+            document.body.removeChild(container);
+          }
+        }, 5000);
+      }
+      
+      // KRITISCH ÜBERARBEITET: Zum nächsten Level wechseln - deutlich vereinfacht
+      nextLevel() {
+        console.log("nextLevel aufgerufen");
+        this.audioManager.playSound('click');
+        
+        // UI-Aktualisierung
+        this.domElements.levelOverlay.classList.add("hidden");
+        
+        // Status zurücksetzen
+        this.isDragging = false;
+        this.clearSelection();
+        this.selectedCells = [];
+        this.startCell = null;
+        
+        // Zum nächsten Level wechseln
+        this.currentLevelIndex++;
+        
+        // Level initialisieren - setzt auch levelPending zurück
+        this.initLevel();
+        
+        // Spielfortschritt speichern
+        this.saveGameProgress();
+      }
+      
+      // Spiel neu starten (vom letzten Spielstand)
+      restartGame() {
+        this.audioManager.playSound('click');
+        this.domElements.endScreen.classList.add("hidden");
+        this.levelPending = false;  // Wichtig: Zurücksetzen des Übergangs-Flags
+        
+        // Aktuellen Fortschritt beibehalten, nur Zeit zurücksetzen
+        this.startTime = Date.now();
+        clearInterval(this.timerInterval);
+        this.timerInterval = setInterval(() => this.updateTimer(), 1000);
+        
+        this.initLevel();
+        
+        // Spielfortschritt speichern
+        this.saveGameProgress();
+      }
+      
+      // Schwierigkeitsgrad visuell aktualisieren
+      updateDifficultyVisual() {
+        let select = this.domElements.difficultySelect;
+        let difficulty = select.value;
+        
+        if (difficulty === "easy") {
+          select.style.backgroundColor = "rgba(168, 230, 207, 0.8)";
+          select.style.color = "#000";
+        } else if (difficulty === "hard") {
+          select.style.backgroundColor = "rgba(255, 139, 148, 0.8)";
+          select.style.color = "#000";
+        } else if (difficulty === "loose") {
+          select.style.backgroundColor = "rgba(211, 211, 211, 0.8)";
+          select.style.color = "#000";
+        }
+      }
+      
+      // Musik umschalten
+      toggleMusic() {
+        const musicEnabled = this.audioManager.toggleMusic();
+        this.domElements.musicToggle.innerHTML = musicEnabled ? musicOnIcon : musicOffIcon;
+        
+        // Klicksound abspielen, wenn Sound eingeschaltet ist
+        if (this.audioManager.soundEnabled) {
+          this.audioManager.playSound('click');
+        }
+        
+        this.saveGameProgress();
+      }
+      
+      // Soundeffekte umschalten
+      toggleSound() {
+        const soundEnabled = this.audioManager.toggleSound();
+        this.domElements.soundToggle.innerHTML = soundEnabled ? soundOnIcon : soundOffIcon;
+        
+        // Wenn Sound gerade eingeschaltet wurde, spiele Klicksound ab
+        if (soundEnabled) {
+          this.audioManager.playSound('click');
+        }
+        
+        this.saveGameProgress();
+      }
+      
+      // Tipp geben
+      giveHint() {
+        if (this.levelPending || this.foundWords.size >= this.targetWords.length) return;
+        
+        // Nur ungelöste Wörter in Betracht ziehen
+        const unsolvedWords = this.targetWords.filter(word => !this.foundWords.has(word));
+        
+        if (unsolvedWords.length === 0) return;
+        
+        // Zufälliges ungelöstes Wort auswählen
+        const randomWord = unsolvedWords[Math.floor(Math.random() * unsolvedWords.length)];
+        
+        // Erste Buchstaben des Worts im Gitter kurz aufblinken lassen
+        const letter = randomWord[0];
+        let firstLetterCells = [];
+        
+        // Alle Zellen mit dem ersten Buchstaben des gesuchten Wortes finden
+        document.querySelectorAll(".cell").forEach(cell => {
+          if (cell.textContent === letter) {
+            firstLetterCells.push(cell);
+          }
+        });
+        
+        // Erste Buchstaben kurz aufleuchten lassen
+        if (firstLetterCells.length > 0) {
+          firstLetterCells.forEach(cell => {
+            cell.style.transition = "all 0.3s ease";
+            cell.style.backgroundColor = "var(--cell-selected)";
+            cell.style.color = "#000";
+            cell.style.transform = "scale(1.2)";
+            cell.style.zIndex = "10";
+            cell.style.boxShadow = "0 0 15px var(--cell-selected)";
+            
+            setTimeout(() => {
+              cell.style.backgroundColor = "";
+              cell.style.color = "";
+              cell.style.transform = "";
+              cell.style.zIndex = "";
+              cell.style.boxShadow = "";
+            }, 1000);
+          });
+          
+          // Tipp zählen
+          this.hintsUsed++;
+          this.saveGameProgress();
+          
+          // Sound abspielen
+          this.audioManager.playSound('hint');
+        }
+      }
+      
+      // Hilfe anzeigen
+      showHelp() {
+        this.audioManager.playSound('click');
+        this.domElements.helpOverlay.classList.remove("hidden");
+      }
+      
+      // Hilfe verbergen
+      hideHelp() {
+        this.audioManager.playSound('click');
+        this.domElements.helpOverlay.classList.add("hidden");
+      }
+    }
+    
+    // Spiel initialisieren, wenn das DOM geladen ist
+    document.addEventListener("DOMContentLoaded", () => {
+      // Sternenhimmel erstellen vor dem Spielstart
+      window.gameInstance = new GameManager();
+      
+      // Scrollunterdrückung für Touch-Geräte, um versehentliches Scrollen beim Spielen zu verhindern
+      document.addEventListener('touchmove', function(e) {
+        if (e.target.closest('#grid')) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+    });
+  </script>
+</body>
+</html>
       min-height: 100vh;
       position: relative;
       line-height: 1.4;
