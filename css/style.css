@@ -1,0 +1,1035 @@
+/* Grundlegende CSS-Variablen und -Einstellungen */
+:root {
+  --bg-color: #000;
+  --bg-gradient-start: #0a1721;
+  --bg-gradient-end: #1a2a3a;
+  --cell-bg: #111;
+  --cell-border: #333;
+  --cell-text: #fff;
+  --cell-selected: #ff8c00;
+  --cell-found: #0f0;
+  --text-shadow: 0 0 5px #0ff;
+  --title-shadow: 0 0 10px #ff00ff;
+  --overlay-bg: rgba(10, 23, 33, 0.95);
+  --btn-hover: rgba(255, 255, 255, 0.3);
+  --transition-speed: 0.3s;
+  --main-font: 'Press Start 2P', cursive;
+  --lyric-font: 'Source Sans Pro', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+  background-attachment: fixed;
+  color: var(--cell-text);
+  font-family: var(--main-font);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  position: relative;
+  line-height: 1.4;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ambient stars background */
+#star-field {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  animation: twinkle var(--twinkle-duration, 4s) infinite ease-in-out;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+h1 {
+  margin: 20px 0 10px;
+  text-shadow: var(--title-shadow);
+  font-size: 1.3rem;
+  letter-spacing: 1px;
+  text-align: center;
+  animation: glow 2s infinite alternate;
+  padding: 15px;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 5px var(--title-shadow); }
+  to { text-shadow: 0 0 15px var(--title-shadow), 0 0 20px var(--title-shadow); }
+}
+
+p {
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
+  position: relative;
+  width: 100%;
+  max-width: 550px;
+}
+
+/* Timer-Anzeige im Spielbereich */
+#timer {
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 8px 15px;
+  border-radius: 20px;
+  box-shadow: 0 0 10px rgba(255, 140, 0, 0.5);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+#timer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: shine 3s infinite linear;
+}
+
+@keyframes shine {
+  to { left: 100%; }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 5px;
+  margin: 20px 0;
+  user-select: none;
+  touch-action: none;
+  box-shadow: 0 6px 22px rgba(0,0,0,0.7);
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.4);
+  transition: transform var(--transition-speed);
+  position: relative;
+}
+
+.grid::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, var(--cell-selected), transparent, var(--cell-selected));
+  z-index: -1;
+  border-radius: 12px;
+  opacity: 0.3;
+  animation: borderGlow 4s infinite alternate;
+}
+
+@keyframes borderGlow {
+  0% { opacity: 0.1; }
+  100% { opacity: 0.4; }
+}
+
+.grid:hover {
+  transform: translateY(-3px);
+}
+
+.cell {
+  width: 36px;
+  height: 36px;
+  background: var(--cell-bg);
+  border: 1px solid var(--cell-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: var(--cell-text);
+  text-shadow: var(--text-shadow);
+  cursor: pointer;
+  transition: all var(--transition-speed);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.cell::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.cell:hover {
+  transform: scale(1.05);
+  z-index: 2;
+}
+
+.cell:hover::after {
+  opacity: 1;
+}
+
+.cell.selected {
+  background: var(--cell-selected);
+  color: #000;
+  transform: scale(1.1);
+  z-index: 3;
+  box-shadow: 0 0 10px var(--cell-selected);
+}
+
+.cell.found {
+  background: var(--cell-found);
+  color: #000;
+  animation: pulse 1s ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); box-shadow: 0 0 20px var(--cell-found); }
+  100% { transform: scale(1); }
+}
+
+.word-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  max-width: 90%;
+  margin-top: 20px;
+}
+
+.word {
+  padding: 8px 12px;
+  border: 2px solid var(--cell-selected);
+  border-radius: 8px;
+  text-shadow: var(--text-shadow);
+  font-size: 0.7rem;
+  transition: all var(--transition-speed);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.word:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+}
+
+.word.found {
+  text-decoration: line-through;
+  opacity: 0.7;
+  background: rgba(255,255,255,0.1);
+  animation: wordFound 0.5s ease-in-out;
+  border-color: var(--cell-found);
+}
+
+@keyframes wordFound {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); background: var(--cell-found); color: #000; }
+  100% { transform: scale(1); }
+}
+
+/* Overlays */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--overlay-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+  line-height: 1.5;
+  border-radius: 8px;
+  animation: fadeIn 0.6s ease-out;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.overlay.hidden {
+  display: none !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Verbesserte Buttons mit Hover-Effekten */
+.btn {
+  margin-top: 25px;
+  padding: 12px 24px;
+  border: 2px solid #fff;
+  background: transparent;
+  color: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--main-font);
+  border-radius: 5px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: var(--btn-hover);
+  transition: all 0.3s ease;
+  z-index: -1;
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.4);
+}
+
+.btn:hover::before {
+  width: 100%;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+/* Varianten für verschiedene Button-Typen */
+.btn.primary {
+  background-color: rgba(255, 140, 0, 0.3);
+  border-color: var(--cell-selected);
+}
+
+.btn.secondary {
+  background-color: rgba(0, 120, 255, 0.3);
+  border-color: #0074D9;
+}
+
+label, select {
+  font-family: var(--main-font);
+  color: #fff;
+  margin-top: 15px;
+  font-size: 0.8rem;
+}
+
+select {
+  background-color: rgba(168, 230, 207, 0.8);
+  color: #000;
+  padding: 8px 12px;
+  border: 2px solid #fff;
+  border-radius: 5px;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-align: center;
+  margin: 15px 0;
+  position: relative;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+select:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.4);
+}
+
+select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+}
+
+/* Custom select arrow */
+.select-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.select-wrapper::after {
+  content: '▼';
+  font-size: 0.7rem;
+  color: #000;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Hilfe-Dialog Optimierung */
+.help-container {
+  max-height: 70vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cell-selected) rgba(0,0,0,0.3);
+}
+
+.help-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.help-container::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.3);
+  border-radius: 10px;
+}
+
+.help-container::-webkit-scrollbar-thumb {
+  background-color: var(--cell-selected);
+  border-radius: 10px;
+}
+
+.help-section p {
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+/* Mobile-Optimierung */
+@media (max-width: 500px) {
+  .cell {
+    width: 26px;
+    height: 26px;
+    font-size: 0.65rem;
+  }
+
+  h1 {
+    font-size: 0.85rem;
+    padding: 0 10px;
+    margin-bottom: 30px;
+  }
+
+  #timer {
+    font-size: 0.75rem;
+    margin-bottom: 10px;
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    width: auto;
+    min-width: 80px;
+    text-align: left;
+    padding: 4px 10px;
+  }
+
+  #levelIndicator {
+    top: 10px;
+    right: 10px;
+    font-size: 0.65rem;
+    padding: 4px 8px;
+    margin-bottom: 15px;
+  }
+
+  .word {
+    padding: 4px 6px;
+    font-size: 0.55rem;
+  }
+
+  .overlay {
+    padding: 12px;
+  }
+
+  p {
+    font-size: 0.65rem;
+  }
+
+  /* Anpassung der Button-Positionen im Spielbereich */
+  #musicToggle, #soundToggle, #hintButton {
+    position: fixed !important;
+    bottom: 15px !important;
+  }
+
+  #musicToggle {
+    right: 20px !important;
+  }
+
+  #soundToggle {
+    right: 70px !important;
+  }
+
+  #hintButton {
+    left: 20px !important;
+  }
+
+  /* Abstand zwischen Spielfeld und Level-Anzeige */
+  .grid {
+    margin-top: 35px;
+  }
+
+  /* Kleinere Zellengröße für sehr kleine Geräte */
+  @media (max-width: 360px) {
+    .cell {
+      width: 22px;
+      height: 22px;
+      font-size: 0.6rem;
+    }
+
+    .word-list {
+      gap: 6px;
+    }
+  }
+
+  /* Anpassungen für die Hilfeanzeige */
+  .help-container {
+    padding: 15px;
+    max-height: 70vh;
+    width: 90%;
+    max-width: 300px;
+  }
+
+  .help-title {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+  }
+
+  .help-section {
+    margin-bottom: 12px;
+  }
+
+  .help-section h3 {
+    font-size: 0.7rem;
+    margin-bottom: 5px;
+  }
+
+  .help-section p {
+    font-size: 0.65rem;
+    margin: 0;
+  }
+
+  /* Verbesserte Textdarstellung in der Lyricanzeige */
+  #lyricDisplay {
+    font-size: 0.85rem;
+    padding: 15px;
+    max-width: 90%;
+  }
+
+  .level-quote {
+    font-size: 0.75rem;
+    padding: 0 10px;
+    max-width: 90%;
+  }
+
+  /* Epic Badge verschieben */
+  .epic-badge {
+    top: auto;
+    bottom: 100px;
+    left: 10px;
+    font-size: 0.55rem;
+  }
+}
+
+/* Musik-Button mit Animation */
+#musicToggle {
+  position: absolute;
+  bottom: -50px;
+  right: 15px;
+  z-index: 101;
+  padding: 8px;
+  border: none;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#musicToggle:hover {
+  transform: scale(1.1) rotate(5deg);
+  filter: drop-shadow(0 0 8px var(--cell-selected));
+  background: rgba(255, 140, 0, 0.2);
+}
+
+#musicToggle svg {
+  width: 28px;
+  height: 28px;
+  filter: drop-shadow(0 0 5px var(--cell-selected));
+}
+
+/* Hinzugefügte Hilfefunktion */
+#hintButton {
+  position: absolute;
+  bottom: -50px;
+  left: 15px;
+  border: none;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-family: var(--main-font);
+  font-size: 0.7rem;
+  cursor: pointer;
+  padding: 5px 10px;
+  z-index: 101;
+  text-shadow: 0 0 5px var(--cell-selected);
+  transition: all 0.3s ease;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 140, 0, 0.4);
+  white-space: nowrap;
+}
+
+#hintButton:hover {
+  transform: scale(1.1);
+  text-shadow: 0 0 8px var(--cell-selected);
+  background: rgba(255, 140, 0, 0.2);
+}
+
+/* Fortschrittsanzeige */
+#progress {
+  width: 100%;
+  max-width: 420px;
+  height: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 5px;
+  margin-top: 10px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#progressBar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cell-selected), #ffb74d);
+  transition: width 0.5s ease;
+  width: 0;
+  box-shadow: 0 0 10px var(--cell-selected);
+  position: relative;
+  overflow: hidden;
+}
+
+#progressBar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: progressShine 2s infinite;
+}
+
+@keyframes progressShine {
+  to { left: 150%; }
+}
+
+/* Verbesserte Lyric Display */
+#lyricDisplay {
+  background: rgba(0, 0, 0, 0.7);
+  padding: 25px;
+  border-radius: 10px;
+  border: 1px solid var(--cell-selected);
+  box-shadow: 0 0 25px rgba(255, 140, 0, 0.4);
+  max-width: 600px;
+  white-space: pre-wrap;
+  margin-bottom: 20px;
+  animation: fadeInUp 1s ease-out;
+  font-family: var(--lyric-font);
+  line-height: 1.6;
+  font-weight: 300;
+  font-size: 1.1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+#lyricDisplay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cell-selected), transparent);
+  animation: lineSweep 4s infinite alternate;
+}
+
+#lyricDisplay::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cell-selected), transparent);
+  animation: lineSweep 4s infinite alternate-reverse;
+}
+
+@keyframes lineSweep {
+  0% { opacity: 0.2; }
+  100% { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Farbige Hervorhebung für Lyrics */
+.highlight {
+  color: var(--cell-selected);
+  font-weight: bold;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 2px 5px;
+  border-radius: 3px;
+  box-shadow: 0 0 8px var(--cell-selected);
+  display: inline-block;
+  animation: glow-text 1.5s infinite alternate;
+}
+
+@keyframes glow-text {
+  from { text-shadow: 0 0 2px var(--cell-selected); }
+  to { text-shadow: 0 0 8px var(--cell-selected), 0 0 10px var(--cell-selected); }
+}
+
+/* Konfetti-Animation für Level-Abschluss */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  background-color: #f00;
+  opacity: 0;
+  z-index: 99;
+  animation: confetti 5s ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes confetti {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(1080deg); opacity: 0; }
+}
+
+/* Level-Anzeige */
+#levelIndicator {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 0.7rem;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 7px 12px;
+  border-radius: 15px;
+  box-shadow: 0 0 8px rgba(255, 140, 0, 0.4);
+  border: 1px solid rgba(255, 140, 0, 0.3);
+}
+
+/* Sound-Effekte Button */
+#soundToggle {
+  position: absolute;
+  bottom: -50px;
+  right: 70px;
+  z-index: 101;
+  padding: 8px;
+  border: none;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#soundToggle:hover {
+  transform: scale(1.1) rotate(-5deg);
+  filter: drop-shadow(0 0 8px var(--cell-selected));
+  background: rgba(255, 140, 0, 0.2);
+}
+
+#soundToggle svg {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 0 5px var(--cell-selected));
+}
+
+/* Hilfedialog */
+#helpOverlay {
+  background: var(--overlay-bg);
+  z-index: 102;
+}
+
+.help-container {
+  max-width: 500px;
+  width: 90%;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 20px;
+  border-radius: 10px;
+  border: 2px solid var(--cell-selected);
+  position: relative;
+  overflow: auto;
+  max-height: 60vh;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cell-selected) rgba(0,0,0,0.3);
+}
+
+.help-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.help-container::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.3);
+  border-radius: 10px;
+}
+
+.help-container::-webkit-scrollbar-thumb {
+  background-color: var(--cell-selected);
+  border-radius: 10px;
+}
+
+.help-container::before,
+.help-container::after {
+  content: '';
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, var(--cell-selected), transparent 70%);
+  border-radius: 50%;
+  opacity: 0.1;
+  animation: moveGlow 10s infinite alternate ease-in-out;
+}
+
+.help-container::before {
+  top: -50px;
+  left: -50px;
+  animation-delay: 0s;
+}
+
+.help-container::after {
+  bottom: -50px;
+  right: -50px;
+  animation-delay: 5s;
+}
+
+@keyframes moveGlow {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(40px, 40px); }
+}
+
+.help-title {
+  color: var(--cell-selected);
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+  text-shadow: 0 0 5px rgba(255, 140, 0, 0.5);
+}
+
+.help-section {
+  margin-bottom: 20px;
+  text-align: left;
+  position: relative;
+  padding-left: 15px;
+}
+
+.help-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, var(--cell-selected), transparent);
+  opacity: 0.5;
+}
+
+.help-section h3 {
+  color: var(--cell-selected);
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+/* Speicherhinweis */
+.save-notice {
+  font-size: 0.6rem;
+  opacity: 0.7;
+  margin-top: 15px;
+  max-width: 400px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px;
+  border-radius: 5px;
+}
+
+/* Button Container für die Startseite */
+.button-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+/* Epic Mode Badge */
+.epic-badge {
+  position: absolute;
+  top: 10px;
+  left: 15px;
+  font-size: 0.6rem;
+  background: linear-gradient(45deg, #ff8c00, #ff5722);
+  padding: 5px 10px;
+  border-radius: 15px;
+  box-shadow: 0 0 10px rgba(255, 140, 0, 0.6);
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.epic-badge.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Level completion quotes */
+.level-quote {
+  font-family: var(--lyric-font);
+  font-size: 1rem;
+  font-style: italic;
+  margin-top: 15px;
+  opacity: 0.9;
+  max-width: 500px;
+  line-height: 1.4;
+}
+
+/* Loot box style reward */
+.reward-box {
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, #ffbc40, #ff8c00);
+  border-radius: 10px;
+  margin: 20px auto;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 0 30px rgba(255, 140, 0, 0.7);
+  transition: all 0.3s ease;
+  animation: float 3s infinite ease-in-out;
+  transform-style: preserve-3d;
+}
+
+.reward-box:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 0 40px rgba(255, 140, 0, 0.9);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+.reward-box::before,
+.reward-box::after {
+  content: '';
+  position: absolute;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.reward-box::before {
+  width: 20px;
+  height: 100%;
+  left: 40px;
+  top: 0;
+}
+
+.reward-box::after {
+  width: 100%;
+  height: 20px;
+  left: 0;
+  top: 40px;
+}
+
+/* Mandarin icon */
+.mandarin-icon {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: #ff6d00;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 15px rgba(255, 109, 0, 0.7);
+  z-index: 105;
+  top: -15px;
+  right: -15px;
+  transform: rotate(-15deg);
+  transition: all 0.3s ease;
+}
+
+.mandarin-icon:hover {
+  transform: rotate(15deg) scale(1.1);
+}
+
+.mandarin-icon::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 15px;
+  width: 10px;
+  height: 15px;
+  background: #2e7d32;
+  border-radius: 40% 40% 0 0;
+  transform: rotate(-30deg);
+}
+
+/* Memory flash effect */
+.memory-flash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  opacity: 0;
+  z-index: 200;
+  pointer-events: none;
+}
+
+@keyframes flash {
+  0% { opacity: 0; }
+  10% { opacity: 0.7; }
+  100% { opacity: 0; }
+}
+
+/* Shop Link Style */
+.shop-link {
+  display: inline-block;
+  padding: 12px 24px;
+  margin-top: 20px;
+  background-color: var(--cell-selected);
+  color: #000;
+  text-decoration: none;
+  border-radius: 5px;
+  font-family: var(--main-font);
+  transition: background-color 0.3s ease;
+}
+
+.shop-link:hover {
+  background-color: #ffb74d;
+}
+
+/* Gutscheincode Style */
+#couponCode {
+  display: none; /* Standardmäßig ausblenden */
+  margin-top: 20px; 
+  font-size: 0.9rem;
+}
