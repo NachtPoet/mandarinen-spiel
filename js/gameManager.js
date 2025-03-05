@@ -462,68 +462,87 @@ class GameManager {
     return (minDist <= threshold) ? nearest : null;
   }
 
-  checkSelectedWord() {
-    if (this.selectedCells.length === 0 || this.levelPending) return;
 
-    const word = this.selectedCells.map(c => c.letter).join("");
-    const reversed = this.selectedCells.map(c => c.letter).reverse().join("");
+checkSelectedWord() {
+  if (this.selectedCells.length === 0 || this.levelPending) return;
 
-    if (this.targetWords.includes(word) || this.targetWords.includes(reversed)) {
-      const foundWord = this.targetWords.includes(word) ? word : reversed;
+  const word = this.selectedCells.map(c => c.letter).join("");
+  const reversed = this.selectedCells.map(c => c.letter).reverse().join("");
 
-      if (!this.foundWords.has(foundWord)) {
-        this.foundWords.add(foundWord);
+  if (this.targetWords.includes(word) || this.targetWords.includes(reversed)) {
+    const foundWord = this.targetWords.includes(word) ? word : reversed;
 
-        this.selectedCells.forEach(c => c.el.classList.add("found"));
+    if (!this.foundWords.has(foundWord)) {
+      this.foundWords.add(foundWord);
+      
+      // Stem-Index für das Wort bestimmen
+      const wordIndex = this.targetWords.indexOf(foundWord);
+      const stemIndex = (wordIndex >= 0 && wordIndex < 5) ? wordIndex + 1 : 0;
 
-        this.selectedCells.forEach(c => {
-          c.el.style.animation = "none";
-          setTimeout(() => {
-            c.el.style.animation = "pulse 0.6s ease-in-out";
-          }, 5);
-        });
-
-        let wordEl = document.getElementById("word-" + foundWord);
-        if (wordEl) {
-          wordEl.classList.add("found");
-          if (this.currentDifficulty === "loose") {
-            wordEl.textContent = foundWord;
-          }
-        }
-
-        this.audioManager.playSound('wordFound');
+      // Jede Zelle markieren
+      this.selectedCells.forEach(c => {
+        // Standard-Klasse "found" hinzufügen
+        c.el.classList.add("found");
         
-        // Stem-Audio basierend auf Wortposition aktualisieren
-        // Index des Wortes in der targetWords-Liste finden
-        const wordIndex = this.targetWords.indexOf(foundWord);
-        if (wordIndex >= 0 && wordIndex < 5) { // Maximal 5 Stems aktivierbar (außer Klavier)
-          // Stem-Index ist wordIndex + 1 (da Stem 0 das Klavier ist)
-          const stemIndex = wordIndex + 1;
-          this.stemAudioManager.activateStem(stemIndex);
+        // Falls ein Stem-Index existiert, diesen als Datenattribut setzen
+        if (stemIndex > 0) {
+          c.el.setAttribute('data-stem', stemIndex);
           
-          // Visuelle Anzeige der Stem-Aktivierung
-          const stemName = getStemName(stemIndex);
-          showStemActivation(stemName, stemIndex);
-        }
-
-        createConfetti(5);
-
-        updateProgressBar(this.foundWords.size, this.targetWords.length, this.domElements.progressBar);
-
-        if (this.foundWords.size === this.targetWords.length) {
-          console.log("Alle Wörter gefunden!");
-
-          if (this.hintsUsed === 0) {
-            this.domElements.epicBadge.classList.add('visible');
+          // Prüfen, ob die Zelle bereits Teil eines anderen Wortes ist
+          if (c.el.hasAttribute('data-word')) {
+            c.el.classList.add('multi-word');
           }
-
-          this.levelPending = true;
-
-          setTimeout(() => this.showLevelComplete(), 800);
+          
+          // Aktuelles Wort der Zelle zuordnen
+          c.el.setAttribute('data-word', foundWord);
         }
+        
+        // Pulse-Animation
+        c.el.style.animation = "none";
+        setTimeout(() => {
+          c.el.style.animation = "pulse 0.6s ease-in-out, cell-glow 1.5s infinite alternate";
+        }, 5);
+      });
+
+      let wordEl = document.getElementById("word-" + foundWord);
+      if (wordEl) {
+        wordEl.classList.add("found");
+        wordEl.classList.add("word-just-found");
+        setTimeout(() => wordEl.classList.remove("word-just-found"), 700);
+        
+        if (this.currentDifficulty === "loose") {
+          wordEl.textContent = foundWord;
+        }
+      }
+
+      this.audioManager.playSound('wordFound');
+      
+      // Stem-Audio basierend auf Wortposition aktualisieren
+      if (wordIndex >= 0 && wordIndex < 5) {
+        this.stemAudioManager.activateStem(stemIndex);
+        const stemName = getStemName(stemIndex);
+        showStemActivation(stemName, stemIndex);
+      }
+
+      createConfetti(5);
+
+      updateProgressBar(this.foundWords.size, this.targetWords.length, this.domElements.progressBar);
+
+      if (this.foundWords.size === this.targetWords.length) {
+        console.log("Alle Wörter gefunden!");
+
+        if (this.hintsUsed === 0) {
+          this.domElements.epicBadge.classList.add('visible');
+        }
+
+        this.levelPending = true;
+
+        setTimeout(() => this.showLevelComplete(), 800);
       }
     }
   }
+}
+
 
   showLevelComplete() {
     console.log("Zeige Level-Abschluss");
