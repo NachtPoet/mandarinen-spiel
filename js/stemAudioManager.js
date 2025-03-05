@@ -1,6 +1,6 @@
 /**
  * StemAudioManager - Verwendet vordefinierte HTML-Audio-Elemente
- * In ES5-Syntax für bessere Browser-Kompatibilität
+ * In ES5-Syntax für bessere Browser-Kompatibilität und mit verbesserter Fehlerbehandlung
  */
 function StemAudioManager() {
   // Anzahl der Stems
@@ -25,6 +25,9 @@ function StemAudioManager() {
   // Hauptlautstärke
   this.volume = 0.7;
   
+  // Stems getestet und bereit
+  this.stemsReady = [false, false, false, false, false, false];
+  
   // Initialisieren
   this.init();
 }
@@ -33,43 +36,55 @@ function StemAudioManager() {
  * Initialisiert alle Audio-Elemente
  */
 StemAudioManager.prototype.init = function() {
-  // Sicherstellen, dass alle Audio-Elemente existieren
-  var missingElements = false;
-  for (var i = 0; i < this.stems.length; i++) {
-    if (!this.stems[i]) {
-      missingElements = true;
-      break;
-    }
-  }
-  
-  if (missingElements) {
-    console.error("Einige Audio-Elemente konnten nicht gefunden werden. Bitte überprüfe die HTML-Datei.");
-    return;
-  }
-  
-  // Stems vorbereiten
   var self = this;
+  
+  // Prüfe, ob Audio-Elemente existieren und lade sie
+  var allStemsFound = true;
+  
   for (var i = 0; i < this.numStems; i++) {
-    // Lautstärke setzen (nur Klavier hörbar)
+    if (!this.stems[i]) {
+      console.error("Audio-Element für Stem " + (i+1) + " konnte nicht gefunden werden");
+      allStemsFound = false;
+      continue;
+    }
+    
+    // Setze Anfangslautstärke
     this.stems[i].volume = (i === 0) ? this.volume : 0;
     
-    // Fehlerbehandlung
-    (function(index) {
-      self.stems[index].addEventListener('error', function(e) {
-        console.warn("Stem " + (index+1) + " konnte nicht geladen werden:", e);
+    // Event-Listener für erfolgreiche Ladung
+    (function(index, manager) {
+      manager.stems[index].addEventListener('canplaythrough', function() {
+        console.log("Stem " + (index+1) + " erfolgreich geladen");
+        manager.stemsReady[index] = true;
       });
-    })(i);
+      
+      // Fehlerbehandlung
+      manager.stems[index].addEventListener('error', function(e) {
+        console.warn("Stem " + (index+1) + " konnte nicht geladen werden:", e);
+        
+        // Fallback für fehlende Stems: Stummes Audio-Element
+        if (index > 0) { // Wenn nicht Piano
+          var fallbackAudio = document.createElement('audio');
+          fallbackAudio.loop = true;
+          fallbackAudio.volume = 0;
+          manager.stems[index] = fallbackAudio;
+        }
+      });
+    })(i, this);
   }
   
-  // Synchronisierung
+  if (!allStemsFound) {
+    console.warn("Einige Stems fehlen. Eingeschränkte Funktionalität.");
+  }
+  
+  // Synchronisierung für Piano-Element
   if (this.stems[0]) {
-    var self = this;
     this.stems[0].addEventListener('play', function() {
       self.syncAllStems();
     });
   }
   
-  console.log("StemAudioManager initialisiert mit HTML-Audio-Elementen");
+  console.log("StemAudioManager initialisiert");
 };
 
 /**
@@ -77,23 +92,24 @@ StemAudioManager.prototype.init = function() {
  */
 StemAudioManager.prototype.syncAllStems = function() {
   var primaryStem = this.stems[0];
-  var currentTime = primaryStem.currentTime;
+  if (!primaryStem || primaryStem.error) return;
+  
+  var currentTime = primaryStem.currentTime || 0;
   
   // Alle anderen Stems synchronisieren
   for (var i = 1; i < this.stems.length; i++) {
-    (function(index, manager) {
-      if (manager.stems[index].paused && !primaryStem.paused) {
-        // Erst Zeit setzen, dann abspielen
-        try {
-          manager.stems[index].currentTime = currentTime;
-          manager.stems[index].play().catch(function(e) {
-            console.log("Stem " + index + " konnte nicht gestartet werden:", e);
-          });
-        } catch (e) {
-          console.warn("Konnte Stem " + index + " nicht synchronisieren:", e);
-        }
+    if (!this.stems[i] || !this.stemsReady[i]) continue;
+    
+    if (this.stems[i].paused && !primaryStem.paused) {
+      try {
+        this.stems[i].currentTime = currentTime;
+        this.stems[i].play().catch(function(e) {
+          console.log("Stem konnte nicht synchronisiert werden:", e);
+        });
+      } catch (e) {
+        console.warn("Fehler bei der Synchronisierung:", e);
       }
-    })(i, this);
+    }
   }
 };
 
@@ -101,10 +117,8 @@ StemAudioManager.prototype.syncAllStems = function() {
  * Startet die Wiedergabe aller Stems
  */
 StemAudioManager.prototype.play = function() {
-  // Prüfen, ob bereits abgespielt wird
-  if (this.isPlaying) return;
+  if (this.isPlaying || !this.stems[0]) return;
   
-  // Versuchen, das erste Element abzuspielen
   var self = this;
   var playPromise = this.stems[0].play();
   
@@ -112,7 +126,6 @@ StemAudioManager.prototype.play = function() {
     playPromise.catch(function(e) {
       console.log("Stem 0 konnte nicht gestartet werden:", e);
       
-      // Bei Autoplay-Beschränkungen: Play-Button erstellen
       if (!document.getElementById('manual-play-button')) {
         var playButton = document.createElement('button');
         playButton.id = 'manual-play-button';
@@ -125,13 +138,14 @@ StemAudioManager.prototype.play = function() {
         playButton.style.zIndex = '1000';
         
         playButton.addEventListener('click', function() {
-          self.stems[0].play().then(function() {
-            // Nach Benutzerinteraktion alle Stems starten
-            self.syncAllStems();
-            playButton.remove();
-          }).catch(function(err) {
-            console.error("Fehler beim Starten der Musik:", err);
-          });
+          if (self.stems[0]) {
+            self.stems[0].play().then(function() {
+              self.syncAllStems();
+              playButton.remove();
+            }).catch(function(err) {
+              console.error("Fehler:", err);
+            });
+          }
         });
         
         document.body.appendChild(playButton);
@@ -147,7 +161,13 @@ StemAudioManager.prototype.play = function() {
  */
 StemAudioManager.prototype.pause = function() {
   for (var i = 0; i < this.stems.length; i++) {
-    this.stems[i].pause();
+    if (this.stems[i] && !this.stems[i].paused) {
+      try {
+        this.stems[i].pause();
+      } catch (e) {
+        console.warn("Konnte Stem nicht pausieren:", e);
+      }
+    }
   }
   this.isPlaying = false;
 };
@@ -160,6 +180,11 @@ StemAudioManager.prototype.pause = function() {
 StemAudioManager.prototype.activateStem = function(stemIndex) {
   if (stemIndex < 0 || stemIndex >= this.numStems) {
     return false; // Ungültiger Index
+  }
+  
+  if (!this.stems[stemIndex]) {
+    console.warn("Stem " + stemIndex + " ist nicht verfügbar");
+    return false;
   }
   
   // Prüfen, ob der Stem bereits aktiv ist
@@ -220,6 +245,8 @@ StemAudioManager.prototype.resetToBaseStem = function() {
   
   // Alle Stems außer Klavier auf 0 setzen
   for (var i = 1; i < this.numStems; i++) {
+    if (!this.stems[i]) continue;
+    
     (function(index, manager) {
       // Fade-Out Funktion
       var startVolume = manager.stems[index].volume;
@@ -263,7 +290,9 @@ StemAudioManager.prototype.setVolume = function(volume) {
     
     // Lautstärke für aktive Stems anpassen
     for (var i = 0; i < this.activeStems; i++) {
-      this.stems[i].volume = volume;
+      if (this.stems[i]) {
+        this.stems[i].volume = volume;
+      }
     }
   }
 };
@@ -273,7 +302,9 @@ StemAudioManager.prototype.setVolume = function(volume) {
  */
 StemAudioManager.prototype.dispose = function() {
   for (var i = 0; i < this.stems.length; i++) {
-    this.stems[i].pause();
-    this.stems[i].src = '';
+    if (this.stems[i]) {
+      this.stems[i].pause();
+      this.stems[i].src = '';
+    }
   }
 };
