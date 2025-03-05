@@ -1,6 +1,6 @@
 /**
  * StemAudioManager - Vereinfachte Version, die alle Stems gleichzeitig abspielt
- * und nur die Lautstärke regelt
+ * und nur die Lautstärke regelt. Mit automatischer Loop-Synchronisation.
  */
 function StemAudioManager() {
   // Anzahl der Stems
@@ -43,6 +43,9 @@ function StemAudioManager() {
   
   // Fade-Status (für Animation)
   this.fadingStems = new Set();
+  
+  // Loop-Sync-Status
+  this.loopSyncInitialized = false;
   
   // Initialisieren
   this.init();
@@ -142,6 +145,84 @@ StemAudioManager.prototype.init = function() {
 };
 
 /**
+ * Initialisiert die Loop-Synchronisation, die automatisch
+ * die Stems am Loop-Übergang synchronisiert
+ */
+StemAudioManager.prototype.initLoopSynchronization = function() {
+  var self = this;
+  var lastTime = 0;
+  var loopCheckId = null;
+  var loopSyncActive = false;
+  
+  // Funktion, die den Loop-Check startet, sobald Dauer bekannt ist
+  function startLoopCheck() {
+    if (loopCheckId) {
+      clearInterval(loopCheckId);
+    }
+    
+    // Prüfen, ob die Dauer bekannt ist
+    var duration = self.stems[0].duration;
+    if (isNaN(duration) || duration === Infinity || duration === 0) {
+      // Dauer noch nicht bekannt, später erneut versuchen
+      console.log("Dauer der Audio-Datei noch nicht bekannt, warte...");
+      setTimeout(startLoopCheck, 500);
+      return;
+    }
+    
+    // Dauer gefunden, Schwellenwert für Loop-Erkennung setzen (10% der Gesamtlänge)
+    var loopThreshold = Math.min(duration * 0.1, 10); // Max. 10 Sekunden, min. 10% der Gesamtlänge
+    console.log("Loop-Synchronisation initialisiert. Audio-Länge: " + duration.toFixed(2) + "s, Erkennungsschwelle: " + loopThreshold.toFixed(2) + "s");
+    
+    // Regelmäßig auf Loop-Übergänge prüfen
+    loopCheckId = setInterval(function() {
+      if (!self.isPlaying || !self.stems[0]) return;
+      
+      var currentTime = self.stems[0].currentTime;
+      
+      // Loop-Erkennung: wenn die Zeit von nahe am Ende zu nahe am Anfang springt
+      if (lastTime > (duration - loopThreshold) && currentTime < loopThreshold) {
+        console.log("Loop-Übergang erkannt! Von " + lastTime.toFixed(2) + "s zu " + currentTime.toFixed(2) + "s");
+        
+        // Synchronisation während der ersten 500ms nach Loop-Rücksprung deaktivieren
+        if (!loopSyncActive) {
+          loopSyncActive = true;
+          
+          // Alle Stems auf die gleiche Zeit setzen
+          for (var i = 1; i < self.numStems; i++) {
+            if (self.stems[i] && !self.stems[i].paused) {
+              var beforeSync = self.stems[i].currentTime;
+              self.stems[i].currentTime = currentTime;
+              console.log("Stem " + i + " synchronisiert von " + beforeSync.toFixed(2) + "s auf " + currentTime.toFixed(2) + "s");
+            }
+          }
+          
+          // Nach einer kurzen Zeit wieder Synchronisation erlauben
+          setTimeout(function() {
+            loopSyncActive = false;
+          }, 500);
+        }
+      }
+      
+      lastTime = currentTime;
+    }, 50); // Alle 50ms prüfen (hohe Abtastrate für präzise Erkennung)
+  }
+  
+  // Loop-Check starten, sobald die Dauer bekannt ist
+  startLoopCheck();
+  
+  // Zusätzlich auf loadedmetadata-Event reagieren
+  this.stems[0].addEventListener('loadedmetadata', function() {
+    console.log("Metadaten geladen, Audio-Länge: " + self.stems[0].duration + "s");
+    startLoopCheck();
+  });
+  
+  // Falls die Datei bereits geladen ist
+  if (this.stems[0].readyState >= 1) {
+    startLoopCheck();
+  }
+};
+
+/**
  * Startet die Wiedergabe ALLER Stems (inaktive mit Lautstärke 0)
  */
 StemAudioManager.prototype.play = function() {
@@ -173,6 +254,12 @@ StemAudioManager.prototype.play = function() {
       .then(function() {
         console.log("Alle Stems erfolgreich gestartet");
         self.isPlaying = true;
+        
+        // Loop-Synchronisation initialisieren
+        if (!self.loopSyncInitialized) {
+          self.initLoopSynchronization();
+          self.loopSyncInitialized = true;
+        }
       })
       .catch(function(error) {
         console.warn("Einige Stems konnten nicht automatisch gestartet werden:", error);
@@ -206,6 +293,12 @@ StemAudioManager.prototype.play = function() {
                 console.log("Alle Stems manuell gestartet");
                 self.isPlaying = true;
                 playButton.remove();
+                
+                // Loop-Synchronisation initialisieren
+                if (!self.loopSyncInitialized) {
+                  self.initLoopSynchronization();
+                  self.loopSyncInitialized = true;
+                }
               })
               .catch(function(err) {
                 console.error("Fehler beim manuellen Start:", err);
@@ -217,6 +310,12 @@ StemAudioManager.prototype.play = function() {
       });
   } else {
     this.isPlaying = true;
+    
+    // Loop-Synchronisation initialisieren
+    if (!this.loopSyncInitialized) {
+      this.initLoopSynchronization();
+      this.loopSyncInitialized = true;
+    }
   }
 };
 
