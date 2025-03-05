@@ -113,13 +113,40 @@
     <button id="closeHelpButton" class="btn">Zurück zur Reise</button>
   </div>
 
-  <!-- Audio-Elemente für Stems direkt im HTML -->
-  <audio id="stem-piano" src="assets/audio/stems/01_piano.mp3" preload="auto" loop></audio>
-  <audio id="stem-bass" src="assets/audio/stems/02_bass.mp3" preload="auto" loop></audio>
-  <audio id="stem-drums" src="assets/audio/stems/03_drums.mp3" preload="auto" loop></audio>
-  <audio id="stem-guitars" src="assets/audio/stems/04_guitars.mp3" preload="auto" loop></audio>
-  <audio id="stem-others" src="assets/audio/stems/05_others.mp3" preload="auto" loop></audio>
-  <audio id="stem-vocals" src="assets/audio/stems/06_vocals.mp3" preload="auto" loop></audio>
+  <!-- Audio-Elemente für Stems direkt im HTML - ohne src Attribute -->
+  <audio id="stem-piano" preload="auto" loop></audio>
+  <audio id="stem-bass" preload="auto" loop></audio>
+  <audio id="stem-drums" preload="auto" loop></audio>
+  <audio id="stem-guitars" preload="auto" loop></audio>
+  <audio id="stem-others" preload="auto" loop></audio>
+  <audio id="stem-vocals" preload="auto" loop></audio>
+
+  <!-- Script zum dynamischen Setzen der Audio-Quellen -->
+  <script>
+    // Bestimme die Basis-URL der Webseite
+    var baseUrl = window.location.origin + '/';
+    
+    // Bei GitHub Pages mit Repository-Namen ergänzen
+    if (window.location.hostname.includes('github.io')) {
+      var repo = window.location.pathname.split('/')[1];
+      if (repo) baseUrl += repo + '/';
+    }
+    
+    // Bei benutzerdefinierten Domains wie mandarinenspiel.alexandrajanzen.de
+    // bleibt baseUrl einfach bei "/"
+    
+    // Setze Audioquellen mit absoluten Pfaden
+    document.getElementById('stem-piano').src = baseUrl + 'assets/audio/stems/01_piano.mp3';
+    document.getElementById('stem-bass').src = baseUrl + 'assets/audio/stems/02_bass.mp3';
+    document.getElementById('stem-drums').src = baseUrl + 'assets/audio/stems/03_drums.mp3';
+    document.getElementById('stem-guitars').src = baseUrl + 'assets/audio/stems/04_guitars.mp3';
+    document.getElementById('stem-others').src = baseUrl + 'assets/audio/stems/05_others.mp3';
+    document.getElementById('stem-vocals').src = baseUrl + 'assets/audio/stems/06_vocals.mp3';
+    
+    // Debug-Ausgabe
+    console.log('Audio-Basispfad: ' + baseUrl);
+    console.log('Erster Audiopfad: ' + document.getElementById('stem-piano').src);
+  </script>
 
   <!-- JavaScript Dateien einbinden -->
   <script src="js/utils.js"></script>
