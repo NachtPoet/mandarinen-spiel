@@ -1653,3 +1653,117 @@ select:focus {
 .word-just-found {
   animation: word-found-effect 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+
+/* Farbliche Markierung von gefundenen Wörtern im Grid */
+
+/* Grundstil für gefundene Zellen (subtiler als die Wortliste) */
+.cell.found {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Farbliche Varianten für die verschiedenen Stems */
+.cell.found[data-stem="1"] {
+  border-color: #2196F3 !important;
+  box-shadow: 0 0 8px rgba(33, 150, 243, 0.6) !important;
+  color: #0d47a1 !important;
+  font-weight: bold !important;
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.7) !important;
+}
+
+.cell.found[data-stem="2"] {
+  border-color: #F44336 !important;
+  box-shadow: 0 0 8px rgba(244, 67, 54, 0.6) !important;
+  color: #b71c1c !important;
+  font-weight: bold !important;
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.7) !important;
+}
+
+.cell.found[data-stem="3"] {
+  border-color: #4CAF50 !important;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.6) !important;
+  color: #1b5e20 !important;
+  font-weight: bold !important;
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.7) !important;
+}
+
+.cell.found[data-stem="4"] {
+  border-color: #9C27B0 !important;
+  box-shadow: 0 0 8px rgba(156, 39, 176, 0.6) !important;
+  color: #4a148c !important;
+  font-weight: bold !important;
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.7) !important;
+}
+
+.cell.found[data-stem="5"] {
+  border-color: #FF9800 !important;
+  box-shadow: 0 0 8px rgba(255, 152, 0, 0.6) !important;
+  color: #e65100 !important;
+  font-weight: bold !important;
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Hintergrundfarbe und Overlay für gefundene Zellen */
+.cell.found::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  opacity: 0.15; /* Sehr subtil */
+  transition: all 0.3s ease;
+}
+
+.cell.found[data-stem="1"]::after {
+  background-color: #2196F3;
+}
+
+.cell.found[data-stem="2"]::after {
+  background-color: #F44336;
+}
+
+.cell.found[data-stem="3"]::after {
+  background-color: #4CAF50;
+}
+
+.cell.found[data-stem="4"]::after {
+  background-color: #9C27B0;
+}
+
+.cell.found[data-stem="5"]::after {
+  background-color: #FF9800;
+}
+
+/* Hoverzustand für gefundene Zellen verstärken */
+.cell.found:hover {
+  transform: scale(1.1) !important;
+  z-index: 10 !important;
+}
+
+.cell.found:hover::after {
+  opacity: 0.4;
+}
+
+/* Markierung für Zellen, die Teil mehrerer Wörter sind */
+.cell.found.multi-word {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.1) 3px,
+    rgba(255, 255, 255, 0.2) 3px,
+    rgba(255, 255, 255, 0.2) 6px
+  ) !important;
+}
+
+/* Leuchteffekt für gefundene Zellen */
+@keyframes cell-glow {
+  0% { box-shadow: 0 0 5px rgba(var(--cell-color, 255, 255, 255), 0.5); }
+  100% { box-shadow: 0 0 10px rgba(var(--cell-color, 255, 255, 255), 0.8); }
+}
+
+.cell.found {
+  animation: cell-glow 1.5s infinite alternate;
+}
