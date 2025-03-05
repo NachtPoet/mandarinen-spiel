@@ -9,13 +9,13 @@ Reißt alle Schränke auf
 Nur Liebe hier im Haus
 Wir sehen glücklich aus`,
     colorScheme: {
-      bg: "#0a1721",
-      cellBg: "#152736",
-      cellBorder: "#ff8c00",
-      cellSelected: "#ff8c00",
-      cellFound: "#ffd700",
-      textShadow: "0 0 5px #ff8c00",
-      titleShadow: "0 0 10px #ff8c00"
+      bg: "#2a0d32", // Dunkles Violett für Hintergrund
+      cellBg: "#3a1142", // Etwas helleres Violett für Zellen
+      cellBorder: "#631D76", // Hauptviolett für Umrandung
+      cellSelected: "#9b4dba", // Helleres Violett für Auswahl
+      cellFound: "#d6a6f1", // Noch helleres Violett für gefundene Zellen
+      textShadow: "0 0 5px rgba(155, 77, 186, 0.8)", // Violett-Glow für Text
+      titleShadow: "0 0 10px rgba(155, 77, 186, 0.9)" // Stärkerer Violett-Glow für Titel
     },
     targetWords: ["VERSTECK", "KINDER", "GARDINEN", "SCHRÄNKE", "GLÜCKLICH"],
     quote: "Kindheit ist wie eine Mandarinenschale - ihr Duft bleibt ein Leben lang in Erinnerung."
@@ -29,13 +29,13 @@ Und wenn wir Abschied nehmen
 Gibst du mir Mandarinen
 Bis wir uns wiedersehen`,
     colorScheme: {
-      bg: "#001f3f",
-      cellBg: "#002f4b",
-      cellBorder: "#0074D9",
-      cellSelected: "#0074D9",
-      cellFound: "#7FDBFF",
-      textShadow: "0 0 5px #0074D9",
-      titleShadow: "0 0 10px #0074D9"
+      bg: "#593240", // Dunkles Rosé für Hintergrund
+      cellBg: "#6a3c4b", // Etwas helleres Rosé für Zellen
+      cellBorder: "#F7C1BB", // Haupt-Rosa für Umrandung
+      cellSelected: "#ffada3", // Helleres Rosa für Auswahl
+      cellFound: "#ffd6cf", // Noch helleres Rosa für gefundene Zellen
+      textShadow: "0 0 5px rgba(247, 193, 187, 0.8)", // Rosa-Glow für Text
+      titleShadow: "0 0 10px rgba(247, 193, 187, 0.9)" // Stärkerer Rosa-Glow für Titel
     },
     targetWords: ["GITARRE", "BURGEN", "FANTASIEN", "ABSCHIED", "MANDARINEN"],
     quote: "In jedem Abschied liegt der Keim eines Wiedersehens, in jeder Mandarine die Süße der Erinnerung."
@@ -46,13 +46,13 @@ Zwischen uns wurden Mauern gebaut
 Hast mir gefehlt, so viele Male
 Und ich dir auch`,
     colorScheme: {
-      bg: "#2e003e",
-      cellBg: "#3a0f4a",
-      cellBorder: "#b10dc9",
-      cellSelected: "#b10dc9",
-      cellFound: "#e4a1f7",
-      textShadow: "0 0 5px #b10dc9",
-      titleShadow: "0 0 10px #b10dc9"
+      bg: "#4a0d17", // Dunkles Rot für Hintergrund
+      cellBg: "#5c1720", // Etwas helleres Rot für Zellen
+      cellBorder: "#D62941", // Haupt-Rot für Umrandung
+      cellSelected: "#ff5066", // Helleres Rot für Auswahl
+      cellFound: "#ff8c98", // Noch helleres Rot für gefundene Zellen
+      textShadow: "0 0 5px rgba(214, 41, 65, 0.8)", // Rot-Glow für Text
+      titleShadow: "0 0 10px rgba(214, 41, 65, 0.9)" // Stärkerer Rot-Glow für Titel
     },
     targetWords: ["TAGEN", "JAHRE", "MAUERN", "FEHLT", "VIELE"],
     quote: "Zeit baut manchmal Mauern, doch wahre Verbindungen finden immer einen Weg hindurch."
@@ -63,13 +63,13 @@ Können uns nie verloren gehen
 Auch getrennt in den dunkelsten Stunden
 Was wir haben wird nie vergehen`,
     colorScheme: {
-      bg: "#003300",
-      cellBg: "#004d00",
-      cellBorder: "#00cc00",
-      cellSelected: "#00cc00",
-      cellFound: "#99ff99",
-      textShadow: "0 0 5px #00cc00",
-      titleShadow: "0 0 10px #00cc00"
+      bg: "#2c3c33", // Dunkles Grün für Hintergrund
+      cellBg: "#3a4a41", // Etwas helleres Grün für Zellen
+      cellBorder: "#99B9AB", // Haupt-Grün für Umrandung
+      cellSelected: "#b5d1c6", // Helleres Grün für Auswahl
+      cellFound: "#d1e8df", // Noch helleres Grün für gefundene Zellen
+      textShadow: "0 0 5px rgba(153, 185, 171, 0.8)", // Grün-Glow für Text
+      titleShadow: "0 0 10px rgba(153, 185, 171, 0.9)" // Stärkerer Grün-Glow für Titel
     },
     targetWords: ["VERBUNDEN", "VERLOREN", "DUNKELSTEN", "VERGEHEN", "HABEN"],
     quote: "Selbst in den dunkelsten Stunden leuchten die hellsten Erinnerungen am stärksten."
@@ -81,13 +81,13 @@ Du warst so viele Jahre nicht da
 Aber nie weg
 Ich hab immer Mandarinen im Gepäck`,
     colorScheme: {
-      bg: "#3e1f0f",
-      cellBg: "#4a2f1b",
-      cellBorder: "#ff851b",
-      cellSelected: "#ff8c00",
-      cellFound: "#ffdc00",
-      textShadow: "0 0 5px #ff851b",
-      titleShadow: "0 0 10px #ff851b"
+      bg: "#5c4a10", // Dunkles Goldgelb für Hintergrund
+      cellBg: "#6e5918", // Etwas helleres Goldgelb für Zellen
+      cellBorder: "#FDC840", // Haupt-Gelb für Umrandung
+      cellSelected: "#ffdb70", // Helleres Gelb für Auswahl
+      cellFound: "#ffe9a1", // Noch helleres Gelb für gefundene Zellen
+      textShadow: "0 0 5px rgba(253, 200, 64, 0.8)", // Gelb-Glow für Text
+      titleShadow: "0 0 10px rgba(253, 200, 64, 0.9)" // Stärkerer Gelb-Glow für Titel
     },
     targetWords: ["KURVEN", "SERPENTINEN", "REGENTAGEN", "FEHLER", "MANDARINEN"],
     quote: "Auf kurvenreichen Wegen des Lebens sind es die kleinen Symbole, die uns Halt geben."
@@ -101,13 +101,13 @@ In deinen Armen
 Das letzte Puzzleteil
 So viele Wunden heilen`,
     colorScheme: {
-      bg: "#330033",
-      cellBg: "#440044",
-      cellBorder: "#cc33ff",
-      cellSelected: "#cc33ff",
-      cellFound: "#e6b3ff",
-      textShadow: "0 0 5px #cc33ff",
-      titleShadow: "0 0 10px #cc33ff"
+      bg: "#3d0e24", // Dunkles Violett-Rot für Hintergrund
+      cellBg: "#4d1730", // Etwas helleres Violett-Rot für Zellen
+      cellBorder: "#b5265e", // Mischung aus Violett und Rot
+      cellSelected: "#e85588", // Hellere Mischung für Auswahl
+      cellFound: "#ff9ebb", // Noch hellere Mischung für gefundene Zellen
+      textShadow: "0 0 5px rgba(214, 41, 118, 0.8)", // Violett-Rot-Glow für Text
+      titleShadow: "0 0 10px rgba(214, 41, 118, 0.9)" // Stärkerer Violett-Rot-Glow für Titel
     },
     targetWords: ["ZITTERN", "TÜR", "SCHRITTE", "PUZZLETEIL", "WUNDEN"],
     quote: "Manchmal heilen alte Wunden erst, wenn wir den Mut finden, an vergessene Türen zu klopfen."
@@ -121,13 +121,13 @@ Vergilbte Bilder
 In alten Holzvitrinen
 Und da zwei Mandarinen`,
     colorScheme: {
-      bg: "#222222",
-      cellBg: "#333333",
-      cellBorder: "#aaaaaa",
-      cellSelected: "#aaaaaa",
-      cellFound: "#dddddd",
-      textShadow: "0 0 5px #aaaaaa",
-      titleShadow: "0 0 10px #aaaaaa"
+      bg: "#3c4020", // Dunkles Grün-Gelb für Hintergrund
+      cellBg: "#4a4e2a", // Etwas helleres Grün-Gelb für Zellen
+      cellBorder: "#b3c161", // Mischung aus Grün und Gelb
+      cellSelected: "#d1dd83", // Hellere Mischung für Auswahl
+      cellFound: "#edf4b5", // Noch hellere Mischung für gefundene Zellen
+      textShadow: "0 0 5px rgba(179, 193, 97, 0.8)", // Grün-Gelb-Glow für Text
+      titleShadow: "0 0 10px rgba(179, 193, 97, 0.9)" // Stärkerer Grün-Gelb-Glow für Titel
     },
     targetWords: ["HAARE", "BLICK", "LACHEN", "BILDER", "VITRINEN"],
     quote: "In einem vertrauten Blick liegt mehr Geschichte als in tausend Bildern."
@@ -138,13 +138,13 @@ Aus Mauersteinen bauten wir einen Weg
 All die verpassten ersten Male
 Tun nicht mehr so weh`,
     colorScheme: {
-      bg: "#1a1a1a",
-      cellBg: "#2a2a2a",
-      cellBorder: "#ff6600",
-      cellSelected: "#ff6600",
-      cellFound: "#ffcc00",
-      textShadow: "0 0 5px #ff6600",
-      titleShadow: "0 0 10px #ff6600"
+      bg: "#511a20", // Dunkles Rosa-Rot für Hintergrund
+      cellBg: "#63222a", // Etwas helleres Rosa-Rot für Zellen
+      cellBorder: "#e6747e", // Mischung aus Rosa und Rot
+      cellSelected: "#ff97a0", // Hellere Mischung für Auswahl
+      cellFound: "#ffbbc1", // Noch hellere Mischung für gefundene Zellen
+      textShadow: "0 0 5px rgba(230, 116, 126, 0.8)", // Rosa-Rot-Glow für Text
+      titleShadow: "0 0 10px rgba(230, 116, 126, 0.9)" // Stärkerer Rosa-Rot-Glow für Titel
     },
     targetWords: ["TAGE", "MAUERSTEINE", "ERSTEN", "MALE", "WEH"],
     quote: "Aus den Steinen, die uns einst trennten, bauen wir heute die Brücken, die uns verbinden."
@@ -155,13 +155,13 @@ Können uns nie verloren gehen
 Auch getrennt in den dunkelsten Stunden
 Was wir haben wird nie vergehen`,
     colorScheme: {
-      bg: "#003300",
-      cellBg: "#004d00",
-      cellBorder: "#00cc00",
-      cellSelected: "#00cc00",
-      cellFound: "#99ff99",
-      textShadow: "0 0 5px #00cc00",
-      titleShadow: "0 0 10px #00cc00"
+      bg: "#2c3c33", // Dunkles Grün für Hintergrund
+      cellBg: "#3a4a41", // Etwas helleres Grün für Zellen
+      cellBorder: "#99B9AB", // Haupt-Grün für Umrandung
+      cellSelected: "#b5d1c6", // Helleres Grün für Auswahl
+      cellFound: "#d1e8df", // Noch helleres Grün für gefundene Zellen
+      textShadow: "0 0 5px rgba(153, 185, 171, 0.8)", // Grün-Glow für Text
+      titleShadow: "0 0 10px rgba(153, 185, 171, 0.9)" // Stärkerer Grün-Glow für Titel
     },
     targetWords: ["VERBUNDEN", "VERLOREN", "DUNKELSTEN", "VERGEHEN", "HABEN"],
     quote: "Wahre Verbindungen kennen keine Entfernung, keine Zeit und keine Grenzen."
@@ -173,13 +173,13 @@ Du warst so viele Jahre nicht da
 Aber nie weg
 Ich hab immer Mandarinen im Gepäck`,
     colorScheme: {
-      bg: "#3e1f0f",
-      cellBg: "#4a2f1b",
-      cellBorder: "#ff851b",
-      cellSelected: "#ff851b",
-      cellFound: "#ffdc00",
-      textShadow: "0 0 5px #ff851b",
-      titleShadow: "0 0 10px #ff851b"
+      bg: "#47204a", // Dunkle Mischung für Hintergrund
+      cellBg: "#562959", // Etwas hellere Mischung für Zellen
+      cellBorder: "#d69f46", // Mischung aus Gelb und Violett
+      cellSelected: "#e9b86a", // Hellere Mischung für Auswahl
+      cellFound: "#ffd492", // Noch hellere Mischung für gefundene Zellen
+      textShadow: "0 0 5px rgba(214, 159, 70, 0.8)", // Gelb-Violett-Glow für Text
+      titleShadow: "0 0 10px rgba(214, 159, 70, 0.9)" // Stärkerer Gelb-Violett-Glow für Titel
     },
     targetWords: ["KURVEN", "SERPENTINEN", "REGENTAGEN", "FEHLER", "MANDARINEN"],
     quote: "Am Ende jeder Reise steht die Erkenntnis: Es sind nicht die Orte, die wir besuchen, sondern die Menschen, die wir mitnehmen."
