@@ -1,5 +1,5 @@
-// AudioManager-Klasse für die Verwaltung von Musik und Soundeffekten
-// In ES5-Syntax für bessere Browser-Kompatibilität
+// AudioManager-Klasse für die Verwaltung von Soundeffekten (LOKALE WAV-DATEIEN)
+// In ES5-Syntax für Browser-Kompatibilität
 function AudioManager() {
   this.bgMusic = document.createElement("audio");
   this.bgMusic.loop = true;
@@ -14,13 +14,13 @@ function AudioManager() {
     flash: document.createElement("audio")
   };
 
-  // Tatsächlich funktionierende URLs für Soundeffekte
-  this.soundEffects.wordFound.src = "https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3";
-  this.soundEffects.levelComplete.src = "https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3";
-  this.soundEffects.gameComplete.src = "https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3";
-  this.soundEffects.click.src = "https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3";
-  this.soundEffects.hint.src = "https://assets.mixkit.co/sfx/preview/mixkit-magic-sweep-game-trophy-257.mp3";
-  this.soundEffects.flash.src = "https://assets.mixkit.co/sfx/preview/mixkit-fast-small-sweep-transition-166.mp3";
+  // **LOKALE PFADE ZU WAV-DATEIEN IM ORDNER assets/audio/effects/**
+  this.soundEffects.wordFound.src = "assets/audio/effects/wordFound.wav";
+  this.soundEffects.levelComplete.src = "assets/audio/effects/levelComplete.wav";
+  this.soundEffects.gameComplete.src = "assets/audio/effects/gameComplete.wav";
+  this.soundEffects.click.src = "assets/audio/effects/click.wav";
+  this.soundEffects.hint.src = "assets/audio/effects/hint.wav";
+  this.soundEffects.flash.src = "assets/audio/effects/flash.wav";
 
   // Preload der Soundeffekte
   var self = this;
@@ -33,35 +33,6 @@ function AudioManager() {
   this.soundEnabled = true;
 }
 
-// Methode zum Setzen der Musik für ein Level
-AudioManager.prototype.setMusicForLevel = function(levelIndex) {
-  var levelNum = (levelIndex + 1).toString();
-  if (levelNum.length < 2) levelNum = "0" + levelNum;
-  
-  // Verschiedene URL-Varianten versuchen
-  var possiblePaths = [
-    "assets/audio/Mandarinen_Game_" + levelNum + ".mp3",
-    "./assets/audio/Mandarinen_Game_" + levelNum + ".mp3",
-    "/assets/audio/Mandarinen_Game_" + levelNum + ".mp3"
-  ];
-  
-  // Debug-Info
-  console.log("Versuche diese Pfade:", possiblePaths);
-  
-  this.bgMusic.src = possiblePaths[0];
-  
-  if (this.musicEnabled) {
-    var self = this;
-    var playPromise = this.bgMusic.play();
-    
-    if (playPromise !== undefined) {
-      playPromise.catch(function(err) {
-        console.error("Musik konnte nicht gestartet werden:", err);
-      });
-    }
-  }
-};
-
 // Methode zum Abspielen von Soundeffekten
 AudioManager.prototype.playSound = function(name) {
   if (this.soundEnabled && this.soundEffects[name]) {
@@ -71,21 +42,22 @@ AudioManager.prototype.playSound = function(name) {
 
       // Promise-basierte Wiedergabe mit Fehlerbehandlung
       var playPromise = this.soundEffects[name].play();
+      var self = this;
 
       if (playPromise !== undefined) {
         playPromise
           .then(function() {
             // Wiedergabe erfolgreich gestartet
-            console.log("Sound " + name + " wird abgespielt");
+            console.log("Sound " + name + " wird abgespielt: " + name); // Debug-Ausgabe hinzugefügt
           })
           .catch(function(err) {
             // Auto-play wurde möglicherweise verhindert
-            console.log("Sound " + name + " konnte nicht abgespielt werden:", err);
+            console.log("Sound " + name + " konnte nicht abgespielt werden (Auto-Play verhindert?):", err);
 
             // Versuche es erneut nach einer Benutzerinteraktion
             document.addEventListener('click', function() {
-              this.soundEffects[name].play().catch(function(e) {
-                console.log('Wiedergabeversuch fehlgeschlagen:', e);
+              self.soundEffects[name].play().catch(function(e) {
+                console.log('Wiedergabeversuch fehlgeschlagen (nach User-Interaktion):', e);
               });
             }, { once: true });
           });
