@@ -113,12 +113,23 @@
     <button id="closeHelpButton" class="btn">Zurück zur Reise</button>
   </div>
 
+  <!-- Audio-Elemente für Stems direkt im HTML -->
+  <audio id="stem-piano" src="assets/audio/stems/01_piano.mp3" preload="auto" loop></audio>
+  <audio id="stem-bass" src="assets/audio/stems/02_bass.mp3" preload="auto" loop></audio>
+  <audio id="stem-drums" src="assets/audio/stems/03_drums.mp3" preload="auto" loop></audio>
+  <audio id="stem-guitars" src="assets/audio/stems/04_guitars.mp3" preload="auto" loop></audio>
+  <audio id="stem-others" src="assets/audio/stems/05_others.mp3" preload="auto" loop></audio>
+  <audio id="stem-vocals" src="assets/audio/stems/06_vocals.mp3" preload="auto" loop></audio>
+
   <!-- JavaScript Dateien einbinden -->
   <script src="js/utils.js"></script>
   <script src="js/levels.js"></script>
+  <!-- Erst die ursprüngliche AudioManager-Klasse laden: -->
   <script src="js/audioManager.js"></script>
+  <!-- Dann die Stem-Audio-Manager-Klasse: -->
   <script src="js/stemAudioManager.js"></script>
   <script src="js/ui.js"></script>
+  <!-- GameManager muss nach AudioManager und StemAudioManager geladen werden: -->
   <script src="js/gameManager.js"></script>
   <script src="js/main.js"></script>
 </body>
