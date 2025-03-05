@@ -50,11 +50,9 @@ function StemAudioManager() {
 StemAudioManager.prototype.tryLoadWithDifferentPaths = function(audioElement, filename, callback) {
   // Verschiedene Pfade versuchen
   var possiblePaths = [
-    'assets/audio/stems/' + filename,  // Relativer Pfad
-    './assets/audio/stems/' + filename, // Mit führendem ./
-    '/assets/audio/stems/' + filename,  // Mit führendem /
-    'https://nachtpoet.github.io/mandarinenspiel/assets/audio/stems/' + filename // Absoluter URL
-  ];
+  './01_piano.mp3', // Direkt im Root, relativ zu index.html
+  // ... die anderen Pfade erstmal auskommentieren oder löschen ...
+];
   
   console.log("Versuche, Stem zu laden mit Pfaden:", possiblePaths);
   
