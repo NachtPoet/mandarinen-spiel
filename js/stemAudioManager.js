@@ -1,6 +1,6 @@
 /**
- * StemAudioManager - Verwendet vordefinierte HTML-Audio-Elemente
- * In ES5-Syntax für bessere Browser-Kompatibilität und mit verbesserter Fehlerbehandlung
+ * StemAudioManager - Verwendet HTML-Audio-Elemente mit adaptiven Pfaden
+ * In ES5-Syntax für bessere Browser-Kompatibilität
  */
 function StemAudioManager() {
   // Anzahl der Stems
@@ -25,12 +25,77 @@ function StemAudioManager() {
   // Hauptlautstärke
   this.volume = 0.7;
   
-  // Stems getestet und bereit
-  this.stemsReady = [false, false, false, false, false, false];
+  // Stems erfolgreich geladen
+  this.stemsLoaded = [false, false, false, false, false, false];
+  
+  // Stem-Dateinamen
+  this.stemFiles = [
+    '01_piano.mp3',
+    '02_bass.mp3',
+    '03_drums.mp3',
+    '04_guitars.mp3',
+    '05_others.mp3',
+    '06_vocals.mp3'
+  ];
   
   // Initialisieren
   this.init();
 }
+
+/**
+ * Versucht, eine Audio-Datei mit verschiedenen Pfadvarianten zu laden
+ * @param {HTMLAudioElement} audioElement - Das Audio-Element
+ * @param {String} filename - Der Dateiname
+ */
+StemAudioManager.prototype.tryLoadWithDifferentPaths = function(audioElement, filename, callback) {
+  // Verschiedene Pfade versuchen
+  var possiblePaths = [
+    'assets/audio/stems/' + filename,  // Relativer Pfad
+    './assets/audio/stems/' + filename, // Mit führendem ./
+    '/assets/audio/stems/' + filename,  // Mit führendem /
+    'https://mandarinenspiel.alexandrajanzen.de/assets/audio/stems/' + filename // Absoluter URL
+  ];
+  
+  console.log("Versuche, Stem zu laden mit Pfaden:", possiblePaths);
+  
+  // Verwende den ersten Pfad und lade die Datei vor
+  audioElement.src = possiblePaths[0];
+  audioElement.load();
+  
+  var attemptCount = 0;
+  var self = this;
+  
+  // Bei Erfolg Callback aufrufen
+  var successHandler = function() {
+    console.log("Erfolg mit Pfad:", possiblePaths[attemptCount]);
+    audioElement.removeEventListener('canplaythrough', successHandler);
+    if (callback) callback(true);
+  };
+  
+  // Bei Fehler nächsten Pfad versuchen
+  var errorHandler = function(e) {
+    console.log("Fehler mit Pfad " + possiblePaths[attemptCount] + ":", e);
+    audioElement.removeEventListener('error', errorHandler);
+    
+    attemptCount++;
+    if (attemptCount < possiblePaths.length) {
+      console.log("Versuche nächsten Pfad:", possiblePaths[attemptCount]);
+      audioElement.src = possiblePaths[attemptCount];
+      audioElement.load();
+      
+      // Event-Handler neu hinzufügen
+      audioElement.addEventListener('canplaythrough', successHandler);
+      audioElement.addEventListener('error', errorHandler);
+    } else {
+      console.error("Alle Pfade für " + filename + " gescheitert.");
+      if (callback) callback(false);
+    }
+  };
+  
+  // Event-Handler hinzufügen
+  audioElement.addEventListener('canplaythrough', successHandler);
+  audioElement.addEventListener('error', errorHandler);
+};
 
 /**
  * Initialisiert alle Audio-Elemente
@@ -51,24 +116,11 @@ StemAudioManager.prototype.init = function() {
     // Setze Anfangslautstärke
     this.stems[i].volume = (i === 0) ? this.volume : 0;
     
-    // Event-Listener für erfolgreiche Ladung
+    // Versuche verschiedene Pfade für jedes Stem
     (function(index, manager) {
-      manager.stems[index].addEventListener('canplaythrough', function() {
-        console.log("Stem " + (index+1) + " erfolgreich geladen");
-        manager.stemsReady[index] = true;
-      });
-      
-      // Fehlerbehandlung
-      manager.stems[index].addEventListener('error', function(e) {
-        console.warn("Stem " + (index+1) + " konnte nicht geladen werden:", e);
-        
-        // Fallback für fehlende Stems: Stummes Audio-Element
-        if (index > 0) { // Wenn nicht Piano
-          var fallbackAudio = document.createElement('audio');
-          fallbackAudio.loop = true;
-          fallbackAudio.volume = 0;
-          manager.stems[index] = fallbackAudio;
-        }
+      manager.tryLoadWithDifferentPaths(manager.stems[index], manager.stemFiles[index], function(success) {
+        manager.stemsLoaded[index] = success;
+        console.log("Stem " + (index+1) + " Ladestatus:", success);
       });
     })(i, this);
   }
@@ -92,13 +144,13 @@ StemAudioManager.prototype.init = function() {
  */
 StemAudioManager.prototype.syncAllStems = function() {
   var primaryStem = this.stems[0];
-  if (!primaryStem || primaryStem.error) return;
+  if (!primaryStem) return;
   
   var currentTime = primaryStem.currentTime || 0;
   
   // Alle anderen Stems synchronisieren
   for (var i = 1; i < this.stems.length; i++) {
-    if (!this.stems[i] || !this.stemsReady[i]) continue;
+    if (!this.stems[i] || !this.stemsLoaded[i]) continue;
     
     if (this.stems[i].paused && !primaryStem.paused) {
       try {
@@ -182,8 +234,8 @@ StemAudioManager.prototype.activateStem = function(stemIndex) {
     return false; // Ungültiger Index
   }
   
-  if (!this.stems[stemIndex]) {
-    console.warn("Stem " + stemIndex + " ist nicht verfügbar");
+  if (!this.stems[stemIndex] || !this.stemsLoaded[stemIndex]) {
+    console.warn("Stem " + stemIndex + " ist nicht verfügbar oder nicht geladen");
     return false;
   }
   
