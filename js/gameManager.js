@@ -4,6 +4,7 @@ class GameManager {
     // Spieldaten
     this.levels = GAME_LEVELS;
     this.audioManager = new AudioManager();
+    this.stemAudioManager = new StemAudioManager(); // Neue Stem-Manager-Instanz
     this.currentLevelIndex = 0;
     this.currentLevel = null;
     this.gridSize = 12;
@@ -170,6 +171,10 @@ class GameManager {
     clearInterval(this.timerInterval);
     this.timerInterval = setInterval(() => this.updateTimerDisplay(), 1000);
     this.initLevel();
+    
+    // Stem-Audio starten (nach Benutzerinteraktion)
+    this.stemAudioManager.play();
+    
     this.saveGameProgress();
   }
 
@@ -193,6 +198,10 @@ class GameManager {
     this.timerInterval = setInterval(() => this.updateTimerDisplay(), 1000);
 
     this.initLevel();
+    
+    // Stem-Audio starten
+    this.stemAudioManager.resetToBaseStem();
+    this.stemAudioManager.play();
 
     this.resetGameProgress();
     this.saveGameProgress();
@@ -254,10 +263,18 @@ class GameManager {
     renderGrid(this.grid, this.gridSize, this.domElements.grid);
     renderWordList(this.targetWords, this.foundWords, this.currentDifficulty, this.domElements.wordList);
     this.addCellListeners();
-    this.audioManager.setMusicForLevel(this.currentLevelIndex);
+    
+    // Alte Musik-Routine entfernt:
+    // this.audioManager.setMusicForLevel(this.currentLevelIndex);
 
     if (this.currentLevelIndex > 0) {
-      triggerMemoryFlash(this.audioManager);
+      // Flash-Effekt mit nur Sound-Effekt
+      const flash = document.querySelector('.memory-flash');
+      flash.style.animation = 'none';
+      setTimeout(() => {
+        flash.style.animation = 'flash 1.5s forwards';
+        this.audioManager.playSound('flash');
+      }, 10);
     }
   }
 
@@ -475,6 +492,14 @@ class GameManager {
         }
 
         this.audioManager.playSound('wordFound');
+        
+        // Stem-Audio basierend auf Wortposition aktualisieren
+        // Index des Wortes in der targetWords-Liste finden
+        const wordIndex = this.targetWords.indexOf(foundWord);
+        if (wordIndex >= 0 && wordIndex < 5) { // Maximal 5 Stems aktivierbar (außer Klavier)
+          // Stem-Index ist wordIndex + 1 (da Stem 0 das Klavier ist)
+          this.stemAudioManager.activateStem(wordIndex + 1);
+        }
 
         createConfetti(5);
 
@@ -513,7 +538,15 @@ class GameManager {
 
       this.domElements.levelQuote.textContent = `"${this.currentLevel.quote}"`;
 
-      setTimeout(() => triggerMemoryFlash(this.audioManager), 500);
+      // Flash-Effekt mit nur Sound-Effekt
+      setTimeout(() => {
+        const flash = document.querySelector('.memory-flash');
+        flash.style.animation = 'none';
+        setTimeout(() => {
+          flash.style.animation = 'flash 1.5s forwards';
+          this.audioManager.playSound('flash');
+        }, 10);
+      }, 500);
 
       this.domElements.levelOverlay.classList.remove("hidden");
     } else {
@@ -541,7 +574,15 @@ class GameManager {
       this.audioManager.playSound('gameComplete');
       createConfetti(50);
 
-      setTimeout(() => triggerMemoryFlash(this.audioManager), 1000);
+      // Flash-Effekt mit nur Sound-Effekt
+      setTimeout(() => {
+        const flash = document.querySelector('.memory-flash');
+        flash.style.animation = 'none';
+        setTimeout(() => {
+          flash.style.animation = 'flash 1.5s forwards';
+          this.audioManager.playSound('flash');
+        }, 10);
+      }, 1000);
     }
   }
 
@@ -555,6 +596,9 @@ class GameManager {
     clearCellSelection();
     this.selectedCells = [];
     this.startCell = null;
+
+    // Stems auf Grundzustand zurücksetzen (nur Klavier)
+    this.stemAudioManager.resetToBaseStem();
 
     this.currentLevelIndex++;
 
@@ -577,6 +621,9 @@ class GameManager {
     this.timerInterval = setInterval(() => this.updateTimerDisplay(), 1000);
 
     this.initLevel();
+    
+    // Stems zurücksetzen
+    this.stemAudioManager.resetToBaseStem();
 
     this.saveGameProgress();
   }
@@ -584,6 +631,13 @@ class GameManager {
   toggleMusic() {
     const musicEnabled = this.audioManager.toggleMusic();
     this.domElements.musicToggle.innerHTML = musicEnabled ? musicOnIcon : musicOffIcon;
+
+    // Auch den Stem-Manager steuern
+    if (musicEnabled) {
+      this.stemAudioManager.play();
+    } else {
+      this.stemAudioManager.pause();
+    }
 
     if (this.audioManager.soundEnabled) {
       this.audioManager.playSound('click');
