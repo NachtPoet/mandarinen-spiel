@@ -498,7 +498,12 @@ class GameManager {
         const wordIndex = this.targetWords.indexOf(foundWord);
         if (wordIndex >= 0 && wordIndex < 5) { // Maximal 5 Stems aktivierbar (außer Klavier)
           // Stem-Index ist wordIndex + 1 (da Stem 0 das Klavier ist)
-          this.stemAudioManager.activateStem(wordIndex + 1);
+          const stemIndex = wordIndex + 1;
+          this.stemAudioManager.activateStem(stemIndex);
+          
+          // Visuelle Anzeige der Stem-Aktivierung
+          const stemName = getStemName(stemIndex);
+          showStemActivation(stemName, stemIndex);
         }
 
         createConfetti(5);

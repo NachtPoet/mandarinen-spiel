@@ -77,15 +77,42 @@ function renderGrid(grid, gridSize, gridContainer) {
 function renderWordList(targetWords, foundWords, difficulty, wordListDiv) {
   wordListDiv.innerHTML = "";
 
-  targetWords.forEach(word => {
+  // Icons für jeden Stem
+  const stemIcons = [
+    '',
+    '<svg class="stem-icon bass-icon" viewBox="0 0 24 24"><path d="M6 18V6h12v12H6z" class="stem-icon-base" /><path d="M11 8h2v8h-2v-8z" class="stem-icon-detail" /></svg>',
+    '<svg class="stem-icon drums-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5.5" class="stem-icon-base" /><circle cx="12" cy="12" r="2" class="stem-icon-detail" /></svg>',
+    '<svg class="stem-icon guitar-icon" viewBox="0 0 24 24"><path d="M7 19l10-14 M10 19.5l7-15" class="stem-icon-detail" /></svg>',
+    '<svg class="stem-icon other-icon" viewBox="0 0 24 24"><rect x="8" y="8" width="8" height="8" class="stem-icon-base" /><path d="M8 12h8 M12 8v8" class="stem-icon-detail" /></svg>',
+    '<svg class="stem-icon vocal-icon" viewBox="0 0 24 24"><circle cx="12" cy="10" r="3" class="stem-icon-base" /><path d="M8 16c0-2 2-3 4-3s4 1 4 3" class="stem-icon-detail" /></svg>'
+  ];
+
+  targetWords.forEach((word, index) => {
     const span = document.createElement("span");
     span.classList.add("word");
     span.id = "word-" + word;
+    
+    // Stem-Index für dieses Wort (maximal 5 Stems zu aktivieren, wie in gameManager.js)
+    const stemIndex = index < 5 ? index + 1 : 0;
+    
+    if (stemIndex > 0) {
+      span.setAttribute('data-stem', stemIndex);
+      span.setAttribute('title', getStemName(stemIndex));
+    }
 
+    // Text-Inhalt basierend auf Schwierigkeitsgrad
     if (difficulty === "loose") {
       span.textContent = word[0] + "-".repeat(word.length - 1);
     } else {
       span.textContent = word;
+    }
+
+    // Icon-Container hinzufügen
+    if (stemIndex > 0) {
+      const iconSpan = document.createElement("span");
+      iconSpan.classList.add("stem-icon-container");
+      iconSpan.innerHTML = stemIcons[stemIndex];
+      span.appendChild(iconSpan);
     }
 
     if (foundWords.has(word)) {
@@ -93,10 +120,33 @@ function renderWordList(targetWords, foundWords, difficulty, wordListDiv) {
       if (difficulty === "loose") {
         span.textContent = word;
       }
+      
+      // Bei gefundenen Wörtern volle Transparenz für das Icon
+      if (stemIndex > 0) {
+        span.classList.add("stem-active");
+      }
     }
 
     wordListDiv.appendChild(span);
   });
+}
+
+/**
+ * Gibt den Namen eines Stems basierend auf seinem Index zurück
+ * @param {number} stemIndex - Index des Stems (1-5)
+ * @returns {string} - Name des Stems
+ */
+function getStemName(stemIndex) {
+  const stemNames = [
+    "Piano (Basis)",
+    "Bass",
+    "Schlagzeug",
+    "Gitarren",
+    "Weitere Instrumente",
+    "Gesang"
+  ];
+  
+  return stemNames[stemIndex] || "";
 }
 
 /**
@@ -192,4 +242,42 @@ function giveWordHint(targetWords, foundWords, audioManager) {
   }
 
   return 0;
+}
+
+/**
+ * Zeigt visuell an, dass ein neuer Stem aktiviert wurde
+ * @param {string} stemName - Name des aktivierten Stems
+ * @param {number} stemIndex - Index des Stems (1-5)
+ */
+function showStemActivation(stemName, stemIndex) {
+  const gameContainer = document.getElementById('gameContainer');
+  if (!gameContainer) return;
+  
+  // Erstelle ein temporäres Element zur Anzeige
+  const notification = document.createElement('div');
+  notification.className = 'stem-notification';
+  notification.setAttribute('data-stem', stemIndex);
+  
+  // Musikalisches Notensymbol hinzufügen und dabei basierend auf dem Stem variieren
+  const noteSymbols = ['♪', '♫', '🎵', '🎶'];
+  const randomNote = noteSymbols[Math.floor(Math.random() * noteSymbols.length)];
+  const endNote = noteSymbols[Math.floor(Math.random() * noteSymbols.length)];
+  
+  notification.innerHTML = `
+    <div class="stem-notification-icon"></div>
+    ${randomNote} ${stemName} aktiviert ${endNote}
+  `;
+  
+  // Füge es zum Spielbereich hinzu
+  gameContainer.appendChild(notification);
+  
+  // Animation starten und dann Element entfernen
+  setTimeout(() => {
+    notification.classList.add('show');
+    
+    setTimeout(() => {
+      notification.classList.add('hide');
+      setTimeout(() => notification.remove(), 500);
+    }, 2000);
+  }, 10);
 }
