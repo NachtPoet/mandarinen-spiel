@@ -1033,3 +1033,623 @@ select:focus {
   margin-top: 20px; 
   font-size: 0.9rem;
 }
+
+/* Stem-Icon-Styles für die Wort-Liste */
+
+/* Grundlegender Containerstil für die Icons */
+.stem-icon-container {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  margin-left: 5px;
+  vertical-align: middle;
+  position: relative;
+  opacity: 0.5; /* Nicht gefundene Wörter haben halbtransparente Icons */
+  transition: all 0.3s ease;
+}
+
+.word.stem-active .stem-icon-container {
+  opacity: 1; /* Volle Sichtbarkeit für gefundene Worte */
+  animation: icon-pulse 1.5s infinite alternate;
+}
+
+@keyframes icon-pulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.2); }
+}
+
+/* Grundstile für die SVG-Icons */
+.stem-icon {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.stem-icon-base, .stem-icon-detail {
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: all 0.3s ease;
+}
+
+/* Farbschemata für die unterschiedlichen Stems */
+/* Bass (Stem 1) */
+[data-stem="1"] .stem-icon-base {
+  stroke: #2196F3;
+  fill: rgba(33, 150, 243, 0.2);
+}
+[data-stem="1"] .stem-icon-detail {
+  stroke: #0d47a1;
+}
+[data-stem="1"].word.found {
+  border-color: #2196F3;
+  background: rgba(33, 150, 243, 0.1);
+}
+
+/* Drums (Stem 2) */
+[data-stem="2"] .stem-icon-base {
+  stroke: #F44336;
+  fill: rgba(244, 67, 54, 0.2);
+}
+[data-stem="2"] .stem-icon-detail {
+  stroke: #b71c1c;
+}
+[data-stem="2"].word.found {
+  border-color: #F44336;
+  background: rgba(244, 67, 54, 0.1);
+}
+
+/* Guitars (Stem 3) */
+[data-stem="3"] .stem-icon-base {
+  stroke: #4CAF50;
+  fill: rgba(76, 175, 80, 0.2);
+}
+[data-stem="3"] .stem-icon-detail {
+  stroke: #1b5e20;
+}
+[data-stem="3"].word.found {
+  border-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+}
+
+/* Others (Stem 4) */
+[data-stem="4"] .stem-icon-base {
+  stroke: #9C27B0;
+  fill: rgba(156, 39, 176, 0.2);
+}
+[data-stem="4"] .stem-icon-detail {
+  stroke: #4a148c;
+}
+[data-stem="4"].word.found {
+  border-color: #9C27B0;
+  background: rgba(156, 39, 176, 0.1);
+}
+
+/* Vocals (Stem 5) */
+[data-stem="5"] .stem-icon-base {
+  stroke: #FF9800;
+  fill: rgba(255, 152, 0, 0.2);
+}
+[data-stem="5"] .stem-icon-detail {
+  stroke: #e65100;
+}
+[data-stem="5"].word.found {
+  border-color: #FF9800;
+  background: rgba(255, 152, 0, 0.1);
+}
+
+/* Bei Hover ein optisches Feedback geben und Tooltip-artige Anzeige */
+.word[data-stem] {
+  position: relative;
+}
+
+.word[data-stem]:hover::after {
+  content: attr(title);
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.6rem;
+  white-space: nowrap;
+  z-index: 100;
+  opacity: 0;
+  animation: fade-in 0.3s forwards;
+}
+
+@keyframes fade-in {
+  to { opacity: 1; }
+}
+
+/* Spezielle Aktivierungsanimation, wenn ein Wort gefunden wird */
+@keyframes stem-activated {
+  0% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.5); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.word.found .stem-icon-container {
+  animation: stem-activated 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Kleine optische Anpassungen für die Wortliste als Ganzes */
+.word-list {
+  margin-top: 25px; /* Etwas mehr Abstand zum Grid */
+}
+
+/* Auf Mobilgeräten kleinere Icons */
+@media (max-width: 500px) {
+  .stem-icon-container {
+    width: 12px;
+    height: 12px;
+    margin-left: 3px;
+  }
+  
+  .word[data-stem]:hover::after {
+    top: -20px;
+    font-size: 0.5rem;
+    padding: 1px 4px;
+  }
+}
+
+/* CSS für die Stem-Aktivierungsbenachrichtigung */
+.stem-notification {
+  position: fixed;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50px);
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  box-shadow: 0 0 20px rgba(255, 140, 0, 0.5);
+  z-index: 1000;
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  pointer-events: none; /* Erlaubt Klicks durch die Benachrichtigung */
+}
+
+.stem-notification.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.stem-notification.hide {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-30px);
+}
+
+.stem-notification-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  background: radial-gradient(circle, var(--cell-selected), transparent 70%);
+  border-radius: 50%;
+  animation: pulse-icon 1s infinite alternate;
+}
+
+@keyframes pulse-icon {
+  0% { transform: scale(0.8); opacity: 0.7; }
+  100% { transform: scale(1.2); opacity: 1; }
+}
+
+/* Anpassung für Mobilgeräte */
+@media (max-width: 500px) {
+  .stem-notification {
+    font-size: 0.7rem;
+    padding: 8px 15px;
+    top: 30px;
+  }
+  
+  .stem-notification-icon {
+    width: 15px;
+    height: 15px;
+    margin-right: 8px;
+  }
+}
+
+/* Variation je nach Stem-Typ */
+.stem-notification[data-stem="1"] {
+  border-color: #2196F3;
+  background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(33, 150, 243, 0.2));
+}
+
+.stem-notification[data-stem="2"] {
+  border-color: #F44336;
+  background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(244, 67, 54, 0.2));
+}
+
+.stem-notification[data-stem="3"] {
+  border-color: #4CAF50;
+  background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(76, 175, 80, 0.2));
+}
+
+.stem-notification[data-stem="4"] {
+  border-color: #9C27B0;
+  background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(156, 39, 176, 0.2));
+}
+
+.stem-notification[data-stem="5"] {
+  border-color: #FF9800;
+  background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(255, 152, 0, 0.2));
+}
+
+/* Farbliche Anpassungen für Wortfelder */
+
+/* Hintergrundfarben für Wörter basierend auf ihrem Stem-Typ */
+/* Auch nicht gefundene Wörter haben bereits einen subtilen Hintergrund */
+[data-stem="1"].word {
+  background: rgba(33, 150, 243, 0.05);
+  border-color: rgba(33, 150, 243, 0.4);
+}
+
+[data-stem="2"].word {
+  background: rgba(244, 67, 54, 0.05);
+  border-color: rgba(244, 67, 54, 0.4);
+}
+
+[data-stem="3"].word {
+  background: rgba(76, 175, 80, 0.05);
+  border-color: rgba(76, 175, 80, 0.4);
+}
+
+[data-stem="4"].word {
+  background: rgba(156, 39, 176, 0.05);
+  border-color: rgba(156, 39, 176, 0.4);
+}
+
+[data-stem="5"].word {
+  background: rgba(255, 152, 0, 0.05);
+  border-color: rgba(255, 152, 0, 0.4);
+}
+
+/* Stärkere Farbgebung für gefundene Wörter */
+[data-stem="1"].word.found {
+  background: rgba(33, 150, 243, 0.15);
+  border-color: #2196F3;
+  box-shadow: 0 0 8px rgba(33, 150, 243, 0.3);
+}
+
+[data-stem="2"].word.found {
+  background: rgba(244, 67, 54, 0.15);
+  border-color: #F44336;
+  box-shadow: 0 0 8px rgba(244, 67, 54, 0.3);
+}
+
+[data-stem="3"].word.found {
+  background: rgba(76, 175, 80, 0.15);
+  border-color: #4CAF50;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
+}
+
+[data-stem="4"].word.found {
+  background: rgba(156, 39, 176, 0.15);
+  border-color: #9C27B0;
+  box-shadow: 0 0 8px rgba(156, 39, 176, 0.3);
+}
+
+[data-stem="5"].word.found {
+  background: rgba(255, 152, 0, 0.15);
+  border-color: #FF9800;
+  box-shadow: 0 0 8px rgba(255, 152, 0, 0.3);
+}
+
+/* Verbesserte Farbgebung für die Benachrichtigungen */
+.stem-notification[data-stem="1"] {
+  border-color: #2196F3;
+  background: linear-gradient(to bottom, rgba(33, 150, 243, 0.9) 0%, rgba(13, 71, 161, 0.8) 100%);
+  color: white;
+  box-shadow: 0 0 15px rgba(33, 150, 243, 0.7);
+}
+
+.stem-notification[data-stem="2"] {
+  border-color: #F44336;
+  background: linear-gradient(to bottom, rgba(244, 67, 54, 0.9) 0%, rgba(183, 28, 28, 0.8) 100%);
+  color: white;
+  box-shadow: 0 0 15px rgba(244, 67, 54, 0.7);
+}
+
+.stem-notification[data-stem="3"] {
+  border-color: #4CAF50;
+  background: linear-gradient(to bottom, rgba(76, 175, 80, 0.9) 0%, rgba(27, 94, 32, 0.8) 100%);
+  color: white;
+  box-shadow: 0 0 15px rgba(76, 175, 80, 0.7);
+}
+
+.stem-notification[data-stem="4"] {
+  border-color: #9C27B0;
+  background: linear-gradient(to bottom, rgba(156, 39, 176, 0.9) 0%, rgba(74, 20, 140, 0.8) 100%);
+  color: white;
+  box-shadow: 0 0 15px rgba(156, 39, 176, 0.7);
+}
+
+.stem-notification[data-stem="5"] {
+  border-color: #FF9800;
+  background: linear-gradient(to bottom, rgba(255, 152, 0, 0.9) 0%, rgba(230, 81, 0, 0.8) 100%);
+  color: white;
+  box-shadow: 0 0 15px rgba(255, 152, 0, 0.7);
+}
+
+/* Anpassung der Icon-Farbe in den Benachrichtigungen */
+.stem-notification[data-stem="1"] .stem-notification-icon {
+  background: radial-gradient(circle, #90CAF9, #1976D2);
+}
+
+.stem-notification[data-stem="2"] .stem-notification-icon {
+  background: radial-gradient(circle, #FFCDD2, #D32F2F);
+}
+
+.stem-notification[data-stem="3"] .stem-notification-icon {
+  background: radial-gradient(circle, #A5D6A7, #388E3C);
+}
+
+.stem-notification[data-stem="4"] .stem-notification-icon {
+  background: radial-gradient(circle, #CE93D8, #7B1FA2);
+}
+
+.stem-notification[data-stem="5"] .stem-notification-icon {
+  background: radial-gradient(circle, #FFCC80, #F57C00);
+}
+
+/* Größere und deutlichere Icons */
+.stem-icon-container {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-left: 7px;
+  vertical-align: middle;
+  position: relative;
+  opacity: 0.6; /* Leicht erhöhte Sichtbarkeit auch für nicht gefundene Wörter */
+  transition: all 0.3s ease;
+}
+
+.stem-icon {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  stroke-width: 2; /* Etwas dickere Linien für bessere Sichtbarkeit */
+}
+
+/* Stem-Icon-Farben verstärken */
+[data-stem="1"] .stem-icon-base {
+  stroke: #2196F3;
+  fill: rgba(33, 150, 243, 0.3); /* Mehr Füllung */
+}
+[data-stem="2"] .stem-icon-base {
+  stroke: #F44336;
+  fill: rgba(244, 67, 54, 0.3);
+}
+[data-stem="3"] .stem-icon-base {
+  stroke: #4CAF50;
+  fill: rgba(76, 175, 80, 0.3);
+}
+[data-stem="4"] .stem-icon-base {
+  stroke: #9C27B0;
+  fill: rgba(156, 39, 176, 0.3);
+}
+[data-stem="5"] .stem-icon-base {
+  stroke: #FF9800;
+  fill: rgba(255, 152, 0, 0.3);
+}
+
+/* Stärkere Kennzeichnung für gefundene Wörter */
+[data-stem="1"].word.found {
+  background: rgba(33, 150, 243, 0.25); /* Satterer Hintergrund */
+  border-color: #2196F3;
+  box-shadow: 0 0 10px rgba(33, 150, 243, 0.5); /* Stärkerer Glüh-Effekt */
+  animation: pulse-word 2s infinite alternate; /* Pulsieren hinzufügen */
+}
+
+[data-stem="2"].word.found {
+  background: rgba(244, 67, 54, 0.25);
+  border-color: #F44336;
+  box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+  animation: pulse-word 2s infinite alternate;
+}
+
+[data-stem="3"].word.found {
+  background: rgba(76, 175, 80, 0.25);
+  border-color: #4CAF50;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+  animation: pulse-word 2s infinite alternate;
+}
+
+[data-stem="4"].word.found {
+  background: rgba(156, 39, 176, 0.25);
+  border-color: #9C27B0;
+  box-shadow: 0 0 10px rgba(156, 39, 176, 0.5);
+  animation: pulse-word 2s infinite alternate;
+}
+
+[data-stem="5"].word.found {
+  background: rgba(255, 152, 0, 0.25);
+  border-color: #FF9800;
+  box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+  animation: pulse-word 2s infinite alternate;
+}
+
+/* Pulsieren für gefundene Worte */
+@keyframes pulse-word {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 5px rgba(var(--pulse-color, 255, 140, 0), 0.3);
+  }
+  100% {
+    transform: scale(1.05);
+    box-shadow: 0 0 12px rgba(var(--pulse-color, 255, 140, 0), 0.6);
+  }
+}
+
+/* Fix für die Durchstreichung - entfernt die standard text-decoration und fügt eine benutzerdefinierte Linie hinzu */
+.word.found {
+  text-decoration: none !important; /* Standard-Durchstreichung entfernen */
+  position: relative;
+  opacity: 0.85; /* Nicht ganz so transparent */
+}
+
+/* Benutzerdefinierte Durchstreichung, die mittig verläuft */
+.word.found::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%; /* Mittig im Element */
+  width: 100%;
+  height: 1.5px;
+  background-color: rgba(0, 0, 0, 0.5); /* Dunklere, aber halbtransparente Linie */
+  pointer-events: none;
+}
+
+/* Angepasste Versionen für die verschiedenen Stems */
+[data-stem="1"].word.found::after {
+  background-color: rgba(13, 71, 161, 0.7);
+}
+
+[data-stem="2"].word.found::after {
+  background-color: rgba(183, 28, 28, 0.7);
+}
+
+[data-stem="3"].word.found::after {
+  background-color: rgba(27, 94, 32, 0.7);
+}
+
+[data-stem="4"].word.found::after {
+  background-color: rgba(74, 20, 140, 0.7);
+}
+
+[data-stem="5"].word.found::after {
+  background-color: rgba(230, 81, 0, 0.7);
+}
+
+/* Zusätzliche Verbesserungen */
+.word[data-stem] {
+  padding-right: 30px; /* Mehr Platz für das Icon */
+  position: relative;
+}
+
+.stem-icon-container {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Auf Mobilgeräten entsprechend anpassen */
+@media (max-width: 500px) {
+  .stem-icon-container {
+    width: 16px;
+    height: 16px;
+    margin-left: 4px;
+  }
+  
+  .word[data-stem] {
+    padding-right: 24px;
+  }
+}
+
+/* Durchstreichung vollständig entfernen und Hintergrund intensivieren */
+
+/* Grundeinstellung für gefundene Wörter - Durchstreichung komplett entfernen */
+.word.found {
+  text-decoration: none !important;
+  position: relative;
+  opacity: 1; /* Volle Opazität */
+}
+
+/* Spezielle ::after Durchstreichung entfernen */
+.word.found::after {
+  display: none !important;
+}
+
+/* Intensivere Hintergrundfarben für gefundene Wörter */
+[data-stem="1"].word.found {
+  background: rgba(33, 150, 243, 0.7) !important; /* Sehr intensive Färbung */
+  border-color: #0d47a1 !important;
+  box-shadow: 0 0 12px rgba(33, 150, 243, 0.7) !important;
+  color: white !important; /* Textfarbe auf weiß setzen für besseren Kontrast */
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5) !important; /* Textschatten für bessere Lesbarkeit */
+  animation: pulse-word 2s infinite alternate !important;
+}
+
+[data-stem="2"].word.found {
+  background: rgba(244, 67, 54, 0.7) !important;
+  border-color: #b71c1c !important;
+  box-shadow: 0 0 12px rgba(244, 67, 54, 0.7) !important;
+  color: white !important;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5) !important;
+  animation: pulse-word 2s infinite alternate !important;
+}
+
+[data-stem="3"].word.found {
+  background: rgba(76, 175, 80, 0.7) !important;
+  border-color: #1b5e20 !important;
+  box-shadow: 0 0 12px rgba(76, 175, 80, 0.7) !important;
+  color: white !important;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5) !important;
+  animation: pulse-word 2s infinite alternate !important;
+}
+
+[data-stem="4"].word.found {
+  background: rgba(156, 39, 176, 0.7) !important;
+  border-color: #4a148c !important;
+  box-shadow: 0 0 12px rgba(156, 39, 176, 0.7) !important;
+  color: white !important;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5) !important;
+  animation: pulse-word 2s infinite alternate !important;
+}
+
+[data-stem="5"].word.found {
+  background: rgba(255, 152, 0, 0.7) !important;
+  border-color: #e65100 !important;
+  box-shadow: 0 0 12px rgba(255, 152, 0, 0.7) !important;
+  color: white !important;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5) !important;
+  animation: pulse-word 2s infinite alternate !important;
+}
+
+/* Verstärktes Pulsieren für gefundene Worte */
+@keyframes pulse-word {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 8px rgba(var(--pulse-color, 255, 140, 0), 0.5);
+  }
+  100% {
+    transform: scale(1.07);
+    box-shadow: 0 0 15px rgba(var(--pulse-color, 255, 140, 0), 0.8);
+  }
+}
+
+/* Icons für gefundene Wörter besser sichtbar machen */
+.word.found .stem-icon-container {
+  opacity: 1;
+}
+
+.word.found .stem-icon-base, 
+.word.found .stem-icon-detail {
+  stroke: white !important; /* Icons in weiß für besseren Kontrast auf farbigem Hintergrund */
+}
+
+/* Zusätzliche Verbesserung: Glüh-Effekt für gefundene Worte */
+.word.found {
+  transform-origin: center;
+  transition: all 0.3s ease;
+}
+
+/* Wenn ein Wort gerade gefunden wurde */
+@keyframes word-found-effect {
+  0% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.15); filter: brightness(1.5); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* Diese Animation wird durch JavaScript hinzugefügt, wenn ein Wort gefunden wird */
+.word-just-found {
+  animation: word-found-effect 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
