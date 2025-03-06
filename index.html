@@ -17,29 +17,57 @@
 
   <h1>Mandarinen: Erinnerungen im Gepäck</h1>
 
-  <!-- Startbildschirm inkl. Schwierigkeitsauswahl -->
+  <!-- Startbildschirm mit Cover-Ästhetik -->
   <div id="startScreen" class="overlay">
-    <div class="mandarin-icon"></div>
-    <h2>Willkommen zurück!</h2>
-    <p>
-      Tauche ein in die Welt der Mandarinen und entdecke verschüttete Erinnerungen. Jedes gefundene Wort
-      enthüllt einen Teil eines besonderen Liedes.<br>
-      Folge der Geschichte durch die Zeit - von der Kindheit bis zum Wiedersehen.
-    </p>
-    <div class="select-wrapper">
-      <label for="difficultySelect">Schwierigkeitsgrad:</label>
-      <select id="difficultySelect">
-        <option value="easy" selected>Leichtes Gepäck</option>
-        <option value="hard">Schweres Gepäck</option>
-        <option value="loose">Loch in der Tasche</option>
-      </select>
+    <div class="cover-frame">
+      <!-- Goldene Überschrift wie auf dem Cover -->
+      <div class="cover-title">
+        <span class="artist-name">ALEXANDRA JANZEN</span>
+        <span class="song-title">MANDARINEN</span>
+      </div>
+      
+      <!-- Mandarinen-Animation -->
+      <div class="double-mandarins">
+        <div class="mandarin-left"></div>
+        <div class="mandarin-right"></div>
+      </div>
+      
+      <h2>Erinnerungen im Gepäck</h2>
+      
+      <p>
+        Tauche ein in die Welt der Mandarinen und entdecke verschüttete Erinnerungen. Jedes gefundene Wort
+        enthüllt einen Teil eines besonderen Liedes.<br>
+        Folge der Geschichte durch die Zeit - von der Kindheit bis zum Wiedersehen.
+      </p>
+      
+      <div class="select-wrapper">
+        <label for="difficultySelect">Schwierigkeitsgrad:</label>
+        <select id="difficultySelect">
+          <option value="easy" selected>Leichtes Gepäck</option>
+          <option value="hard">Schweres Gepäck</option>
+          <option value="loose">Loch in der Tasche</option>
+        </select>
+      </div>
+      
+      <div class="button-container">
+        <button id="startButton" class="btn primary">
+          <span class="gold-triangle"></span>Spiel fortsetzen
+        </button>
+        <button id="startNewButton" class="btn secondary">Neue Reise beginnen</button>
+        <button id="helpButton" class="btn">Spielanleitung</button>
+      </div>
+      
+      <p class="save-notice">Dein Fortschritt und deine Erinnerungen werden automatisch gespeichert.</p>
+      
+      <!-- Copyright-Info im Cover-Stil -->
+      <div class="cover-footer">
+        <span class="gold-triangle"></span>
+        <span>1</span>
+      </div>
     </div>
-    <div class="button-container">
-      <button id="startButton" class="btn primary">Spiel fortsetzen</button>
-      <button id="startNewButton" class="btn secondary">Neue Reise beginnen</button>
-      <button id="helpButton" class="btn">Spielanleitung</button>
-    </div>
-    <p class="save-notice">Dein Fortschritt und deine Erinnerungen werden automatisch gespeichert.</p>
+    
+    <!-- Filmkorn-Overlay -->
+    <div class="vintage-overlay"></div>
   </div>
 
   <!-- Spielbereich -->
@@ -54,31 +82,91 @@
     <button id="musicToggle"></button>
     <button id="soundToggle"></button>
     <button id="hintButton">TIPP</button>
+    <!-- Cover-Reveal Button hinzufügen -->
+    <button class="cover-reveal-button" id="coverRevealButton" aria-label="Cover anzeigen"></button>
   </div>
 
-  <!-- Overlay für Level-Belohnung -->
+  <!-- Verbessertes Level-Overlay mit Cover-Ästhetik -->
   <div id="levelOverlay" class="overlay hidden">
-    <div id="lyricDisplay" style="white-space: pre-wrap;"></div>
-    <div class="level-quote" id="levelQuote"></div>
-    <button id="nextLevelButton" class="btn primary">Weiter in der Geschichte</button>
+    <div class="cover-frame level-frame">
+      <!-- Cover-Titel für konsistentes Design -->
+      <div class="cover-title">
+        <span class="artist-name">ALEXANDRA JANZEN</span>
+        <span class="song-title">MANDARINEN</span>
+      </div>
+      
+      <!-- Level-Badge mit Cover-Stil -->
+      <div class="level-badge">
+        <div class="double-mandarins small">
+          <div class="mandarin-left"></div>
+          <div class="mandarin-right"></div>
+        </div>
+        <div class="level-number">LEVEL <span id="currentLevelNum">1</span></div>
+      </div>
+      
+      <!-- Verbesserte Lyrics-Anzeige -->
+      <div class="lyrics-container">
+        <div id="lyricDisplay" style="white-space: pre-wrap;"></div>
+        <div class="level-quote" id="levelQuote"></div>
+      </div>
+      
+      <!-- Button mit Cover-Stil -->
+      <button id="nextLevelButton" class="btn primary">
+        <span class="gold-triangle"></span>
+        Weiter in der Geschichte
+      </button>
+      
+      <!-- Cover-Footer mit goldenem Dreieck -->
+      <div class="cover-footer">
+        <span class="gold-triangle"></span>
+        <span id="levelFooterNum">1</span>
+      </div>
+    </div>
+    
+    <!-- Vintage-Overlay für Filmkorn-Effekt -->
+    <div class="vintage-overlay"></div>
   </div>
 
   <!-- Emotionaler Endscreen -->
   <div id="endScreen" class="overlay hidden">
-    <div class="mandarin-icon"></div>
-    <h2>Reise vollendet</h2>
-    <p id="endMessage">
-      In den Mandarinen liegen Erinnerungen und Verbundenheit –
-      du hast die Geschichte des Songs Stück für Stück entdeckt.
-    </p>
-    <div class="reward-box" id="rewardBox"></div>
-    <p id="couponCode">Dein Gutscheincode: MANDARINE10 (10% Rabatt)</p>
-    <p><a href="https://shop.alexandrajanzen.de/" target="_blank" class="shop-link">Zum Shop</a></p>
-    <div class="button-container">
-      <button id="restartButton" class="btn primary">Erneut spielen</button>
-      <button id="restartNewButton" class="btn secondary">Neue Reise beginnen</button>
+    <div class="cover-frame">
+      <!-- Cover-Titel für konsistentes Design -->
+      <div class="cover-title">
+        <span class="artist-name">ALEXANDRA JANZEN</span>
+        <span class="song-title">MANDARINEN</span>
+      </div>
+      
+      <!-- Doppelte Mandarinen -->
+      <div class="double-mandarins">
+        <div class="mandarin-left"></div>
+        <div class="mandarin-right"></div>
+      </div>
+      
+      <h2>Reise vollendet</h2>
+      <p id="endMessage">
+        In den Mandarinen liegen Erinnerungen und Verbundenheit –
+        du hast die Geschichte des Songs Stück für Stück entdeckt.
+      </p>
+      <div class="reward-box" id="rewardBox"></div>
+      <p id="couponCode">Dein Gutscheincode: MANDARINE10 (10% Rabatt)</p>
+      <p><a href="https://shop.alexandrajanzen.de/" target="_blank" class="shop-link">Zum Shop</a></p>
+      <div class="button-container">
+        <button id="restartButton" class="btn primary">
+          <span class="gold-triangle"></span>Erneut spielen
+        </button>
+        <button id="restartNewButton" class="btn secondary">Neue Reise beginnen</button>
+      </div>
+      <p class="save-notice">Die Erinnerungen bleiben - du kannst jederzeit mit einem anderen Schwierigkeitsgrad spielen.</p>
+      
+      <!-- Cover-Footer mit goldenem Dreieck -->
+      <div class="cover-footer">
+        <span class="gold-triangle"></span>
+        <span>1</span>
+      </div>
     </div>
-    <p class="save-notice">Die Erinnerungen bleiben - du kannst jederzeit mit einem anderen Schwierigkeitsgrad spielen.</p>
+    
+    <!-- Filmkorn-Overlay -->
+    <div class="vintage-overlay"></div>
   </div>
 
   <!-- Hilfe-Overlay -->
@@ -113,6 +201,18 @@
     <button id="closeHelpButton" class="btn">Zurück zur Reise</button>
   </div>
 
+  <!-- Cover-Modal außerhalb aller Container am Ende des body -->
+  <div class="cover-modal" id="coverModal">
+    <div class="cover-container">
+      <img src="assets/images/mandarinen_cover.jpg" alt="Alexandra Janzen - Mandarinen Cover" id="fullCoverImage">
+      <div class="cover-info">
+        <h3>Alexandra Janzen - Mandarinen</h3>
+        <p>Das neue Album jetzt überall verfügbar</p>
+      </div>
+      <div class="cover-close" id="coverModalClose">&times;</div>
+    </div>
+  </div>
+
   <!-- Audio-Elemente -->
   <audio id="stem-piano" preload="auto" loop></audio>
   <audio id="stem-bass" preload="auto" loop></audio>
@@ -132,5 +232,8 @@
   <!-- GameManager muss nach AudioManager und StemAudioManager geladen werden: -->
   <script src="js/gameManager.js"></script>
   <script src="js/main.js"></script>
+  <!-- Neue Cover-Animations und Integration hinzufügen -->
+  <script src="js/cover-animations.js"></script>
+  <script src="js/cover-integration.js"></script>
 </body>
 </html>
