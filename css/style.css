@@ -1502,3 +1502,1477 @@ select:focus {
     }
   }
 }
+
+/* 
+ * Erweiterungen für style.css - Cover-inspirierte Ergänzungen
+ * Füge diesen Code am Ende deiner vorhandenen style.css ein
+ */
+
+/* Erweiterte Farbpalette basierend auf dem Cover */
+:root {
+  /* Original-Palette bleibt erhalten */
+  
+  /* Neue Farben vom Cover */
+  --color-mandarin-bright: #FF8C00;
+  --color-mandarin-dark: #E67300;
+  --color-turquoise: #A0D8EF;
+  --color-dark-turquoise: #69B3CB;
+  --color-cover-black: #191919;
+  --color-cover-gold: #FFF0AC;
+  
+  /* Angepasste Hintergrundfarben */
+  --bg-gradient-start: var(--color-cover-black);
+  --bg-gradient-end: #282828;
+}
+
+/* Filmkorn-Overlay für das gesamte Spiel */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0.03; /* Sehr subtil */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Gold-Überschriften wie im Cover */
+h1, h2 {
+  color: var(--color-cover-gold);
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(255, 240, 172, 0.5);
+}
+
+/* Türkis-Akzente für UI-Elemente */
+#timer, #levelIndicator {
+  background: linear-gradient(to right, 
+    rgba(160, 216, 239, 0.2), 
+    rgba(105, 179, 203, 0.3));
+  box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
+}
+
+/* Vintage-Rahmen für das Spielfeld */
+.grid {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  position: relative;
+}
+
+.grid::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  z-index: -1;
+  border-radius: 12px;
+  background: linear-gradient(45deg, 
+    var(--color-mandarin-bright), 
+    transparent, 
+    var(--color-turquoise));
+  opacity: 0.2;
+  animation: borderGlow 4s infinite alternate;
+}
+
+/* Vintage-Overlay für den gesamten Spielbereich */
+.vintage-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  background: radial-gradient(
+    circle at center,
+    transparent 40%,
+    rgba(46, 49, 65, 0.1) 100%
+  );
+}
+
+/* Cover-inspirierte Buttons */
+.btn.primary {
+  background: linear-gradient(to bottom, 
+    rgba(255, 140, 0, 0.3), 
+    rgba(230, 115, 0, 0.4));
+  border-color: var(--color-mandarin-bright);
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
+}
+
+.btn.primary:hover {
+  background: linear-gradient(to bottom, 
+    rgba(255, 140, 0, 0.5), 
+    rgba(230, 115, 0, 0.6));
+  box-shadow: 0 5px 20px rgba(255, 140, 0, 0.5);
+}
+
+.btn.secondary {
+  background: linear-gradient(to bottom, 
+    rgba(160, 216, 239, 0.3), 
+    rgba(105, 179, 203, 0.4));
+  border-color: var(--color-turquoise);
+  box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
+}
+
+.btn.secondary:hover {
+  background: linear-gradient(to bottom, 
+    rgba(160, 216, 239, 0.5), 
+    rgba(105, 179, 203, 0.6));
+  box-shadow: 0 5px 20px rgba(160, 216, 239, 0.5);
+}
+
+/* Goldene Dreiecke als Navigation, inspiriert vom Cover */
+.gold-triangle {
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 15px solid var(--color-cover-gold);
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: middle;
+  filter: drop-shadow(0 0 5px rgba(255, 240, 172, 0.5));
+}
+
+/* Verbesserte Spielfeld-Zellen mit dezenten Mandarinentönen */
+.cell {
+  background: rgba(25, 25, 25, 0.8);
+  border: 1px solid rgba(255, 140, 0, 0.3);
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.cell.selected {
+  background: rgba(255, 140, 0, 0.7);
+  border-color: var(--color-mandarin-bright);
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.5);
+}
+
+.cell.found {
+  border-color: var(--color-cover-gold) !important;
+  box-shadow: 0 0 12px rgba(255, 240, 172, 0.4) !important;
+}
+
+/* Verbesserte Wortliste mit Cover-Ästhetik */
+.word {
+  background: rgba(25, 25, 25, 0.7);
+  border: 1px solid rgba(160, 216, 239, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.word.found {
+  background: linear-gradient(to right, 
+    rgba(255, 140, 0, 0.7), 
+    rgba(255, 165, 0, 0.7)) !important;
+  border-color: var(--color-mandarin-dark) !important;
+  box-shadow: 0 0 12px rgba(255, 140, 0, 0.5) !important;
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Realistischeres Mandarinen-Icon */
+.mandarin-icon {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  z-index: 105;
+  top: -15px;
+  right: -15px;
+  transform: rotate(-10deg);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  
+  /* Schatten für Tiefenwirkung */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+  
+  /* 3D-Effekt durch Gradienten */
+  background: radial-gradient(circle at 35% 35%, 
+    #FFA500 5%, 
+    #FF8C00 45%, 
+    #FF7800 85%);
+}
+
+/* Glanzeffekt wie bei einer echten Mandarine */
+.mandarin-icon::before {
+  content: '';
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  top: -40%;
+  left: -40%;
+  background: radial-gradient(ellipse at center, 
+    rgba(255, 255, 255, 0.7) 0%, 
+    rgba(255, 255, 255, 0) 70%);
+  transform: rotate(-30deg);
+  opacity: 0.5;
+}
+
+/* Stängel und Blatt */
+.mandarin-icon::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 8px;
+  background: #006400;
+  border-radius: 40% 40% 0 0;
+  clip-path: polygon(
+    20% 0%, 
+    80% 0%, 
+    100% 50%, 
+    80% 100%, 
+    20% 100%, 
+    0% 50%
+  );
+}
+
+/* Hover-Animation */
+.mandarin-icon:hover {
+  transform: rotate(10deg) scale(1.15);
+  box-shadow: 0 8px 25px rgba(255, 140, 0, 0.6);
+}
+
+/* Pulsierender Schimmer beim Hover */
+.mandarin-icon:hover::before {
+  animation: mandarin-shine 2s infinite alternate;
+}
+
+@keyframes mandarin-shine {
+  from { 
+    opacity: 0.4;
+    transform: rotate(-30deg) scale(1); 
+  }
+  to { 
+    opacity: 0.7;
+    transform: rotate(-25deg) scale(1.1); 
+  }
+}
+
+/* Doppelte Mandarinen für den Startbildschirm */
+.double-mandarins {
+  position: relative;
+  width: 120px;
+  height: 70px;
+  margin: 30px auto;
+}
+
+.double-mandarins .mandarin-left,
+.double-mandarins .mandarin-right {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, 
+    #FFA500 5%, 
+    #FF8C00 45%, 
+    #FF7800 85%);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+  top: 0;
+}
+
+.double-mandarins .mandarin-left {
+  left: 10px;
+  z-index: 1;
+  animation: float-left 3s infinite alternate ease-in-out;
+}
+
+.double-mandarins .mandarin-right {
+  right: 10px;
+  z-index: 2;
+  animation: float-right 3s infinite alternate ease-in-out;
+}
+
+/* Glanzeffekt auf den Mandarinen */
+.double-mandarins .mandarin-left::before,
+.double-mandarins .mandarin-right::before {
+  content: '';
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  top: -40%;
+  left: -40%;
+  background: radial-gradient(ellipse at center, 
+    rgba(255, 255, 255, 0.7) 0%, 
+    rgba(255, 255, 255, 0) 70%);
+  transform: rotate(-30deg);
+  opacity: 0.5;
+}
+
+/* Stängel */
+.double-mandarins .mandarin-left::after,
+.double-mandarins .mandarin-right::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 7px;
+  background: #006400;
+  border-radius: 40% 40% 0 0;
+  clip-path: polygon(
+    20% 0%, 
+    80% 0%, 
+    100% 50%, 
+    80% 100%, 
+    20% 100%, 
+    0% 50%
+  );
+}
+
+@keyframes float-left {
+  0% { transform: translateY(0) rotate(-5deg); }
+  100% { transform: translateY(-8px) rotate(5deg); }
+}
+
+@keyframes float-right {
+  0% { transform: translateY(-8px) rotate(5deg); }
+  100% { transform: translateY(0) rotate(-5deg); }
+}
+
+@keyframes move-towards-right {
+  0% { transform: translateY(0) rotate(-5deg); left: 10px; }
+  100% { transform: translateY(0) rotate(0deg); left: 30px; }
+}
+
+@keyframes move-towards-left {
+  0% { transform: translateY(-8px) rotate(5deg); right: 10px; }
+  100% { transform: translateY(0) rotate(0deg); right: 30px; }
+}
+
+@keyframes glow-ping {
+  0% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 0.8; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+/* Cover-Frame für die Overlays */
+.cover-frame {
+  max-width: 600px;
+  width: 90%;
+  padding: 30px;
+  background-color: rgba(25, 25, 25, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+}
+
+/* Cover-Titel-Styling */
+.cover-title {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  color: var(--color-cover-gold);
+  font-size: 1rem;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(255, 240, 172, 0.3);
+}
+
+.artist-name {
+  text-align: left;
+}
+
+.song-title {
+  text-align: right;
+}
+
+/* Cover-Footer mit goldenem Dreieck */
+.cover-footer {
+  position: absolute;
+  bottom: 20px;
+  right: 25px;
+  display: flex;
+  align-items: center;
+  color: var(--color-cover-gold);
+}
+
+/* Level-Overlay spezifische Stile */
+.level-frame {
+  max-width: 800px;
+  width: 94%;
+  padding: 40px 30px;
+  transition: all 0.5s ease-out;
+  position: relative;
+}
+
+/* Verbesserter Badge für das Level */
+.level-badge {
+  display: flex;
+  align-items: center;
+  margin: 0 auto 30px;
+  background: rgba(255, 140, 0, 0.2);
+  padding: 10px 20px;
+  border-radius: 30px;
+  width: fit-content;
+  border: 1px solid rgba(255, 140, 0, 0.3);
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.2);
+}
+
+.level-number {
+  color: var(--color-cover-gold);
+  font-size: 1rem;
+  letter-spacing: 2px;
+  margin-left: 10px;
+}
+
+/* Kleinere Version der Mandarinen für den Badge */
+.double-mandarins.small {
+  margin: 0;
+  width: 60px;
+  height: 35px;
+}
+
+.double-mandarins.small .mandarin-left,
+.double-mandarins.small .mandarin-right {
+  width: 30px;
+  height: 30px;
+}
+
+/* Lyrics-Container mit verbessertem Styling */
+.lyrics-container {
+  position: relative;
+  margin: 20px 0 40px;
+  padding: 20px 0;
+}
+
+.lyrics-container::before,
+.lyrics-container::after {
+  content: '';
+  position: absolute;
+  height: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    var(--color-mandarin-bright), 
+    transparent);
+}
+
+.lyrics-container::before {
+  top: 0;
+}
+
+.lyrics-container::after {
+  bottom: 0;
+}
+
+/* Verbesserte Lyrics-Anzeige */
+#lyricDisplay {
+  background: rgba(25, 25, 25, 0.5);
+  padding: 30px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 140, 0, 0.2);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+  margin-bottom: 30px;
+  font-family: var(--lyric-font);
+  line-height: 1.7;
+  font-size: 1.2rem;
+  font-weight: 300;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+}
+
+/* Bessere Hervorhebung in Lyrics */
+.highlight {
+  color: var(--color-mandarin-bright);
+  font-weight: 600;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 2px 6px;
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(255, 140, 0, 0.4);
+  display: inline-block;
+  animation: highlight-pulse 1.5s infinite alternate;
+}
+
+@keyframes highlight-pulse {
+  from { box-shadow: 0 0 8px rgba(255, 140, 0, 0.4); }
+  to { box-shadow: 0 0 15px rgba(255, 140, 0, 0.7); }
+}
+
+/* Verbesserte Level-Zitate */
+.level-quote {
+  font-family: var(--lyric-font);
+  font-size: 1.1rem;
+  font-style: italic;
+  margin: 15px auto 0;
+  max-width: 80%;
+  line-height: 1.5;
+  color: var(--color-turquoise);
+  padding: 15px;
+  position: relative;
+  text-align: center;
+}
+
+.level-quote::before,
+.level-quote::after {
+  content: '"';
+  font-size: 1.5rem;
+  font-family: serif;
+  position: absolute;
+  color: var(--color-cover-gold);
+  opacity: 0.7;
+}
+
+.level-quote::before {
+  top: 0;
+  left: 0;
+}
+
+.level-quote::after {
+  bottom: 0;
+  right: 0;
+}
+
+/* Responsive-Anpassungen für kleine Geräte */
+@media (max-width: 600px) {
+  .cover-title {
+    font-size: 0.7rem;
+    margin-bottom: 20px;
+  }
+  
+  .double-mandarins {
+    transform: scale(0.8);
+    margin: 15px auto;
+  }
+  
+  .cover-frame {
+    padding: 20px 15px;
+  }
+  
+  .level-frame {
+    padding: 30px 15px;
+  }
+  
+  .level-badge {
+    padding: 8px 15px;
+  }
+  
+  .level-number {
+    font-size: 0.8rem;
+  }
+  
+  #lyricDisplay {
+    padding: 20px;
+    font-size: 1rem;
+  }
+  
+  .level-quote {
+    font-size: 0.9rem;
+    max-width: 95%;
+  }
+}
+
+
+/* 
+ * COVER-DESIGN ERWEITERUNGEN FÜR STYLE.CSS
+ * Diese CSS-Ergänzungen am Ende deiner vorhandenen style.css einfügen
+ */
+
+/* Erweiterte Farbpalette basierend auf dem Cover */
+:root {
+  /* Original-Palette bleibt erhalten */
+  
+  /* Neue Farben vom Cover */
+  --color-mandarin-bright: #FF8C00;
+  --color-mandarin-dark: #E67300;
+  --color-turquoise: #A0D8EF;
+  --color-dark-turquoise: #69B3CB;
+  --color-cover-black: #191919;
+  --color-cover-gold: #FFF0AC;
+  
+  /* Angepasste Hintergrundfarben */
+  --bg-gradient-start: var(--color-cover-black);
+  --bg-gradient-end: #282828;
+}
+
+/* Filmkorn-Overlay für das gesamte Spiel */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0.03; /* Sehr subtil */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Gold-Überschriften wie im Cover */
+h1, h2 {
+  color: var(--color-cover-gold);
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(255, 240, 172, 0.5);
+}
+
+/* Türkis-Akzente für UI-Elemente */
+#timer, #levelIndicator {
+  background: linear-gradient(to right, 
+    rgba(160, 216, 239, 0.2), 
+    rgba(105, 179, 203, 0.3));
+  box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
+}
+
+/* Vintage-Rahmen für das Spielfeld */
+.grid {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  position: relative;
+}
+
+.grid::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  z-index: -1;
+  border-radius: 12px;
+  background: linear-gradient(45deg, 
+    var(--color-mandarin-bright), 
+    transparent, 
+    var(--color-turquoise));
+  opacity: 0.2;
+  animation: borderGlow 4s infinite alternate;
+}
+
+/* Vintage-Overlay für den gesamten Spielbereich */
+.vintage-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  background: radial-gradient(
+    circle at center,
+    transparent 40%,
+    rgba(46, 49, 65, 0.1) 100%
+  );
+}
+
+/* Cover-inspirierte Buttons */
+.btn.primary {
+  background: linear-gradient(to bottom, 
+    rgba(255, 140, 0, 0.3), 
+    rgba(230, 115, 0, 0.4));
+  border-color: var(--color-mandarin-bright);
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
+}
+
+.btn.primary:hover {
+  background: linear-gradient(to bottom, 
+    rgba(255, 140, 0, 0.5), 
+    rgba(230, 115, 0, 0.6));
+  box-shadow: 0 5px 20px rgba(255, 140, 0, 0.5);
+}
+
+.btn.secondary {
+  background: linear-gradient(to bottom, 
+    rgba(160, 216, 239, 0.3), 
+    rgba(105, 179, 203, 0.4));
+  border-color: var(--color-turquoise);
+  box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
+}
+
+.btn.secondary:hover {
+  background: linear-gradient(to bottom, 
+    rgba(160, 216, 239, 0.5), 
+    rgba(105, 179, 203, 0.6));
+  box-shadow: 0 5px 20px rgba(160, 216, 239, 0.5);
+}
+
+/* Goldene Dreiecke als Navigation, inspiriert vom Cover */
+.gold-triangle {
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 15px solid var(--color-cover-gold);
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: middle;
+  filter: drop-shadow(0 0 5px rgba(255, 240, 172, 0.5));
+}
+
+/* Verbesserte Spielfeld-Zellen mit dezenten Mandarinentönen */
+.cell {
+  background: rgba(25, 25, 25, 0.8);
+  border: 1px solid rgba(255, 140, 0, 0.3);
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.cell.selected {
+  background: rgba(255, 140, 0, 0.7);
+  border-color: var(--color-mandarin-bright);
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.5);
+}
+
+.cell.found {
+  border-color: var(--color-cover-gold) !important;
+  box-shadow: 0 0 12px rgba(255, 240, 172, 0.4) !important;
+}
+
+/* Verbesserte Wortliste mit Cover-Ästhetik */
+.word {
+  background: rgba(25, 25, 25, 0.7);
+  border: 1px solid rgba(160, 216, 239, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.word.found {
+  background: linear-gradient(to right, 
+    rgba(255, 140, 0, 0.7), 
+    rgba(255, 165, 0, 0.7)) !important;
+  border-color: var(--color-mandarin-dark) !important;
+  box-shadow: 0 0 12px rgba(255, 140, 0, 0.5) !important;
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Realistischeres Mandarinen-Icon */
+.mandarin-icon {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  z-index: 105;
+  top: -15px;
+  right: -15px;
+  transform: rotate(-10deg);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  
+  /* Schatten für Tiefenwirkung */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+  
+  /* 3D-Effekt durch Gradienten */
+  background: radial-gradient(circle at 35% 35%, 
+    #FFA500 5%, 
+    #FF8C00 45%, 
+    #FF7800 85%);
+}
+
+/* Glanzeffekt wie bei einer echten Mandarine */
+.mandarin-icon::before {
+  content: '';
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  top: -40%;
+  left: -40%;
+  background: radial-gradient(ellipse at center, 
+    rgba(255, 255, 255, 0.7) 0%, 
+    rgba(255, 255, 255, 0) 70%);
+  transform: rotate(-30deg);
+  opacity: 0.5;
+}
+
+/* Stängel und Blatt */
+.mandarin-icon::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 8px;
+  background: #006400;
+  border-radius: 40% 40% 0 0;
+  clip-path: polygon(
+    20% 0%, 
+    80% 0%, 
+    100% 50%, 
+    80% 100%, 
+    20% 100%, 
+    0% 50%
+  );
+}
+
+/* Hover-Animation */
+.mandarin-icon:hover {
+  transform: rotate(10deg) scale(1.15);
+  box-shadow: 0 8px 25px rgba(255, 140, 0, 0.6);
+}
+
+/* Pulsierender Schimmer beim Hover */
+.mandarin-icon:hover::before {
+  animation: mandarin-shine 2s infinite alternate;
+}
+
+@keyframes mandarin-shine {
+  from { 
+    opacity: 0.4;
+    transform: rotate(-30deg) scale(1); 
+  }
+  to { 
+    opacity: 0.7;
+    transform: rotate(-25deg) scale(1.1); 
+  }
+}
+
+/* Doppelte Mandarinen für den Startbildschirm */
+.double-mandarins {
+  position: relative;
+  width: 120px;
+  height: 70px;
+  margin: 30px auto;
+}
+
+.double-mandarins .mandarin-left,
+.double-mandarins .mandarin-right {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, 
+    #FFA500 5%, 
+    #FF8C00 45%, 
+    #FF7800 85%);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+  top: 0;
+}
+
+.double-mandarins .mandarin-left {
+  left: 10px;
+  z-index: 1;
+  animation: float-left 3s infinite alternate ease-in-out;
+}
+
+.double-mandarins .mandarin-right {
+  right: 10px;
+  z-index: 2;
+  animation: float-right 3s infinite alternate ease-in-out;
+}
+
+/* Glanzeffekt auf den Mandarinen */
+.double-mandarins .mandarin-left::before,
+.double-mandarins .mandarin-right::before {
+  content: '';
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  top: -40%;
+  left: -40%;
+  background: radial-gradient(ellipse at center, 
+    rgba(255, 255, 255, 0.7) 0%, 
+    rgba(255, 255, 255, 0) 70%);
+  transform: rotate(-30deg);
+  opacity: 0.5;
+}
+
+/* Stängel */
+.double-mandarins .mandarin-left::after,
+.double-mandarins .mandarin-right::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 7px;
+  background: #006400;
+  border-radius: 40% 40% 0 0;
+  clip-path: polygon(
+    20% 0%, 
+    80% 0%, 
+    100% 50%, 
+    80% 100%, 
+    20% 100%, 
+    0% 50%
+  );
+}
+
+@keyframes float-left {
+  0% { transform: translateY(0) rotate(-5deg); }
+  100% { transform: translateY(-8px) rotate(5deg); }
+}
+
+@keyframes float-right {
+  0% { transform: translateY(-8px) rotate(5deg); }
+  100% { transform: translateY(0) rotate(-5deg); }
+}
+
+@keyframes move-towards-right {
+  0% { transform: translateY(0) rotate(-5deg); left: 10px; }
+  100% { transform: translateY(0) rotate(0deg); left: 30px; }
+}
+
+@keyframes move-towards-left {
+  0% { transform: translateY(-8px) rotate(5deg); right: 10px; }
+  100% { transform: translateY(0) rotate(0deg); right: 30px; }
+}
+
+@keyframes glow-ping {
+  0% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 0.8; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+/* Cover-Frame für die Overlays */
+.cover-frame {
+  max-width: 600px;
+  width: 90%;
+  padding: 30px;
+  background-color: rgba(25, 25, 25, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+}
+
+/* Cover-Titel-Styling */
+.cover-title {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  color: var(--color-cover-gold);
+  font-size: 1rem;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(255, 240, 172, 0.3);
+}
+
+.artist-name {
+  text-align: left;
+}
+
+.song-title {
+  text-align: right;
+}
+
+/* Cover-Footer mit goldenem Dreieck */
+.cover-footer {
+  position: absolute;
+  bottom: 20px;
+  right: 25px;
+  display: flex;
+  align-items: center;
+  color: var(--color-cover-gold);
+}
+
+/* Level-Overlay spezifische Stile */
+.level-frame {
+  max-width: 800px;
+  width: 94%;
+  padding: 40px 30px;
+  transition: all 0.5s ease-out;
+  position: relative;
+}
+
+/* Verbesserter Badge für das Level */
+.level-badge {
+  display: flex;
+  align-items: center;
+  margin: 0 auto 30px;
+  background: rgba(255, 140, 0, 0.2);
+  padding: 10px 20px;
+  border-radius: 30px;
+  width: fit-content;
+  border: 1px solid rgba(255, 140, 0, 0.3);
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.2);
+}
+
+.level-number {
+  color: var(--color-cover-gold);
+  font-size: 1rem;
+  letter-spacing: 2px;
+  margin-left: 10px;
+}
+
+/* Kleinere Version der Mandarinen für den Badge */
+.double-mandarins.small {
+  margin: 0;
+  width: 60px;
+  height: 35px;
+}
+
+.double-mandarins.small .mandarin-left,
+.double-mandarins.small .mandarin-right {
+  width: 30px;
+  height: 30px;
+}
+
+/* Lyrics-Container mit verbessertem Styling */
+.lyrics-container {
+  position: relative;
+  margin: 20px 0 40px;
+  padding: 20px 0;
+}
+
+.lyrics-container::before,
+.lyrics-container::after {
+  content: '';
+  position: absolute;
+  height: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    var(--color-mandarin-bright), 
+    transparent);
+}
+
+.lyrics-container::before {
+  top: 0;
+}
+
+.lyrics-container::after {
+  bottom: 0;
+}
+
+/* Verbesserte Lyrics-Anzeige */
+#lyricDisplay {
+  background: rgba(25, 25, 25, 0.5);
+  padding: 30px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 140, 0, 0.2);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+  margin-bottom: 30px;
+  font-family: var(--lyric-font);
+  line-height: 1.7;
+  font-size: 1.2rem;
+  font-weight: 300;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+}
+
+/* Bessere Hervorhebung in Lyrics */
+.highlight {
+  color: var(--color-mandarin-bright);
+  font-weight: 600;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 2px 6px;
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(255, 140, 0, 0.4);
+  display: inline-block;
+  animation: highlight-pulse 1.5s infinite alternate;
+}
+
+@keyframes highlight-pulse {
+  from { box-shadow: 0 0 8px rgba(255, 140, 0, 0.4); }
+  to { box-shadow: 0 0 15px rgba(255, 140, 0, 0.7); }
+}
+
+/* Verbesserte Level-Zitate */
+.level-quote {
+  font-family: var(--lyric-font);
+  font-size: 1.1rem;
+  font-style: italic;
+  margin: 15px auto 0;
+  max-width: 80%;
+  line-height: 1.5;
+  color: var(--color-turquoise);
+  padding: 15px;
+  position: relative;
+  text-align: center;
+}
+
+.level-quote::before,
+.level-quote::after {
+  content: '"';
+  font-size: 1.5rem;
+  font-family: serif;
+  position: absolute;
+  color: var(--color-cover-gold);
+  opacity: 0.7;
+}
+
+.level-quote::before {
+  top: 0;
+  left: 0;
+}
+
+.level-quote::after {
+  bottom: 0;
+  right: 0;
+}
+
+/* COVER-INTEGRATION STYLES */
+
+/* Startbildschirm mit echtem Cover als Hintergrund */
+#startScreen {
+  position: fixed;
+  background: #000;
+}
+
+#startScreen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('../assets/images/mandarinen_cover.jpg') center center/cover no-repeat;
+  opacity: 0.25; /* Abgedunkelt für bessere Lesbarkeit */
+  z-index: -1;
+  filter: blur(3px); /* Leichter Blur für atmosphärischen Effekt */
+  transition: all 1s ease;
+}
+
+#startScreen:hover::before {
+  opacity: 0.3; /* Leicht heller beim Hover */
+  filter: blur(2px); /* Etwas weniger Blur beim Hover */
+}
+
+/* Cover-Schattierung verstärken */
+#startScreen .cover-frame {
+  background: rgba(25, 25, 25, 0.85); /* Etwas transparenter */
+  backdrop-filter: blur(8px); /* Zusätzlicher Blur für besser Lesbarkeit */
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+}
+
+/* Cover-Reveal Button im Spielbereich */
+.cover-reveal-button {
+  position: fixed;
+  bottom: 15px;
+  left: 15px;
+  width: 40px;
+  height: 40px;
+  background: rgba(25, 25, 25, 0.7);
+  border: 1px solid var(--color-mandarin-bright);
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.cover-reveal-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.5);
+}
+
+.cover-reveal-button::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23FF8C00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>') center/contain no-repeat;
+}
+
+/* Cover-Modal für Ansicht des vollen Covers */
+.cover-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.cover-modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cover-container {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+  overflow: hidden;
+  border: 1px solid var(--color-mandarin-bright);
+  box-shadow: 0 0 30px rgba(255, 140, 0, 0.5);
+  transform: scale(0.9);
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cover-modal.active .cover-container {
+  transform: scale(1);
+}
+
+.cover-container img {
+  display: block;
+  max-width: 100%;
+  max-height: 80vh;
+}
+
+.cover-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.5rem;
+  transform: scale(0);
+  transition: all 0.3s ease;
+}
+
+.cover-modal.active .cover-close {
+  transform: scale(1);
+}
+
+.cover-close:hover {
+  background: rgba(214, 41, 65, 0.7);
+  transform: scale(1.1);
+}
+
+/* Cover-Info */
+.cover-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(to top, 
+    rgba(0, 0, 0, 0.8), 
+    transparent);
+  padding: 15px;
+  color: var(--color-cover-gold);
+  text-align: center;
+  transform: translateY(100%);
+  transition: transform 0.5s ease;
+}
+
+.cover-container:hover .cover-info {
+  transform: translateY(0);
+}
+
+/* Cover als animierter Hintergrund für Level-Übergänge */
+#levelOverlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('../assets/images/mandarinen_cover.jpg') center center/cover no-repeat;
+  opacity: 0;
+  z-index: -1;
+  filter: blur(8px) grayscale(30%);
+  transition: opacity 1s ease;
+}
+
+#levelOverlay.show-cover::before {
+  opacity: 0.15;
+  animation: pulse-bg 5s infinite alternate;
+}
+
+@keyframes pulse-bg {
+  from { opacity: 0.1; filter: blur(8px) grayscale(30%); }
+  to { opacity: 0.2; filter: blur(6px) grayscale(10%); }
+}
+
+/* Animiertes Cover auf dem End-Screen */
+#endScreen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('../assets/images/mandarinen_cover.jpg') center center/cover no-repeat;
+  opacity: 0.2;
+  z-index: -1;
+  filter: blur(5px);
+  animation: end-screen-reveal 10s infinite alternate;
+}
+
+@keyframes end-screen-reveal {
+  0% { opacity: 0.1; filter: blur(8px) grayscale(50%); }
+  50% { opacity: 0.25; filter: blur(3px) grayscale(20%); }
+  100% { opacity: 0.2; filter: blur(5px) grayscale(30%); }
+}
+
+/* Vinyl-Player Animation für das Level-Overlay */
+.vinyl-player {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  width: 80px;
+  height: 80px;
+  z-index: 20;
+  transition: all 0.3s ease;
+  transform: rotate(-5deg);
+  cursor: pointer;
+}
+
+.vinyl-player:hover {
+  transform: rotate(0) scale(1.1);
+}
+
+.vinyl-disc {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(30deg,
+    #111 0%,
+    #333 30%,
+    #111 40%,
+    #333 50%,
+    #111 60%,
+    #333 80%,
+    #111 100%
+  );
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform 0.5s ease;
+}
+
+.vinyl-disc.spinning {
+  animation: spin 10s linear infinite;
+}
+
+.vinyl-disc::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle at 50%,
+    transparent 0px,
+    transparent 4px,
+    rgba(255, 255, 255, 0.03) 5px,
+    rgba(255, 255, 255, 0.03) 6px
+  );
+}
+
+.vinyl-label {
+  width: 35%;
+  height: 35%;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 0 10px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.2);
+  position: relative;
+}
+
+.vinyl-label::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 15%;
+  height: 15%;
+  border-radius: 50%;
+  background: #111;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Cover-Fragmente für Split-Effekt */
+.cover-fragments {
+  pointer-events: none;
+  transition: opacity 1s ease;
+}
+
+/* Cover-Partikel */
+.cover-particle {
+  filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
+  z-index: 10;
+  transition: all 0.5s ease;
+}
+
+.cover-particle:hover {
+  transform: scale(1.2) !important;
+  filter: drop-shadow(0 0 10px rgba(255,140,0,0.7));
+}
+
+/* Bild-Zoom-Animation für das Cover im Modal */
+@keyframes image-zoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
+}
+
+#fullCoverImage {
+  transition: transform 0.5s ease;
+}
+
+#fullCoverImage:hover {
+  transform: scale(1.05);
+}
+
+/* Responsive-Anpassungen für kleine Geräte */
+@media (max-width: 600px) {
+  .cover-title {
+    font-size: 0.7rem;
+    margin-bottom: 20px;
+  }
+  
+  .double-mandarins {
+    transform: scale(0.8);
+    margin: 15px auto;
+  }
+  
+  .cover-frame {
+    padding: 20px 15px;
+  }
+  
+  .level-frame {
+    padding: 30px 15px;
+  }
+  
+  .level-badge {
+    padding: 8px 15px;
+  }
+  
+  .level-number {
+    font-size: 0.8rem;
+  }
+  
+  #lyricDisplay {
+    padding: 20px;
+    font-size: 1rem;
+  }
+  
+  .level-quote {
+    font-size: 0.9rem;
+    max-width: 95%;
+  }
+  
+  .vinyl-player {
+    width: 60px;
+    height: 60px;
+    top: 20px;
+    right: 20px;
+  }
+  
+  .cover-fragments {
+    transform: scale(0.7) translate(-50%, -50%);
+  }
+  
+  .cover-reveal-button {
+    bottom: 80px;
+  }
+}
