@@ -1,13 +1,13 @@
 /**
  * cover-integration.js - Erweiterte Interaktionen mit dem Album-Cover
- * Verbesserte Version mit Fehlerbehandlung
+ * Verbesserte Version mit großem Plattenspieler neben dem Songtext
  */
 
 // Cover-Bild vorladen
 const preloadCoverImage = function() {
   try {
     const coverImg = new Image();
-    coverImg.src = 'assets/images/mandarinen_cover.jpg';
+    coverImg.src = '../assets/images/mandarinen_cover.jpg';
   } catch (e) {
     console.warn('Cover-Bild konnte nicht vorgeladen werden:', e);
   }
@@ -19,24 +19,31 @@ const isCoverLoaded = function() {
          document.getElementById('fullCoverImage').complete;
 };
 
-/**
- * Fügt einen kleinen animierten Plattenspieler hinzu, der das Cover dreht
- * Mit verbesserter Fehlerbehandlung
- */
+// Variable für die Animation-ID, damit wir sie später stoppen können
+let vinylRotationAnimationId = null;
+
 const createVinylPlayer = function() {
   try {
-    const levelFrame = document.querySelector('#levelOverlay .level-frame');
-    if (!levelFrame) {
-      console.warn('Level-Frame nicht gefunden, Vinyl-Player wird nicht erstellt');
-      return null;
-    }
-    
-    // Prüfen, ob bereits ein Player existiert
-    if (levelFrame.querySelector('.vinyl-player')) {
-      console.log('Vinyl-Player existiert bereits');
-      return levelFrame.querySelector('.vinyl-player');
+    // Prüfen, ob ein Vinyl-Player bereits existiert und entfernen
+    const existingPlayer = document.querySelector('.vinyl-player');
+    if (existingPlayer) {
+      existingPlayer.remove();
+      
+      // Falls eine Animation läuft, diese stoppen
+      if (vinylRotationAnimationId) {
+        cancelAnimationFrame(vinylRotationAnimationId);
+        vinylRotationAnimationId = null;
+      }
     }
 
+    // Finde den Songtext-Container
+    const lyricsContainer = document.querySelector('#lyricDisplay');
+    if (!lyricsContainer) {
+      console.warn('Lyrics-Container nicht gefunden');
+      return null;
+    }
+
+    // Erstelle den Player-Container
     const playerContainer = document.createElement('div');
     playerContainer.className = 'vinyl-player';
     
@@ -44,21 +51,70 @@ const createVinylPlayer = function() {
     const vinylDisc = document.createElement('div');
     vinylDisc.className = 'vinyl-disc';
     
+    // Alle CSS-Klassen entfernen, die Animation enthalten könnten
+    vinylDisc.classList.remove('spinning');
+    
+    // Alle Inline-Stile zurücksetzen, die die Animation beeinflussen könnten
+    vinylDisc.style.animation = 'none';
+    vinylDisc.style.transform = 'none';
+    vinylDisc.style.transition = 'none';
+    
     // Cover als Label in der Mitte
     const coverLabel = document.createElement('div');
     coverLabel.className = 'vinyl-label';
-    coverLabel.style.backgroundImage = "url('assets/images/mandarinen_cover.jpg')";
+    
+    // Setze verschiedene mögliche Pfade und eine Fallback-Farbe
+    coverLabel.style.backgroundColor = '#FF8C00'; // Mandarine als Fallback
+
+    // Versuche diese Pfade für das Hintergrundbild
+    const coverUrl = [
+      '../assets/images/mandarinen_cover.jpg',
+      './assets/images/mandarinen_cover.jpg',
+      'assets/images/mandarinen_cover.jpg', 
+      '/assets/images/mandarinen_cover.jpg'
+    ].find(path => {
+      try {
+        // Teste jeden Pfad
+        const img = new Image();
+        img.src = path;
+        return img.complete;
+      } catch (e) {
+        return false;
+      }
+    }) || '../assets/images/mandarinen_cover.jpg'; // Fallback auf ersten Pfad
+
+    coverLabel.style.backgroundImage = `url('${coverUrl}')`;
     
     // Zusammensetzen
     vinylDisc.appendChild(coverLabel);
     playerContainer.appendChild(vinylDisc);
     
-    // Zum Level-Overlay hinzufügen
-    levelFrame.insertBefore(playerContainer, levelFrame.firstChild);
+    // Zum Lyrics-Container hinzufügen (direkt im Container)
+    lyricsContainer.appendChild(playerContainer);
     
-    // Animation starten
+    // Animation mit requestAnimationFrame starten (statt CSS-Animation)
     setTimeout(() => {
-      vinylDisc.classList.add('spinning');
+      // Rotationswinkel
+      let rotationAngle = 0;
+      
+      // Rotation pro Frame
+      const rotationSpeed = 0.5; // Anpassbar - höherer Wert = schnellere Rotation
+      
+      // Animationsfunktion
+      function animateRotation() {
+        // Winkel erhöhen
+        rotationAngle += rotationSpeed;
+        
+        // Rotation setzen - nur transform, kein CSS Animation property
+        vinylDisc.style.transform = `rotate(${rotationAngle}deg)`;
+        
+        // Nächsten Frame anfordern
+        vinylRotationAnimationId = requestAnimationFrame(animateRotation);
+      }
+      
+      // Animation starten
+      vinylRotationAnimationId = requestAnimationFrame(animateRotation);
+      console.log('JavaScript-basierte Vinyl-Rotation gestartet');
     }, 500);
     
     return playerContainer;
@@ -108,7 +164,7 @@ const createCoverSplitEffect = function(container) {
           height: ${100 / rows}%;
           top: ${i * (100 / rows)}%;
           left: ${j * (100 / cols)}%;
-          background: url('assets/images/mandarinen_cover.jpg');
+          background: url('../assets/images/mandarinen_cover.jpg');
           background-size: ${cols * 100}% ${rows * 100}%;
           background-position: ${j * -100}% ${i * -100}%;
           transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -175,7 +231,7 @@ const createCoverParticles = function() {
         position: absolute;
         width: ${size}px;
         height: ${size}px;
-        background: url('assets/images/mandarinen_cover.jpg');
+        background: url('../assets/images/mandarinen_cover.jpg');
         background-size: cover;
         border-radius: 50%;
         box-shadow: 0 0 10px rgba(0,0,0,0.5);
@@ -218,43 +274,60 @@ const createCoverParticles = function() {
 };
 
 /**
+ * Animation anhalten, wenn der Overlay nicht mehr sichtbar ist
+ */
+const stopVinylAnimation = function() {
+  if (vinylRotationAnimationId) {
+    console.log('Vinyl-Rotation wird gestoppt');
+    cancelAnimationFrame(vinylRotationAnimationId);
+    vinylRotationAnimationId = null;
+  }
+};
+
+/**
  * Warten auf den Abschluss eines Levels mit verbesserter Sicherheit
  */
 const waitForLevelCompletion = function() {
   // Mehr Kontrolle - den Original-GameManager-Prozess nicht stören
   const checkLevelOverlay = function() {
     const levelOverlay = document.getElementById('levelOverlay');
-    if (levelOverlay && !levelOverlay.classList.contains('hidden')) {
-      console.log('Level-Overlay erkannt, Cover-Funktionen werden initialisiert');
-      
-      // Level-Overlay wurde sichtbar
-      try {
-        // Cover-Hintergrund aktivieren
-        levelOverlay.classList.add('show-cover');
+    
+    if (levelOverlay) {
+      if (!levelOverlay.classList.contains('hidden')) {
+        console.log('Level-Overlay erkannt, Cover-Funktionen werden initialisiert');
         
-        // Warten, bevor der Vinyl-Player erstellt wird, um Konflikte zu vermeiden
-        setTimeout(() => {
-          const player = createVinylPlayer();
+        // Level-Overlay wurde sichtbar
+        try {
+          // Cover-Hintergrund aktivieren
+          levelOverlay.classList.add('show-cover');
           
-          if (player) {
-            // Click-Event für zusätzlichen Effekt
-            player.addEventListener('click', function() {
-              console.log('Vinyl-Player geklickt, Split-Effekt wird gestartet');
-              createCoverSplitEffect(levelOverlay);
-              
-              // Sound-Effekt wenn möglich
-              if (window.gameInstance && window.gameInstance.audioManager) {
-                try {
-                  window.gameInstance.audioManager.playSound('levelComplete');
-                } catch (e) {
-                  console.warn('Sound konnte nicht abgespielt werden:', e);
+          // Warten, bevor der Vinyl-Player erstellt wird, um Konflikte zu vermeiden
+          setTimeout(() => {
+            const player = createVinylPlayer();
+            
+            if (player) {
+              // Click-Event für zusätzlichen Effekt
+              player.addEventListener('click', function() {
+                console.log('Vinyl-Player geklickt, Split-Effekt wird gestartet');
+                createCoverSplitEffect(levelOverlay);
+                
+                // Sound-Effekt wenn möglich
+                if (window.gameInstance && window.gameInstance.audioManager) {
+                  try {
+                    window.gameInstance.audioManager.playSound('levelComplete');
+                  } catch (e) {
+                    console.warn('Sound konnte nicht abgespielt werden:', e);
+                  }
                 }
-              }
-            });
-          }
-        }, 1500); // Längere Verzögerung für mehr Stabilität
-      } catch (e) {
-        console.warn('Fehler bei Level-Abschluss-Verarbeitung:', e);
+              });
+            }
+          }, 1500); // Längere Verzögerung für mehr Stabilität
+        } catch (e) {
+          console.warn('Fehler bei Level-Abschluss-Verarbeitung:', e);
+        }
+      } else {
+        // Wenn Overlay versteckt ist, Animation stoppen um Ressourcen zu sparen
+        stopVinylAnimation();
       }
     }
     
@@ -316,7 +389,25 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Verbesserte Methode für Level-Abschluss-Erkennung ohne Mutation Observer
+  // MutationObserver zur Erkennung von Änderungen am Level-Overlay
+  const levelOverlay = document.getElementById('levelOverlay');
+  if (levelOverlay) {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          if (levelOverlay.classList.contains('hidden')) {
+            // Overlay versteckt - Animation stoppen
+            stopVinylAnimation();
+          }
+        }
+      });
+    });
+    
+    // Überwachung starten
+    observer.observe(levelOverlay, { attributes: true });
+  }
+  
+  // Verbesserte Methode für Level-Abschluss-Erkennung
   waitForLevelCompletion();
   
   // Cover-Partikel beim vollständigen Spielabschluss - verwendet den robusteren Polling-Ansatz
@@ -384,5 +475,21 @@ document.addEventListener('DOMContentLoaded', function() {
       };
       console.log('GameManager.showLevelComplete erfolgreich erweitert');
     }
+    
+    // Originale nextLevel-Funktion sichern und erweitern
+    if (window.gameInstance.nextLevel) {
+      const originalNextLevel = window.gameInstance.nextLevel;
+      window.gameInstance.nextLevel = function() {
+        // Animation stoppen, bevor wir zum nächsten Level wechseln
+        stopVinylAnimation();
+        
+        // Originale Funktion aufrufen
+        originalNextLevel.apply(window.gameInstance);
+      };
+      console.log('GameManager.nextLevel erfolgreich erweitert');
+    }
   }
+  
+  // Bei Seiten-Navigation oder Entladen Animation stoppen
+  window.addEventListener('beforeunload', stopVinylAnimation);
 });

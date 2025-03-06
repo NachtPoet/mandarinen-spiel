@@ -91,16 +91,59 @@ class GameManager {
 
     // Cheats für Entwicklung und Tests
     document.addEventListener("keydown", (e) => {
-      if (e.key === "L" && e.shiftKey) {
-        e.preventDefault();
-        if (this.currentLevelIndex < this.levels.length - 1) {
-          this.currentLevelIndex++;
-          this.initLevel();
-        } else {
-          this.showLevelComplete();
-        }
-      }
-    });
+  if (e.key === "L" && e.shiftKey) {
+    e.preventDefault();
+    console.log("Debug: Level-Skip aktiviert");
+    
+    // Alle Wörter als gefunden markieren und showLevelComplete auslösen
+    const remainingWords = this.targetWords.filter(word => !this.foundWords.has(word));
+    if (remainingWords.length > 0) {
+      console.log("Debug: Markiere alle verbliebenden Wörter als gefunden");
+      
+      // Workaround: Jedes verbleibende Wort mit geringem Zeitabstand als gefunden markieren
+      let delay = 0;
+      remainingWords.forEach(word => {
+        setTimeout(() => {
+          // Simuliere das Finden des Wortes
+          this.foundWords.add(word);
+          
+          // UI aktualisieren
+          let wordEl = document.getElementById("word-" + word);
+          if (wordEl) {
+            wordEl.classList.add("found");
+            wordEl.classList.add("word-just-found");
+            setTimeout(() => wordEl.classList.remove("word-just-found"), 700);
+            
+            if (this.currentDifficulty === "loose") {
+              wordEl.textContent = word;
+            }
+          }
+          
+          // Fortschrittsbalken aktualisieren
+          updateProgressBar(this.foundWords.size, this.targetWords.length, this.domElements.progressBar);
+          
+          // Sound abspielen
+          this.audioManager.playSound('wordFound');
+          
+          // Level als abgeschlossen markieren, wenn alle Wörter gefunden wurden
+          if (this.foundWords.size === this.targetWords.length) {
+            console.log("Debug: Level abgeschlossen durch Debug-Skip");
+            this.levelPending = true;
+            
+            // 800ms Verzögerung wie im normalen Spielablauf
+            setTimeout(() => this.showLevelComplete(), 800);
+          }
+        }, delay);
+        
+        // Verzögere das nächste Wort um 300ms
+        delay += 300;
+      });
+    } else if (this.currentLevelIndex >= this.levels.length - 1) {
+      // Wenn wir im letzten Level sind, direkt das Ende anzeigen
+      this.showLevelComplete();
+    }
+  }
+});
   }
 
   openReward() {
