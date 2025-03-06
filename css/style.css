@@ -1,16 +1,11 @@
 /* 
  * Mandarinen: Erinnerungen im Gepäck 
- * CSS mit Album-Farbpalette:
- * - Violett: #631D76
- * - Rosa: #F7C1BB
- * - Rot: #D62941
- * - Gelb: #FDC840
- * - Grün: #99B9AB
+ * Vollständige CSS mit Cover-Integration
  */
 
 /* ==== GRUNDLEGENDE CSS-VARIABLEN ==== */
 :root {
-  /* Hauptfarben aus der Album-Palette */
+  /* Original-Farbpalette */
   --color-violet: #631D76;
   --color-pink: #F7C1BB;
   --color-red: #D62941;
@@ -31,10 +26,18 @@
   --color-yellow-light: #fed77d;
   --color-green-light: #bdd4ca;
   
+  /* Neue Farben vom Cover */
+  --color-mandarin-bright: #FF8C00;
+  --color-mandarin-dark: #E67300;
+  --color-turquoise: #A0D8EF;
+  --color-dark-turquoise: #69B3CB;
+  --color-cover-black: #191919;
+  --color-cover-gold: #FFF0AC;
+  
   /* UI-Farben */
   --bg-color: #1c0f21;
-  --bg-gradient-start: #2a0d32;
-  --bg-gradient-end: #1d1d20;
+  --bg-gradient-start: var(--color-cover-black);
+  --bg-gradient-end: #282828;
   --cell-bg: #3a1142;
   --cell-border: #631D76;
   --cell-text: #fff;
@@ -74,6 +77,20 @@ body {
   padding: 0;
 }
 
+/* Filmkorn-Overlay für das gesamte Spiel */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0.03; /* Sehr subtil */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
 h1 {
   margin: 20px 0 10px;
   text-shadow: var(--title-shadow);
@@ -82,6 +99,13 @@ h1 {
   text-align: center;
   animation: glow 2s infinite alternate;
   padding: 15px;
+  color: var(--color-cover-gold);
+}
+
+h2 {
+  color: var(--color-cover-gold);
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(255, 240, 172, 0.5);
 }
 
 p {
@@ -156,6 +180,26 @@ p {
   50% { transform: translateY(-10px) rotate(5deg); }
 }
 
+@keyframes float-left {
+  0% { transform: translateY(0) rotate(-5deg); }
+  100% { transform: translateY(-8px) rotate(5deg); }
+}
+
+@keyframes float-right {
+  0% { transform: translateY(-8px) rotate(5deg); }
+  100% { transform: translateY(0) rotate(-5deg); }
+}
+
+@keyframes move-towards-right {
+  0% { transform: translateY(0) rotate(-5deg); left: 10px; }
+  100% { transform: translateY(0) rotate(0deg); left: 30px; }
+}
+
+@keyframes move-towards-left {
+  0% { transform: translateY(-8px) rotate(5deg); right: 10px; }
+  100% { transform: translateY(0) rotate(0deg); right: 30px; }
+}
+
 @keyframes fade-in {
   to { opacity: 1; }
 }
@@ -189,6 +233,49 @@ p {
   0% { opacity: 0; }
   10% { opacity: 0.7; }
   100% { opacity: 0; }
+}
+
+@keyframes glow-ping {
+  0% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 0.8; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+@keyframes mandarin-shine {
+  from { 
+    opacity: 0.4;
+    transform: rotate(-30deg) scale(1); 
+  }
+  to { 
+    opacity: 0.7;
+    transform: rotate(-25deg) scale(1.1); 
+  }
+}
+
+@keyframes highlight-pulse {
+  from { box-shadow: 0 0 8px rgba(255, 140, 0, 0.4); }
+  to { box-shadow: 0 0 15px rgba(255, 140, 0, 0.7); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-bg {
+  from { opacity: 0.1; filter: blur(8px) grayscale(30%); }
+  to { opacity: 0.2; filter: blur(6px) grayscale(10%); }
+}
+
+@keyframes end-screen-reveal {
+  0% { opacity: 0.1; filter: blur(8px) grayscale(50%); }
+  50% { opacity: 0.25; filter: blur(3px) grayscale(20%); }
+  100% { opacity: 0.2; filter: blur(5px) grayscale(30%); }
+}
+
+@keyframes image-zoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
 }
 
 /* ==== STERN HINTERGRUND ==== */
@@ -235,6 +322,7 @@ p {
   background: rgba(0, 0, 0, 0.4);
   transition: transform var(--transition-speed);
   position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .grid::before {
@@ -244,10 +332,13 @@ p {
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(45deg, var(--color-violet), transparent, var(--color-violet));
   z-index: -1;
   border-radius: 12px;
-  opacity: 0.3;
+  background: linear-gradient(45deg, 
+    var(--color-mandarin-bright), 
+    transparent, 
+    var(--color-turquoise));
+  opacity: 0.2;
   animation: borderGlow 4s infinite alternate;
 }
 
@@ -258,8 +349,9 @@ p {
 .cell {
   width: 36px;
   height: 36px;
-  background: var(--cell-bg);
-  border: 1px solid var(--cell-border);
+  background: rgba(25, 25, 25, 0.8);
+  border: 1px solid rgba(255, 140, 0, 0.3);
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -269,7 +361,6 @@ p {
   cursor: pointer;
   transition: all var(--transition-speed);
   border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   position: relative;
   overflow: hidden;
 }
@@ -296,11 +387,11 @@ p {
 }
 
 .cell.selected {
-  background: var(--cell-selected);
-  color: #fff;
+  background: rgba(255, 140, 0, 0.7);
+  border-color: var(--color-mandarin-bright);
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.5);
   transform: scale(1.1);
   z-index: 3;
-  box-shadow: 0 0 10px var(--cell-selected);
 }
 
 .cell.found {
@@ -308,6 +399,8 @@ p {
   overflow: hidden;
   z-index: 1;
   animation: pulse 1s ease-in-out, cell-glow 1.5s infinite alternate;
+  border-color: var(--color-cover-gold) !important;
+  box-shadow: 0 0 12px rgba(255, 240, 172, 0.4) !important;
 }
 
 /* ==== ZELL-FARBEN FÜR VERSCHIEDENE STEMS ==== */
@@ -414,12 +507,13 @@ p {
 
 .word {
   padding: 8px 12px;
-  border: 2px solid var(--cell-selected);
+  background: rgba(25, 25, 25, 0.7);
+  border: 1px solid rgba(160, 216, 239, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
   border-radius: 8px;
   text-shadow: var(--text-shadow);
   font-size: 0.7rem;
   transition: all var(--transition-speed);
-  background: rgba(0, 0, 0, 0.5);
   padding-right: 30px; /* Mehr Platz für das Icon */
   position: relative;
 }
@@ -435,6 +529,13 @@ p {
   opacity: 1;
   transform-origin: center;
   transition: all 0.3s ease;
+  background: linear-gradient(to right, 
+    rgba(255, 140, 0, 0.7), 
+    rgba(255, 165, 0, 0.7)) !important;
+  border-color: var(--color-mandarin-dark) !important;
+  box-shadow: 0 0 12px rgba(255, 140, 0, 0.5) !important;
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
 }
 
 .word-just-found {
@@ -715,10 +816,12 @@ p {
   font-size: 0.9rem;
   margin-bottom: 15px;
   color: #fff;
-  background: rgba(247, 193, 187, 0.2);
+  background: linear-gradient(to right, 
+    rgba(160, 216, 239, 0.2), 
+    rgba(105, 179, 203, 0.3));
   padding: 8px 15px;
   border-radius: 20px;
-  box-shadow: 0 0 10px rgba(247, 193, 187, 0.4);
+  box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -741,10 +844,12 @@ p {
   top: 10px;
   right: 15px;
   font-size: 0.7rem;
-  background: rgba(247, 193, 187, 0.2);
+  background: linear-gradient(to right, 
+    rgba(160, 216, 239, 0.2), 
+    rgba(105, 179, 203, 0.3));
   padding: 7px 12px;
   border-radius: 15px;
-  box-shadow: 0 0 8px rgba(247, 193, 187, 0.4);
+  box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
   border: 1px solid rgba(247, 193, 187, 0.3);
 }
 
@@ -883,33 +988,71 @@ p {
 /* Mandarin Icon */
 .mandarin-icon {
   position: absolute;
-  width: 40px;
-  height: 40px;
-  background: var(--color-yellow);
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  border: 2px solid #fff;
-  box-shadow: 0 0 15px rgba(253, 200, 64, 0.7);
   z-index: 105;
   top: -15px;
   right: -15px;
-  transform: rotate(-15deg);
-  transition: all 0.3s ease;
+  transform: rotate(-10deg);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+  
+  /* Schatten für Tiefenwirkung */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+  
+  /* 3D-Effekt durch Gradienten */
+  background: radial-gradient(circle at 35% 35%, 
+    #FFA500 5%, 
+    #FF8C00 45%, 
+    #FF7800 85%);
 }
 
-.mandarin-icon:hover {
-  transform: rotate(15deg) scale(1.1);
-}
-
+/* Glanzeffekt wie bei einer echten Mandarine */
 .mandarin-icon::before {
   content: '';
   position: absolute;
-  top: -7px;
-  left: 15px;
-  width: 10px;
-  height: 15px;
-  background: var(--color-green);
-  border-radius: 40% 40% 0 0;
+  width: 120%;
+  height: 120%;
+  top: -40%;
+  left: -40%;
+  background: radial-gradient(ellipse at center, 
+    rgba(255, 255, 255, 0.7) 0%, 
+    rgba(255, 255, 255, 0) 70%);
   transform: rotate(-30deg);
+  opacity: 0.5;
+}
+
+/* Stängel und Blatt */
+.mandarin-icon::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 8px;
+  background: #006400;
+  border-radius: 40% 40% 0 0;
+  clip-path: polygon(
+    20% 0%, 
+    80% 0%, 
+    100% 50%, 
+    80% 100%, 
+    20% 100%, 
+    0% 50%
+  );
+}
+
+/* Hover-Animation */
+.mandarin-icon:hover {
+  transform: rotate(10deg) scale(1.15);
+  box-shadow: 0 8px 25px rgba(255, 140, 0, 0.6);
+}
+
+/* Pulsierender Schimmer beim Hover */
+.mandarin-icon:hover::before {
+  animation: mandarin-shine 2s infinite alternate;
 }
 
 /* Reward Box */
@@ -953,6 +1096,91 @@ p {
   top: 40px;
 }
 
+/* ==== DOPPELTE MANDARINEN ANIMATION ==== */
+.double-mandarins {
+  position: relative;
+  width: 120px;
+  height: 70px;
+  margin: 30px auto;
+}
+
+.double-mandarins .mandarin-left,
+.double-mandarins .mandarin-right {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, 
+    #FFA500 5%, 
+    #FF8C00 45%, 
+    #FF7800 85%);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+  top: 0;
+}
+
+.double-mandarins .mandarin-left {
+  left: 10px;
+  z-index: 1;
+  animation: float-left 3s infinite alternate ease-in-out;
+}
+
+.double-mandarins .mandarin-right {
+  right: 10px;
+  z-index: 2;
+  animation: float-right 3s infinite alternate ease-in-out;
+}
+
+/* Glanzeffekt auf den Mandarinen */
+.double-mandarins .mandarin-left::before,
+.double-mandarins .mandarin-right::before {
+  content: '';
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  top: -40%;
+  left: -40%;
+  background: radial-gradient(ellipse at center, 
+    rgba(255, 255, 255, 0.7) 0%, 
+    rgba(255, 255, 255, 0) 70%);
+  transform: rotate(-30deg);
+  opacity: 0.5;
+}
+
+/* Stängel */
+.double-mandarins .mandarin-left::after,
+.double-mandarins .mandarin-right::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 7px;
+  background: #006400;
+  border-radius: 40% 40% 0 0;
+  clip-path: polygon(
+    20% 0%, 
+    80% 0%, 
+    100% 50%, 
+    80% 100%, 
+    20% 100%, 
+    0% 50%
+  );
+}
+
+/* Kleinere Version für den Badge */
+.double-mandarins.small {
+  margin: 0;
+  width: 60px;
+  height: 35px;
+}
+
+.double-mandarins.small .mandarin-left,
+.double-mandarins.small .mandarin-right {
+  width: 30px;
+  height: 30px;
+}
+
 /* ==== OVERLAYS & DIALOGE ==== */
 .overlay {
   position: fixed;
@@ -978,6 +1206,82 @@ p {
 
 .overlay.hidden {
   display: none !important;
+}
+
+/* Vintage-Overlay */
+.vintage-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  background: radial-gradient(
+    circle at center,
+    transparent 40%,
+    rgba(46, 49, 65, 0.1) 100%
+  );
+}
+
+/* Startbildschirm mit Cover als Hintergrund */
+#startScreen {
+  position: fixed;
+  background: #000;
+}
+
+#startScreen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('../assets/images/mandarinen_cover.jpg') center center/cover no-repeat;
+  opacity: 0.25; /* Abgedunkelt für bessere Lesbarkeit */
+  z-index: -1;
+  filter: blur(3px); /* Leichter Blur für atmosphärischen Effekt */
+  transition: all 1s ease;
+}
+
+#startScreen:hover::before {
+  opacity: 0.3; /* Leicht heller beim Hover */
+  filter: blur(2px); /* Etwas weniger Blur beim Hover */
+}
+
+/* Cover als Hintergrund für Level-Übergänge */
+#levelOverlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('../assets/images/mandarinen_cover.jpg') center center/cover no-repeat;
+  opacity: 0;
+  z-index: -1;
+  filter: blur(8px) grayscale(30%);
+  transition: opacity 1s ease;
+}
+
+#levelOverlay.show-cover::before {
+  opacity: 0.15;
+  animation: pulse-bg 5s infinite alternate;
+}
+
+/* Animiertes Cover auf dem End-Screen */
+#endScreen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('../assets/images/mandarinen_cover.jpg') center center/cover no-repeat;
+  opacity: 0.2;
+  z-index: -1;
+  filter: blur(5px);
+  animation: end-screen-reveal 10s infinite alternate;
 }
 
 /* Hilfe-Dialog */
@@ -1074,69 +1378,186 @@ p {
   line-height: 1.4;
 }
 
+/* ==== COVER-FRAME STYLING ==== */
+.cover-frame {
+  max-width: 600px;
+  width: 90%;
+  padding: 30px;
+  background-color: rgba(25, 25, 25, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+}
+
+/* Cover-Schattierung verstärken */
+#startScreen .cover-frame {
+  background: rgba(25, 25, 25, 0.85); /* Etwas transparenter */
+  backdrop-filter: blur(8px); /* Zusätzlicher Blur für bessere Lesbarkeit */
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+}
+
+/* Cover-Titel-Styling */
+.cover-title {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  color: var(--color-cover-gold);
+  font-size: 1rem;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(255, 240, 172, 0.3);
+}
+
+.artist-name {
+  text-align: left;
+}
+
+.song-title {
+  text-align: right;
+}
+
+/* Cover-Footer mit goldenem Dreieck */
+.cover-footer {
+  position: absolute;
+  bottom: 20px;
+  right: 25px;
+  display: flex;
+  align-items: center;
+  color: var(--color-cover-gold);
+}
+
+/* Spezielle Überschrift für den Startbildschirm */
+#startScreen h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.4rem;
+  letter-spacing: 1px;
+  color: var(--color-cover-gold);
+  text-shadow: 0 0 10px rgba(255, 240, 172, 0.4);
+}
+
+/* ==== LEVEL-OVERLAY STYLES ==== */
+.level-frame {
+  max-width: 800px;
+  width: 94%;
+  padding: 40px 30px;
+  transition: all 0.5s ease-out;
+  position: relative;
+}
+
+/* Level-Badge mit Cover-Stil */
+.level-badge {
+  display: flex;
+  align-items: center;
+  margin: 0 auto 30px;
+  background: rgba(255, 140, 0, 0.2);
+  padding: 10px 20px;
+  border-radius: 30px;
+  width: fit-content;
+  border: 1px solid rgba(255, 140, 0, 0.3);
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.2);
+}
+
+.level-number {
+  color: var(--color-cover-gold);
+  font-size: 1rem;
+  letter-spacing: 2px;
+  margin-left: 10px;
+}
+
+/* Lyrics-Container mit verbessertem Styling */
+.lyrics-container {
+  position: relative;
+  margin: 20px 0 40px;
+  padding: 20px 0;
+}
+
+.lyrics-container::before,
+.lyrics-container::after {
+  content: '';
+  position: absolute;
+  height: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    var(--color-mandarin-bright), 
+    transparent);
+}
+
+.lyrics-container::before {
+  top: 0;
+}
+
+.lyrics-container::after {
+  bottom: 0;
+}
+
 /* Lyric Display */
 #lyricDisplay {
-  background: rgba(0, 0, 0, 0.7);
-  padding: 25px;
+  background: rgba(25, 25, 25, 0.5);
+  padding: 30px;
   border-radius: 10px;
-  border: 1px solid var(--color-violet);
-  box-shadow: 0 0 25px rgba(99, 29, 118, 0.4);
-  max-width: 600px;
-  white-space: pre-wrap;
-  margin-bottom: 20px;
-  animation: fadeInUp 1s ease-out;
+  border: 1px solid rgba(255, 140, 0, 0.2);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+  margin-bottom: 30px;
   font-family: var(--lyric-font);
-  line-height: 1.6;
+  line-height: 1.7;
+  font-size: 1.2rem;
   font-weight: 300;
-  font-size: 1.1rem;
   position: relative;
   overflow: hidden;
+  transition: all 0.4s ease;
+  margin-right: 100px; /* Platz schaffen für den Plattenspieler */
+  max-width: calc(100% - 120px); /* Breite anpassen */
 }
 
-#lyricDisplay::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-violet), transparent);
-  animation: lineSweep 4s infinite alternate;
-}
-
-#lyricDisplay::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-violet), transparent);
-  animation: lineSweep 4s infinite alternate-reverse;
-}
-
-/* Hervorhebung in Lyrics */
+/* Bessere Hervorhebung in Lyrics */
 .highlight {
-  color: var(--color-red);
-  font-weight: bold;
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 2px 5px;
+  color: var(--color-mandarin-bright);
+  font-weight: 600;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 2px 6px;
   border-radius: 3px;
-  box-shadow: 0 0 8px var(--color-red);
+  box-shadow: 0 0 8px rgba(255, 140, 0, 0.4);
   display: inline-block;
-  animation: glow-text 1.5s infinite alternate;
+  animation: highlight-pulse 1.5s infinite alternate;
 }
 
 /* Level-Zitate */
 .level-quote {
   font-family: var(--lyric-font);
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-style: italic;
-  margin-top: 15px;
-  opacity: 0.9;
-  max-width: 500px;
-  line-height: 1.4;
-  color: var(--color-pink);
+  margin: 15px auto 0;
+  max-width: 80%;
+  line-height: 1.5;
+  color: var(--color-turquoise);
+  padding: 15px;
+  position: relative;
+  text-align: center;
+}
+
+.level-quote::before,
+.level-quote::after {
+  content: '"';
+  font-size: 1.5rem;
+  font-family: serif;
+  position: absolute;
+  color: var(--color-cover-gold);
+  opacity: 0.7;
+}
+
+.level-quote::before {
+  top: 0;
+  left: 0;
+}
+
+.level-quote::after {
+  bottom: 0;
+  right: 0;
 }
 
 /* Memory Flash */
@@ -1152,16 +1573,237 @@ p {
   pointer-events: none;
 }
 
-/* Konfetti-Animation */
-.confetti {
-  position: fixed;
-  width: 10px;
-  height: 10px;
-  background-color: #f00;
-  opacity: 0;
-  z-index: 99;
-  animation: confetti 5s ease-in forwards;
+/* ==== VINYL-PLAYER STYLES ==== */
+/* Großer Plattenspieler neben dem Songtext */
+.vinyl-player {
+  position: absolute;
+  top: 50%;         /* Vertikal zentriert */
+  transform: translateY(-50%) rotate(-5deg);
+  right: -110px;    /* Nach rechts versetzt, neben dem Text */
+  width: 100px;     /* Viel größer */
+  height: 100px;    /* Viel größer */
+  z-index: 20;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+.vinyl-player:hover {
+  transform: translateY(-50%) rotate(0) scale(1.1);
+  opacity: 1;
+}
+
+.vinyl-disc {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(30deg,
+    #111 0%,
+    #333 30%,
+    #111 40%,
+    #333 50%,
+    #111 60%,
+    #333 80%,
+    #111 100%
+  );
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform 0.5s ease;
+}
+
+.vinyl-disc.spinning {
+  animation: spin 8s linear infinite;
+}
+
+.vinyl-disc::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle at 50%,
+    transparent 0px,
+    transparent 3px,
+    rgba(255, 255, 255, 0.04) 4px,
+    rgba(255, 255, 255, 0.04) 5px
+  );
+}
+
+.vinyl-label {
+  width: 38%;
+  height: 38%;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 0 15px rgba(0,0,0,0.8);
+  border: 1px solid rgba(255,255,255,0.3);
+  position: relative;
+}
+
+.vinyl-label::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 15%;
+  height: 15%;
+  border-radius: 50%;
+  background: #111;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* Cover-Fragmente für Split-Effekt */
+.cover-fragments {
   pointer-events: none;
+  transition: opacity 1s ease;
+}
+
+/* ==== COVER-REVEAL BUTTON & MODAL ==== */
+.cover-reveal-button {
+  position: fixed;
+  bottom: 15px;
+  left: 15px;
+  width: 40px;
+  height: 40px;
+  background: rgba(25, 25, 25, 0.7);
+  border: 1px solid var(--color-mandarin-bright);
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.cover-reveal-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.5);
+}
+
+.cover-reveal-button::before {
+  content: '';
+  width: 20px;
+  height: 20px;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23FF8C00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>') center/contain no-repeat;
+}
+
+/* Cover-Modal für Ansicht des vollen Covers */
+.cover-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.cover-modal.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cover-container {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+  overflow: hidden;
+  border: 1px solid var(--color-mandarin-bright);
+  box-shadow: 0 0 30px rgba(255, 140, 0, 0.5);
+  transform: scale(0.9);
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cover-modal.active .cover-container {
+  transform: scale(1);
+}
+
+.cover-container img {
+  display: block;
+  max-width: 100%;
+  max-height: 80vh;
+}
+
+#fullCoverImage {
+  transition: transform 0.5s ease;
+}
+
+#fullCoverImage:hover {
+  transform: scale(1.05);
+}
+
+.cover-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.5rem;
+  transform: scale(0);
+  transition: all 0.3s ease;
+}
+
+.cover-modal.active .cover-close {
+  transform: scale(1);
+}
+
+.cover-close:hover {
+  background: rgba(214, 41, 65, 0.7);
+  transform: scale(1.1);
+}
+
+/* Cover-Info */
+.cover-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(to top, 
+    rgba(0, 0, 0, 0.8), 
+    transparent);
+  padding: 15px;
+  color: var(--color-cover-gold);
+  text-align: center;
+  transform: translateY(100%);
+  transition: transform 0.5s ease;
+}
+
+.cover-container:hover .cover-info {
+  transform: translateY(0);
+}
+
+/* Cover-Partikel */
+.cover-particle {
+  filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
+  z-index: 10;
+  transition: all 0.5s ease;
+}
+
+.cover-particle:hover {
+  transform: scale(1.2) !important;
+  filter: drop-shadow(0 0 10px rgba(255,140,0,0.7));
 }
 
 /* ==== BUTTONS & CONTROLS ==== */
@@ -1210,27 +1852,35 @@ p {
 
 /* Button-Varianten */
 .btn.primary {
-  background-color: rgba(99, 29, 118, 0.3);
-  border-color: var(--color-violet);
-  box-shadow: 0 0 15px rgba(99, 29, 118, 0.4);
+  background: linear-gradient(to bottom, 
+    rgba(255, 140, 0, 0.3), 
+    rgba(230, 115, 0, 0.4));
+  border-color: var(--color-mandarin-bright);
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
 }
 
 .btn.primary:hover {
-  background-color: rgba(99, 29, 118,.5);
+  background: linear-gradient(to bottom, 
+    rgba(255, 140, 0, 0.5), 
+    rgba(230, 115, 0, 0.6));
+  box-shadow: 0 5px 20px rgba(255, 140, 0, 0.5);
   transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(99, 29, 118, 0.6);
 }
 
 .btn.secondary {
-  background-color: rgba(214, 41, 65, 0.3);
-  border-color: var(--color-red);
-  box-shadow: 0 0 15px rgba(214, 41, 65, 0.4);
+  background: linear-gradient(to bottom, 
+    rgba(160, 216, 239, 0.3), 
+    rgba(105, 179, 203, 0.4));
+  border-color: var(--color-turquoise);
+  box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
 }
 
 .btn.secondary:hover {
-  background-color: rgba(214, 41, 65, 0.5);
+  background: linear-gradient(to bottom, 
+    rgba(160, 216, 239, 0.5), 
+    rgba(105, 179, 203, 0.6));
+  box-shadow: 0 5px 20px rgba(160, 216, 239, 0.5);
   transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(214, 41, 65, 0.6);
 }
 
 /* Button-Container */
@@ -1240,6 +1890,19 @@ p {
   justify-content: center;
   gap: 15px;
   margin-top: 25px;
+}
+
+/* Goldene Dreiecke */
+.gold-triangle {
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 15px solid var(--color-cover-gold);
+  display: inline-block;
+  margin-right: 10px;
+  vertical-align: middle;
+  filter: drop-shadow(0 0 5px rgba(255, 240, 172, 0.5));
 }
 
 /* Select-Styles */
@@ -1341,8 +2004,67 @@ select:focus {
   border-radius: 5px;
 }
 
+/* Konfetti-Animation */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  background-color: #f00;
+  opacity: 0;
+  z-index: 99;
+  animation: confetti 5s ease-in forwards;
+  pointer-events: none;
+}
+
 /* ==== MOBILE OPTIMIERUNGEN ==== */
-@media (max-width: 500px) {
+@media (max-width: 800px) {
+  .vinyl-player {
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    opacity: 0.8;
+  }
+  
+  #lyricDisplay {
+    margin-right: 70px;
+    max-width: calc(100% - 80px);
+  }
+  
+  .cell {
+    width: 30px;
+    height: 30px;
+    font-size: 0.7rem;
+  }
+  
+  h1 {
+    font-size: 1.1rem;
+    padding: 0 15px;
+  }
+  
+  .cover-title {
+    font-size: 0.8rem;
+    margin-bottom: 20px;
+  }
+  
+  .double-mandarins {
+    transform: scale(0.8);
+    margin: 15px auto;
+  }
+  
+  .level-frame {
+    padding: 30px 15px;
+  }
+  
+  .level-badge {
+    padding: 8px 15px;
+  }
+  
+  .level-number {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 600px) {
   .cell {
     width: 26px;
     height: 26px;
@@ -1353,6 +2075,10 @@ select:focus {
     font-size: 0.85rem;
     padding: 0 10px;
     margin-bottom: 30px;
+  }
+  
+  .cover-frame {
+    padding: 20px 15px;
   }
 
   #timer {
@@ -1405,6 +2131,31 @@ select:focus {
   #hintButton {
     left: 20px !important;
   }
+  
+  .vinyl-player {
+    top: auto;
+    bottom: 20px;
+    right: 20px;
+    transform: rotate(-5deg);
+    width: 50px;
+    height: 50px;
+  }
+  
+  .vinyl-player:hover {
+    transform: rotate(0) scale(1.1);
+  }
+  
+  #lyricDisplay {
+    margin-right: 0;
+    max-width: 100%;
+    padding: 20px;
+    font-size: 1rem;
+  }
+  
+  .level-quote {
+    font-size: 0.9rem;
+    max-width: 95%;
+  }
 
   /* Abstand zwischen Spielfeld und Level-Anzeige */
   .grid {
@@ -1440,6 +2191,11 @@ select:focus {
     height: 15px;
     margin-right: 8px;
   }
+  
+  /* Cover-Reveal-Button */
+  .cover-reveal-button {
+    bottom: 70px;
+  }
 
   /* Hilfe-Container */
   .help-container {
@@ -1468,19 +2224,6 @@ select:focus {
     margin: 0;
   }
 
-  /* Lyric-Display */
-  #lyricDisplay {
-    font-size: 0.85rem;
-    padding: 15px;
-    max-width: 90%;
-  }
-
-  .level-quote {
-    font-size: 0.75rem;
-    padding: 0 10px;
-    max-width: 90%;
-  }
-
   /* Epic Badge */
   .epic-badge {
     top: auto;
@@ -1488,1336 +2231,45 @@ select:focus {
     left: 10px;
     font-size: 0.55rem;
   }
-  
-  /* Sehr kleine Geräte */
-  @media (max-width: 360px) {
-    .cell {
-      width: 22px;
-      height: 22px;
-      font-size: 0.6rem;
-    }
+}
 
-    .word-list {
-      gap: 6px;
-    }
+/* Sehr kleine Geräte */
+@media (max-width: 360px) {
+  .cell {
+    width: 22px;
+    height: 22px;
+    font-size: 0.6rem;
   }
-}
 
-/* 
- * Erweiterungen für style.css - Cover-inspirierte Ergänzungen
- * Füge diesen Code am Ende deiner vorhandenen style.css ein
- */
-
-/* Erweiterte Farbpalette basierend auf dem Cover */
-:root {
-  /* Original-Palette bleibt erhalten */
-  
-  /* Neue Farben vom Cover */
-  --color-mandarin-bright: #FF8C00;
-  --color-mandarin-dark: #E67300;
-  --color-turquoise: #A0D8EF;
-  --color-dark-turquoise: #69B3CB;
-  --color-cover-black: #191919;
-  --color-cover-gold: #FFF0AC;
-  
-  /* Angepasste Hintergrundfarben */
-  --bg-gradient-start: var(--color-cover-black);
-  --bg-gradient-end: #282828;
-}
-
-/* Filmkorn-Overlay für das gesamte Spiel */
-body::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1000;
-  pointer-events: none;
-  opacity: 0.03; /* Sehr subtil */
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-}
-
-/* Gold-Überschriften wie im Cover */
-h1, h2 {
-  color: var(--color-cover-gold);
-  letter-spacing: 1px;
-  text-shadow: 0 0 10px rgba(255, 240, 172, 0.5);
-}
-
-/* Türkis-Akzente für UI-Elemente */
-#timer, #levelIndicator {
-  background: linear-gradient(to right, 
-    rgba(160, 216, 239, 0.2), 
-    rgba(105, 179, 203, 0.3));
-  box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
-}
-
-/* Vintage-Rahmen für das Spielfeld */
-.grid {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 12px;
-  position: relative;
-}
-
-.grid::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  z-index: -1;
-  border-radius: 12px;
-  background: linear-gradient(45deg, 
-    var(--color-mandarin-bright), 
-    transparent, 
-    var(--color-turquoise));
-  opacity: 0.2;
-  animation: borderGlow 4s infinite alternate;
-}
-
-/* Vintage-Overlay für den gesamten Spielbereich */
-.vintage-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  mix-blend-mode: overlay;
-  background: radial-gradient(
-    circle at center,
-    transparent 40%,
-    rgba(46, 49, 65, 0.1) 100%
-  );
-}
-
-/* Cover-inspirierte Buttons */
-.btn.primary {
-  background: linear-gradient(to bottom, 
-    rgba(255, 140, 0, 0.3), 
-    rgba(230, 115, 0, 0.4));
-  border-color: var(--color-mandarin-bright);
-  box-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
-}
-
-.btn.primary:hover {
-  background: linear-gradient(to bottom, 
-    rgba(255, 140, 0, 0.5), 
-    rgba(230, 115, 0, 0.6));
-  box-shadow: 0 5px 20px rgba(255, 140, 0, 0.5);
-}
-
-.btn.secondary {
-  background: linear-gradient(to bottom, 
-    rgba(160, 216, 239, 0.3), 
-    rgba(105, 179, 203, 0.4));
-  border-color: var(--color-turquoise);
-  box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
-}
-
-.btn.secondary:hover {
-  background: linear-gradient(to bottom, 
-    rgba(160, 216, 239, 0.5), 
-    rgba(105, 179, 203, 0.6));
-  box-shadow: 0 5px 20px rgba(160, 216, 239, 0.5);
-}
-
-/* Goldene Dreiecke als Navigation, inspiriert vom Cover */
-.gold-triangle {
-  width: 0;
-  height: 0;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-left: 15px solid var(--color-cover-gold);
-  display: inline-block;
-  margin-right: 10px;
-  vertical-align: middle;
-  filter: drop-shadow(0 0 5px rgba(255, 240, 172, 0.5));
-}
-
-/* Verbesserte Spielfeld-Zellen mit dezenten Mandarinentönen */
-.cell {
-  background: rgba(25, 25, 25, 0.8);
-  border: 1px solid rgba(255, 140, 0, 0.3);
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
-}
-
-.cell.selected {
-  background: rgba(255, 140, 0, 0.7);
-  border-color: var(--color-mandarin-bright);
-  box-shadow: 0 0 15px rgba(255, 140, 0, 0.5);
-}
-
-.cell.found {
-  border-color: var(--color-cover-gold) !important;
-  box-shadow: 0 0 12px rgba(255, 240, 172, 0.4) !important;
-}
-
-/* Verbesserte Wortliste mit Cover-Ästhetik */
-.word {
-  background: rgba(25, 25, 25, 0.7);
-  border: 1px solid rgba(160, 216, 239, 0.4);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-}
-
-.word.found {
-  background: linear-gradient(to right, 
-    rgba(255, 140, 0, 0.7), 
-    rgba(255, 165, 0, 0.7)) !important;
-  border-color: var(--color-mandarin-dark) !important;
-  box-shadow: 0 0 12px rgba(255, 140, 0, 0.5) !important;
-  color: #fff !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
-}
-
-/* Realistischeres Mandarinen-Icon */
-.mandarin-icon {
-  position: absolute;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  z-index: 105;
-  top: -15px;
-  right: -15px;
-  transform: rotate(-10deg);
-  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  overflow: hidden;
-  
-  /* Schatten für Tiefenwirkung */
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-  
-  /* 3D-Effekt durch Gradienten */
-  background: radial-gradient(circle at 35% 35%, 
-    #FFA500 5%, 
-    #FF8C00 45%, 
-    #FF7800 85%);
-}
-
-/* Glanzeffekt wie bei einer echten Mandarine */
-.mandarin-icon::before {
-  content: '';
-  position: absolute;
-  width: 120%;
-  height: 120%;
-  top: -40%;
-  left: -40%;
-  background: radial-gradient(ellipse at center, 
-    rgba(255, 255, 255, 0.7) 0%, 
-    rgba(255, 255, 255, 0) 70%);
-  transform: rotate(-30deg);
-  opacity: 0.5;
-}
-
-/* Stängel und Blatt */
-.mandarin-icon::after {
-  content: '';
-  position: absolute;
-  top: 1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 14px;
-  height: 8px;
-  background: #006400;
-  border-radius: 40% 40% 0 0;
-  clip-path: polygon(
-    20% 0%, 
-    80% 0%, 
-    100% 50%, 
-    80% 100%, 
-    20% 100%, 
-    0% 50%
-  );
-}
-
-/* Hover-Animation */
-.mandarin-icon:hover {
-  transform: rotate(10deg) scale(1.15);
-  box-shadow: 0 8px 25px rgba(255, 140, 0, 0.6);
-}
-
-/* Pulsierender Schimmer beim Hover */
-.mandarin-icon:hover::before {
-  animation: mandarin-shine 2s infinite alternate;
-}
-
-@keyframes mandarin-shine {
-  from { 
-    opacity: 0.4;
-    transform: rotate(-30deg) scale(1); 
-  }
-  to { 
-    opacity: 0.7;
-    transform: rotate(-25deg) scale(1.1); 
-  }
-}
-
-/* Doppelte Mandarinen für den Startbildschirm */
-.double-mandarins {
-  position: relative;
-  width: 120px;
-  height: 70px;
-  margin: 30px auto;
-}
-
-.double-mandarins .mandarin-left,
-.double-mandarins .mandarin-right {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, 
-    #FFA500 5%, 
-    #FF8C00 45%, 
-    #FF7800 85%);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-  top: 0;
-}
-
-.double-mandarins .mandarin-left {
-  left: 10px;
-  z-index: 1;
-  animation: float-left 3s infinite alternate ease-in-out;
-}
-
-.double-mandarins .mandarin-right {
-  right: 10px;
-  z-index: 2;
-  animation: float-right 3s infinite alternate ease-in-out;
-}
-
-/* Glanzeffekt auf den Mandarinen */
-.double-mandarins .mandarin-left::before,
-.double-mandarins .mandarin-right::before {
-  content: '';
-  position: absolute;
-  width: 120%;
-  height: 120%;
-  top: -40%;
-  left: -40%;
-  background: radial-gradient(ellipse at center, 
-    rgba(255, 255, 255, 0.7) 0%, 
-    rgba(255, 255, 255, 0) 70%);
-  transform: rotate(-30deg);
-  opacity: 0.5;
-}
-
-/* Stängel */
-.double-mandarins .mandarin-left::after,
-.double-mandarins .mandarin-right::after {
-  content: '';
-  position: absolute;
-  top: 1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 12px;
-  height: 7px;
-  background: #006400;
-  border-radius: 40% 40% 0 0;
-  clip-path: polygon(
-    20% 0%, 
-    80% 0%, 
-    100% 50%, 
-    80% 100%, 
-    20% 100%, 
-    0% 50%
-  );
-}
-
-@keyframes float-left {
-  0% { transform: translateY(0) rotate(-5deg); }
-  100% { transform: translateY(-8px) rotate(5deg); }
-}
-
-@keyframes float-right {
-  0% { transform: translateY(-8px) rotate(5deg); }
-  100% { transform: translateY(0) rotate(-5deg); }
-}
-
-@keyframes move-towards-right {
-  0% { transform: translateY(0) rotate(-5deg); left: 10px; }
-  100% { transform: translateY(0) rotate(0deg); left: 30px; }
-}
-
-@keyframes move-towards-left {
-  0% { transform: translateY(-8px) rotate(5deg); right: 10px; }
-  100% { transform: translateY(0) rotate(0deg); right: 30px; }
-}
-
-@keyframes glow-ping {
-  0% { opacity: 0; transform: scale(0.5); }
-  50% { opacity: 0.8; transform: scale(1.2); }
-  100% { opacity: 0; transform: scale(1.5); }
-}
-
-/* Cover-Frame für die Overlays */
-.cover-frame {
-  max-width: 600px;
-  width: 90%;
-  padding: 30px;
-  background-color: rgba(25, 25, 25, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  position: relative;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
-}
-
-/* Cover-Titel-Styling */
-.cover-title {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  color: var(--color-cover-gold);
-  font-size: 1rem;
-  margin-bottom: 30px;
-  letter-spacing: 2px;
-  text-shadow: 0 0 10px rgba(255, 240, 172, 0.3);
-}
-
-.artist-name {
-  text-align: left;
-}
-
-.song-title {
-  text-align: right;
-}
-
-/* Cover-Footer mit goldenem Dreieck */
-.cover-footer {
-  position: absolute;
-  bottom: 20px;
-  right: 25px;
-  display: flex;
-  align-items: center;
-  color: var(--color-cover-gold);
-}
-
-/* Level-Overlay spezifische Stile */
-.level-frame {
-  max-width: 800px;
-  width: 94%;
-  padding: 40px 30px;
-  transition: all 0.5s ease-out;
-  position: relative;
-}
-
-/* Verbesserter Badge für das Level */
-.level-badge {
-  display: flex;
-  align-items: center;
-  margin: 0 auto 30px;
-  background: rgba(255, 140, 0, 0.2);
-  padding: 10px 20px;
-  border-radius: 30px;
-  width: fit-content;
-  border: 1px solid rgba(255, 140, 0, 0.3);
-  box-shadow: 0 0 15px rgba(255, 140, 0, 0.2);
-}
-
-.level-number {
-  color: var(--color-cover-gold);
-  font-size: 1rem;
-  letter-spacing: 2px;
-  margin-left: 10px;
-}
-
-/* Kleinere Version der Mandarinen für den Badge */
-.double-mandarins.small {
-  margin: 0;
-  width: 60px;
-  height: 35px;
-}
-
-.double-mandarins.small .mandarin-left,
-.double-mandarins.small .mandarin-right {
-  width: 30px;
-  height: 30px;
-}
-
-/* Lyrics-Container mit verbessertem Styling */
-.lyrics-container {
-  position: relative;
-  margin: 20px 0 40px;
-  padding: 20px 0;
-}
-
-.lyrics-container::before,
-.lyrics-container::after {
-  content: '';
-  position: absolute;
-  height: 1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 70%;
-  background: linear-gradient(90deg, 
-    transparent, 
-    var(--color-mandarin-bright), 
-    transparent);
-}
-
-.lyrics-container::before {
-  top: 0;
-}
-
-.lyrics-container::after {
-  bottom: 0;
-}
-
-/* Verbesserte Lyrics-Anzeige */
-#lyricDisplay {
-  background: rgba(25, 25, 25, 0.5);
-  padding: 30px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 140, 0, 0.2);
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
-  margin-bottom: 30px;
-  font-family: var(--lyric-font);
-  line-height: 1.7;
-  font-size: 1.2rem;
-  font-weight: 300;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.4s ease;
-}
-
-/* Bessere Hervorhebung in Lyrics */
-.highlight {
-  color: var(--color-mandarin-bright);
-  font-weight: 600;
-  background-color: rgba(0, 0, 0, 0.2);
-  padding: 2px 6px;
-  border-radius: 3px;
-  box-shadow: 0 0 8px rgba(255, 140, 0, 0.4);
-  display: inline-block;
-  animation: highlight-pulse 1.5s infinite alternate;
-}
-
-@keyframes highlight-pulse {
-  from { box-shadow: 0 0 8px rgba(255, 140, 0, 0.4); }
-  to { box-shadow: 0 0 15px rgba(255, 140, 0, 0.7); }
-}
-
-/* Verbesserte Level-Zitate */
-.level-quote {
-  font-family: var(--lyric-font);
-  font-size: 1.1rem;
-  font-style: italic;
-  margin: 15px auto 0;
-  max-width: 80%;
-  line-height: 1.5;
-  color: var(--color-turquoise);
-  padding: 15px;
-  position: relative;
-  text-align: center;
-}
-
-.level-quote::before,
-.level-quote::after {
-  content: '"';
-  font-size: 1.5rem;
-  font-family: serif;
-  position: absolute;
-  color: var(--color-cover-gold);
-  opacity: 0.7;
-}
-
-.level-quote::before {
-  top: 0;
-  left: 0;
-}
-
-.level-quote::after {
-  bottom: 0;
-  right: 0;
-}
-
-/* Responsive-Anpassungen für kleine Geräte */
-@media (max-width: 600px) {
-  .cover-title {
-    font-size: 0.7rem;
-    margin-bottom: 20px;
+  .word-list {
+    gap: 6px;
   }
   
-  .double-mandarins {
-    transform: scale(0.8);
-    margin: 15px auto;
-  }
-  
-  .cover-frame {
-    padding: 20px 15px;
-  }
-  
-  .level-frame {
-    padding: 30px 15px;
-  }
-  
-  .level-badge {
-    padding: 8px 15px;
-  }
-  
-  .level-number {
-    font-size: 0.8rem;
-  }
-  
-  #lyricDisplay {
-    padding: 20px;
-    font-size: 1rem;
-  }
-  
-  .level-quote {
-    font-size: 0.9rem;
-    max-width: 95%;
+  .vinyl-player {
+    width: 40px;
+    height: 40px;
   }
 }
 
 
-/* 
- * COVER-DESIGN ERWEITERUNGEN FÜR STYLE.CSS
- * Diese CSS-Ergänzungen am Ende deiner vorhandenen style.css einfügen
- */
-
-/* Erweiterte Farbpalette basierend auf dem Cover */
-:root {
-  /* Original-Palette bleibt erhalten */
-  
-  /* Neue Farben vom Cover */
-  --color-mandarin-bright: #FF8C00;
-  --color-mandarin-dark: #E67300;
-  --color-turquoise: #A0D8EF;
-  --color-dark-turquoise: #69B3CB;
-  --color-cover-black: #191919;
-  --color-cover-gold: #FFF0AC;
-  
-  /* Angepasste Hintergrundfarben */
-  --bg-gradient-start: var(--color-cover-black);
-  --bg-gradient-end: #282828;
-}
-
-/* Filmkorn-Overlay für das gesamte Spiel */
-body::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1000;
-  pointer-events: none;
-  opacity: 0.03; /* Sehr subtil */
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-}
-
-/* Gold-Überschriften wie im Cover */
-h1, h2 {
-  color: var(--color-cover-gold);
-  letter-spacing: 1px;
-  text-shadow: 0 0 10px rgba(255, 240, 172, 0.5);
-}
-
-/* Türkis-Akzente für UI-Elemente */
-#timer, #levelIndicator {
-  background: linear-gradient(to right, 
-    rgba(160, 216, 239, 0.2), 
-    rgba(105, 179, 203, 0.3));
-  box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
-}
-
-/* Vintage-Rahmen für das Spielfeld */
-.grid {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 12px;
-  position: relative;
-}
-
-.grid::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  z-index: -1;
-  border-radius: 12px;
-  background: linear-gradient(45deg, 
-    var(--color-mandarin-bright), 
-    transparent, 
-    var(--color-turquoise));
-  opacity: 0.2;
-  animation: borderGlow 4s infinite alternate;
-}
-
-/* Vintage-Overlay für den gesamten Spielbereich */
-.vintage-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  mix-blend-mode: overlay;
-  background: radial-gradient(
-    circle at center,
-    transparent 40%,
-    rgba(46, 49, 65, 0.1) 100%
-  );
-}
-
-/* Cover-inspirierte Buttons */
-.btn.primary {
-  background: linear-gradient(to bottom, 
-    rgba(255, 140, 0, 0.3), 
-    rgba(230, 115, 0, 0.4));
-  border-color: var(--color-mandarin-bright);
-  box-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
-}
-
-.btn.primary:hover {
-  background: linear-gradient(to bottom, 
-    rgba(255, 140, 0, 0.5), 
-    rgba(230, 115, 0, 0.6));
-  box-shadow: 0 5px 20px rgba(255, 140, 0, 0.5);
-}
-
-.btn.secondary {
-  background: linear-gradient(to bottom, 
-    rgba(160, 216, 239, 0.3), 
-    rgba(105, 179, 203, 0.4));
-  border-color: var(--color-turquoise);
-  box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
-}
-
-.btn.secondary:hover {
-  background: linear-gradient(to bottom, 
-    rgba(160, 216, 239, 0.5), 
-    rgba(105, 179, 203, 0.6));
-  box-shadow: 0 5px 20px rgba(160, 216, 239, 0.5);
-}
-
-/* Goldene Dreiecke als Navigation, inspiriert vom Cover */
-.gold-triangle {
-  width: 0;
-  height: 0;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-left: 15px solid var(--color-cover-gold);
-  display: inline-block;
-  margin-right: 10px;
-  vertical-align: middle;
-  filter: drop-shadow(0 0 5px rgba(255, 240, 172, 0.5));
-}
-
-/* Verbesserte Spielfeld-Zellen mit dezenten Mandarinentönen */
-.cell {
-  background: rgba(25, 25, 25, 0.8);
-  border: 1px solid rgba(255, 140, 0, 0.3);
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
-}
-
-.cell.selected {
-  background: rgba(255, 140, 0, 0.7);
-  border-color: var(--color-mandarin-bright);
-  box-shadow: 0 0 15px rgba(255, 140, 0, 0.5);
-}
-
-.cell.found {
-  border-color: var(--color-cover-gold) !important;
-  box-shadow: 0 0 12px rgba(255, 240, 172, 0.4) !important;
-}
-
-/* Verbesserte Wortliste mit Cover-Ästhetik */
-.word {
-  background: rgba(25, 25, 25, 0.7);
-  border: 1px solid rgba(160, 216, 239, 0.4);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-}
-
-.word.found {
-  background: linear-gradient(to right, 
-    rgba(255, 140, 0, 0.7), 
-    rgba(255, 165, 0, 0.7)) !important;
-  border-color: var(--color-mandarin-dark) !important;
-  box-shadow: 0 0 12px rgba(255, 140, 0, 0.5) !important;
-  color: #fff !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
-}
-
-/* Realistischeres Mandarinen-Icon */
-.mandarin-icon {
-  position: absolute;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  z-index: 105;
-  top: -15px;
-  right: -15px;
-  transform: rotate(-10deg);
-  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  overflow: hidden;
-  
-  /* Schatten für Tiefenwirkung */
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-  
-  /* 3D-Effekt durch Gradienten */
-  background: radial-gradient(circle at 35% 35%, 
-    #FFA500 5%, 
-    #FF8C00 45%, 
-    #FF7800 85%);
-}
-
-/* Glanzeffekt wie bei einer echten Mandarine */
-.mandarin-icon::before {
-  content: '';
-  position: absolute;
-  width: 120%;
-  height: 120%;
-  top: -40%;
-  left: -40%;
-  background: radial-gradient(ellipse at center, 
-    rgba(255, 255, 255, 0.7) 0%, 
-    rgba(255, 255, 255, 0) 70%);
-  transform: rotate(-30deg);
-  opacity: 0.5;
-}
-
-/* Stängel und Blatt */
-.mandarin-icon::after {
-  content: '';
-  position: absolute;
-  top: 1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 14px;
-  height: 8px;
-  background: #006400;
-  border-radius: 40% 40% 0 0;
-  clip-path: polygon(
-    20% 0%, 
-    80% 0%, 
-    100% 50%, 
-    80% 100%, 
-    20% 100%, 
-    0% 50%
-  );
-}
-
-/* Hover-Animation */
-.mandarin-icon:hover {
-  transform: rotate(10deg) scale(1.15);
-  box-shadow: 0 8px 25px rgba(255, 140, 0, 0.6);
-}
-
-/* Pulsierender Schimmer beim Hover */
-.mandarin-icon:hover::before {
-  animation: mandarin-shine 2s infinite alternate;
-}
-
-@keyframes mandarin-shine {
-  from { 
-    opacity: 0.4;
-    transform: rotate(-30deg) scale(1); 
-  }
-  to { 
-    opacity: 0.7;
-    transform: rotate(-25deg) scale(1.1); 
-  }
-}
-
-/* Doppelte Mandarinen für den Startbildschirm */
-.double-mandarins {
-  position: relative;
-  width: 120px;
-  height: 70px;
-  margin: 30px auto;
-}
-
-.double-mandarins .mandarin-left,
-.double-mandarins .mandarin-right {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, 
-    #FFA500 5%, 
-    #FF8C00 45%, 
-    #FF7800 85%);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-  top: 0;
-}
-
-.double-mandarins .mandarin-left {
-  left: 10px;
-  z-index: 1;
-  animation: float-left 3s infinite alternate ease-in-out;
-}
-
-.double-mandarins .mandarin-right {
-  right: 10px;
-  z-index: 2;
-  animation: float-right 3s infinite alternate ease-in-out;
-}
-
-/* Glanzeffekt auf den Mandarinen */
-.double-mandarins .mandarin-left::before,
-.double-mandarins .mandarin-right::before {
-  content: '';
-  position: absolute;
-  width: 120%;
-  height: 120%;
-  top: -40%;
-  left: -40%;
-  background: radial-gradient(ellipse at center, 
-    rgba(255, 255, 255, 0.7) 0%, 
-    rgba(255, 255, 255, 0) 70%);
-  transform: rotate(-30deg);
-  opacity: 0.5;
-}
-
-/* Stängel */
-.double-mandarins .mandarin-left::after,
-.double-mandarins .mandarin-right::after {
-  content: '';
-  position: absolute;
-  top: 1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 12px;
-  height: 7px;
-  background: #006400;
-  border-radius: 40% 40% 0 0;
-  clip-path: polygon(
-    20% 0%, 
-    80% 0%, 
-    100% 50%, 
-    80% 100%, 
-    20% 100%, 
-    0% 50%
-  );
-}
-
-@keyframes float-left {
-  0% { transform: translateY(0) rotate(-5deg); }
-  100% { transform: translateY(-8px) rotate(5deg); }
-}
-
-@keyframes float-right {
-  0% { transform: translateY(-8px) rotate(5deg); }
-  100% { transform: translateY(0) rotate(-5deg); }
-}
-
-@keyframes move-towards-right {
-  0% { transform: translateY(0) rotate(-5deg); left: 10px; }
-  100% { transform: translateY(0) rotate(0deg); left: 30px; }
-}
-
-@keyframes move-towards-left {
-  0% { transform: translateY(-8px) rotate(5deg); right: 10px; }
-  100% { transform: translateY(0) rotate(0deg); right: 30px; }
-}
-
-@keyframes glow-ping {
-  0% { opacity: 0; transform: scale(0.5); }
-  50% { opacity: 0.8; transform: scale(1.2); }
-  100% { opacity: 0; transform: scale(1.5); }
-}
-
-/* Cover-Frame für die Overlays */
-.cover-frame {
-  max-width: 600px;
-  width: 90%;
-  padding: 30px;
-  background-color: rgba(25, 25, 25, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  position: relative;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
-}
-
-/* Cover-Titel-Styling */
-.cover-title {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  color: var(--color-cover-gold);
-  font-size: 1rem;
-  margin-bottom: 30px;
-  letter-spacing: 2px;
-  text-shadow: 0 0 10px rgba(255, 240, 172, 0.3);
-}
-
-.artist-name {
-  text-align: left;
-}
-
-.song-title {
-  text-align: right;
-}
-
-/* Cover-Footer mit goldenem Dreieck */
-.cover-footer {
-  position: absolute;
-  bottom: 20px;
-  right: 25px;
-  display: flex;
-  align-items: center;
-  color: var(--color-cover-gold);
-}
-
-/* Level-Overlay spezifische Stile */
-.level-frame {
-  max-width: 800px;
-  width: 94%;
-  padding: 40px 30px;
-  transition: all 0.5s ease-out;
-  position: relative;
-}
-
-/* Verbesserter Badge für das Level */
-.level-badge {
-  display: flex;
-  align-items: center;
-  margin: 0 auto 30px;
-  background: rgba(255, 140, 0, 0.2);
-  padding: 10px 20px;
-  border-radius: 30px;
-  width: fit-content;
-  border: 1px solid rgba(255, 140, 0, 0.3);
-  box-shadow: 0 0 15px rgba(255, 140, 0, 0.2);
-}
-
-.level-number {
-  color: var(--color-cover-gold);
-  font-size: 1rem;
-  letter-spacing: 2px;
-  margin-left: 10px;
-}
-
-/* Kleinere Version der Mandarinen für den Badge */
-.double-mandarins.small {
-  margin: 0;
-  width: 60px;
-  height: 35px;
-}
-
-.double-mandarins.small .mandarin-left,
-.double-mandarins.small .mandarin-right {
-  width: 30px;
-  height: 30px;
-}
-
-/* Lyrics-Container mit verbessertem Styling */
-.lyrics-container {
-  position: relative;
-  margin: 20px 0 40px;
-  padding: 20px 0;
-}
-
-.lyrics-container::before,
-.lyrics-container::after {
-  content: '';
-  position: absolute;
-  height: 1px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 70%;
-  background: linear-gradient(90deg, 
-    transparent, 
-    var(--color-mandarin-bright), 
-    transparent);
-}
-
-.lyrics-container::before {
-  top: 0;
-}
-
-.lyrics-container::after {
-  bottom: 0;
-}
-
-/* Verbesserte Lyrics-Anzeige */
-#lyricDisplay {
-  background: rgba(25, 25, 25, 0.5);
-  padding: 30px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 140, 0, 0.2);
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
-  margin-bottom: 30px;
-  font-family: var(--lyric-font);
-  line-height: 1.7;
-  font-size: 1.2rem;
-  font-weight: 300;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.4s ease;
-}
-
-/* Bessere Hervorhebung in Lyrics */
-.highlight {
-  color: var(--color-mandarin-bright);
-  font-weight: 600;
-  background-color: rgba(0, 0, 0, 0.2);
-  padding: 2px 6px;
-  border-radius: 3px;
-  box-shadow: 0 0 8px rgba(255, 140, 0, 0.4);
-  display: inline-block;
-  animation: highlight-pulse 1.5s infinite alternate;
-}
-
-@keyframes highlight-pulse {
-  from { box-shadow: 0 0 8px rgba(255, 140, 0, 0.4); }
-  to { box-shadow: 0 0 15px rgba(255, 140, 0, 0.7); }
-}
-
-/* Verbesserte Level-Zitate */
-.level-quote {
-  font-family: var(--lyric-font);
-  font-size: 1.1rem;
-  font-style: italic;
-  margin: 15px auto 0;
-  max-width: 80%;
-  line-height: 1.5;
-  color: var(--color-turquoise);
-  padding: 15px;
-  position: relative;
-  text-align: center;
-}
-
-.level-quote::before,
-.level-quote::after {
-  content: '"';
-  font-size: 1.5rem;
-  font-family: serif;
-  position: absolute;
-  color: var(--color-cover-gold);
-  opacity: 0.7;
-}
-
-.level-quote::before {
-  top: 0;
-  left: 0;
-}
-
-.level-quote::after {
-  bottom: 0;
-  right: 0;
-}
-
-/* COVER-INTEGRATION STYLES */
-
-/* Startbildschirm mit echtem Cover als Hintergrund */
-#startScreen {
-  position: fixed;
-  background: #000;
-}
-
-#startScreen::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url('../assets/images/mandarinen_cover.jpg') center center/cover no-repeat;
-  opacity: 0.25; /* Abgedunkelt für bessere Lesbarkeit */
-  z-index: -1;
-  filter: blur(3px); /* Leichter Blur für atmosphärischen Effekt */
-  transition: all 1s ease;
-}
-
-#startScreen:hover::before {
-  opacity: 0.3; /* Leicht heller beim Hover */
-  filter: blur(2px); /* Etwas weniger Blur beim Hover */
-}
-
-/* Cover-Schattierung verstärken */
-#startScreen .cover-frame {
-  background: rgba(25, 25, 25, 0.85); /* Etwas transparenter */
-  backdrop-filter: blur(8px); /* Zusätzlicher Blur für besser Lesbarkeit */
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
-}
-
-/* Cover-Reveal Button im Spielbereich */
-.cover-reveal-button {
-  position: fixed;
-  bottom: 15px;
-  left: 15px;
-  width: 40px;
-  height: 40px;
-  background: rgba(25, 25, 25, 0.7);
-  border: 1px solid var(--color-mandarin-bright);
-  border-radius: 50%;
-  cursor: pointer;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
-  transition: all 0.3s ease;
-}
-
-.cover-reveal-button:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(255, 140, 0, 0.5);
-}
-
-.cover-reveal-button::before {
-  content: '';
-  width: 20px;
-  height: 20px;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23FF8C00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>') center/contain no-repeat;
-}
-
-/* Cover-Modal für Ansicht des vollen Covers */
-.cover-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.9);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.5s ease;
-}
-
-.cover-modal.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.cover-container {
-  position: relative;
-  max-width: 90%;
-  max-height: 90%;
-  overflow: hidden;
-  border: 1px solid var(--color-mandarin-bright);
-  box-shadow: 0 0 30px rgba(255, 140, 0, 0.5);
-  transform: scale(0.9);
-  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.cover-modal.active .cover-container {
-  transform: scale(1);
-}
-
-.cover-container img {
-  display: block;
-  max-width: 100%;
-  max-height: 80vh;
-}
-
-.cover-close {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 40px;
-  height: 40px;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 50%;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 1.5rem;
-  transform: scale(0);
-  transition: all 0.3s ease;
-}
-
-.cover-modal.active .cover-close {
-  transform: scale(1);
-}
-
-.cover-close:hover {
-  background: rgba(214, 41, 65, 0.7);
-  transform: scale(1.1);
-}
-
-/* Cover-Info */
-.cover-info {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: linear-gradient(to top, 
-    rgba(0, 0, 0, 0.8), 
-    transparent);
-  padding: 15px;
-  color: var(--color-cover-gold);
-  text-align: center;
-  transform: translateY(100%);
-  transition: transform 0.5s ease;
-}
-
-.cover-container:hover .cover-info {
-  transform: translateY(0);
-}
-
-/* Cover als animierter Hintergrund für Level-Übergänge */
-#levelOverlay::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url('../assets/images/mandarinen_cover.jpg') center center/cover no-repeat;
-  opacity: 0;
-  z-index: -1;
-  filter: blur(8px) grayscale(30%);
-  transition: opacity 1s ease;
-}
-
-#levelOverlay.show-cover::before {
-  opacity: 0.15;
-  animation: pulse-bg 5s infinite alternate;
-}
-
-@keyframes pulse-bg {
-  from { opacity: 0.1; filter: blur(8px) grayscale(30%); }
-  to { opacity: 0.2; filter: blur(6px) grayscale(10%); }
-}
-
-/* Animiertes Cover auf dem End-Screen */
-#endScreen::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url('../assets/images/mandarinen_cover.jpg') center center/cover no-repeat;
-  opacity: 0.2;
-  z-index: -1;
-  filter: blur(5px);
-  animation: end-screen-reveal 10s infinite alternate;
-}
-
-@keyframes end-screen-reveal {
-  0% { opacity: 0.1; filter: blur(8px) grayscale(50%); }
-  50% { opacity: 0.25; filter: blur(3px) grayscale(20%); }
-  100% { opacity: 0.2; filter: blur(5px) grayscale(30%); }
-}
-
-/* Vinyl-Player Animation für das Level-Overlay */
+/* ==== VINYL-PLAYER STYLES ==== */
+/* Großer Plattenspieler neben dem Songtext */
 .vinyl-player {
   position: absolute;
-  top: 30px;
-  right: 30px;
-  width: 80px;
-  height: 80px;
+  top: 50%;         /* Vertikal zentriert */
+  right: 3%;    /* Nach rechts versetzt, neben dem Text */
+  width: 100px;     /* Größe */
+  height: 100px;    /* Größe */
   z-index: 20;
-  transition: all 0.3s ease;
-  transform: rotate(-5deg);
+  transition: opacity 0.5s ease; /* NUR opacity-Transition */
   cursor: pointer;
+  opacity: 0.9;
+  /* Wichtig: transform MUSS entfernt werden, da es von JavaScript gesetzt wird */
 }
 
 .vinyl-player:hover {
-  transform: rotate(0) scale(1.1);
+  opacity: 1;
+  /* Keine transform-Eigenschaft mehr hier */
 }
 
 .vinyl-disc {
@@ -2838,39 +2290,22 @@ h1, h2 {
   align-items: center;
   justify-content: center;
   position: relative;
-  transition: transform 0.5s ease;
+  /* WICHTIG: Keine transition oder animation Eigenschaften hier */
 }
 
-.vinyl-disc.spinning {
-  animation: spin 10s linear infinite;
-}
-
-.vinyl-disc::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: repeating-radial-gradient(
-    circle at 50%,
-    transparent 0px,
-    transparent 4px,
-    rgba(255, 255, 255, 0.03) 5px,
-    rgba(255, 255, 255, 0.03) 6px
-  );
-}
+/* Wir entfernen die spinning Klasse und Animation komplett, da wir jetzt JavaScript verwenden */
+/* .vinyl-disc.spinning { ... } wird nicht mehr benötigt */
 
 .vinyl-label {
-  width: 35%;
-  height: 35%;
+  width: 38%;
+  height: 38%;
   border-radius: 50%;
   background-size: cover;
   background-position: center;
-  box-shadow: 0 0 10px rgba(0,0,0,0.6);
-  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 0 15px rgba(0,0,0,0.8);
+  border: 1px solid rgba(255,255,255,0.3);
   position: relative;
+  /* Keine Transformationen oder Transitionen hier */
 }
 
 .vinyl-label::after {
@@ -2886,93 +2321,93 @@ h1, h2 {
   border: 1px solid rgba(255,255,255,0.3);
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+/* Wir entfernen die CSS-Animation, da wir jetzt JavaScript verwenden */
+/* @keyframes continuous-spin { ... } wird nicht mehr benötigt */
 
-/* Cover-Fragmente für Split-Effekt */
-.cover-fragments {
-  pointer-events: none;
-  transition: opacity 1s ease;
-}
-
-/* Cover-Partikel */
-.cover-particle {
-  filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
-  z-index: 10;
-  transition: all 0.5s ease;
-}
-
-.cover-particle:hover {
-  transform: scale(1.2) !important;
-  filter: drop-shadow(0 0 10px rgba(255,140,0,0.7));
-}
-
-/* Bild-Zoom-Animation für das Cover im Modal */
-@keyframes image-zoom {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.1); }
-}
-
-#fullCoverImage {
-  transition: transform 0.5s ease;
-}
-
-#fullCoverImage:hover {
-  transform: scale(1.05);
-}
-
-/* Responsive-Anpassungen für kleine Geräte */
-@media (max-width: 600px) {
-  .cover-title {
-    font-size: 0.7rem;
-    margin-bottom: 20px;
-  }
-  
-  .double-mandarins {
-    transform: scale(0.8);
-    margin: 15px auto;
-  }
-  
-  .cover-frame {
-    padding: 20px 15px;
-  }
-  
-  .level-frame {
-    padding: 30px 15px;
-  }
-  
-  .level-badge {
-    padding: 8px 15px;
-  }
-  
-  .level-number {
-    font-size: 0.8rem;
+/* Plattenspieler für die mobile Ansicht */
+@media (max-width: 800px) {
+  .vinyl-player {
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    opacity: 0.8;
+    /* Keine transform-Eigenschaft */
   }
   
   #lyricDisplay {
-    padding: 20px;
-    font-size: 1rem;
-  }
-  
-  .level-quote {
-    font-size: 0.9rem;
-    max-width: 95%;
-  }
-  
-  .vinyl-player {
-    width: 60px;
-    height: 60px;
-    top: 20px;
-    right: 20px;
-  }
-  
-  .cover-fragments {
-    transform: scale(0.7) translate(-50%, -50%);
-  }
-  
-  .cover-reveal-button {
-    bottom: 80px;
+    margin-right: 70px;
+    max-width: calc(100% - 80px);
   }
 }
+
+/* Sehr kleine Geräte */
+@media (max-width: 600px) {
+  .vinyl-player {
+    top: auto;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    /* Keine transform-Eigenschaft */
+  }
+  
+  #lyricDisplay {
+    margin-right: 0;
+    max-width: 100%;
+  }
+}
+
+/* Noch kleinere Geräte */
+@media (max-width: 360px) {
+  .vinyl-player {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Das Lyric-Display mit Z-Index über dem Plattenspieler */
+#lyricDisplay {
+  position: relative;
+  z-index: 10;       /* Über dem Plattenspieler */
+  background: rgba(25, 25, 25, 0.5); /* Leicht transparent */
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.8); /* Text-Schatten für bessere Lesbarkeit */
+}
+
+/* Verbessertes Vinyl-Label */
+.vinyl-label {
+  width: 45%;        /* Größer für bessere Sichtbarkeit */
+  height: 45%;       /* Größer für bessere Sichtbarkeit */
+}
+
+/* Z-Index-Fixes für korrekte Schichtung aller Elemente */
+.overlay {
+  z-index: 1200; /* Höher als alle anderen UI-Elemente */
+}
+
+#musicToggle, 
+#soundToggle, 
+#hintButton,
+.cover-reveal-button {
+  z-index: 1000; /* Niedriger als Overlays */
+}
+
+body::after {
+  z-index: 900; /* Niedriger als UI-Elemente */
+}
+
+.memory-flash {
+  z-index: 2000; /* Höchster z-index */
+}
+
+#helpOverlay {
+  z-index: 1300;
+}
+
+.cover-modal {
+  z-index: 1500;
+}
+
+.stem-notification {
+  z-index: 1400;
+}
+
