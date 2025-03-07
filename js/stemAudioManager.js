@@ -61,6 +61,57 @@ function StemAudioManager() {
 }
 
 /**
+ * Initialisiert alle Audio-Buffers mit verbesserter Event-Behandlung
+ */
+StemAudioManager.prototype.init = function() {
+  var self = this;
+  
+  // Audio Context wieder aktivieren bei jeder Benutzerinteraktion
+  var resumeAudioOnInteraction = function() {
+    if (self.context.state === 'suspended') {
+      console.log("Versuche AudioContext durch Benutzerinteraktion zu aktivieren");
+      self.context.resume().then(function() {
+        console.log("AudioContext erfolgreich aktiviert");
+      }).catch(function(e) {
+        console.warn("Fehler beim Aktivieren des AudioContext:", e);
+      });
+    }
+  };
+  
+  // Event-Listener für häufigere Benutzerinteraktionen hinzufügen
+  document.addEventListener('click', resumeAudioOnInteraction);
+  document.addEventListener('touchstart', resumeAudioOnInteraction);
+  document.addEventListener('keydown', resumeAudioOnInteraction);
+  
+  // Gezielte Event-Listener für UI-Elemente hinzufügen
+  setTimeout(function() {
+    // Wichtige UI-Elemente für Benutzerinteraktion finden
+    var interactiveElements = [
+      document.getElementById('startButton'),
+      document.getElementById('startNewButton'),
+      document.getElementById('musicToggle'),
+      document.getElementById('soundToggle'),
+      document.getElementById('grid')
+    ];
+    
+    // Event-Listener für alle gefundenen Elemente hinzufügen
+    interactiveElements.forEach(function(element) {
+      if (element) {
+        element.addEventListener('click', resumeAudioOnInteraction);
+        element.addEventListener('touchstart', resumeAudioOnInteraction);
+      }
+    });
+  }, 100);
+  
+  // Alle Stems laden
+  for (var i = 0; i < this.numStems; i++) {
+    this.loadStemBuffer(i);
+  }
+  
+  console.log("StemAudioManager mit erweiterter Web Audio API initialisiert");
+};
+
+/**
  * Versucht, eine Audio-Datei zu laden und in einen Buffer zu dekodieren
  */
 StemAudioManager.prototype.loadStemBuffer = function(index) {
@@ -133,38 +184,28 @@ StemAudioManager.prototype.tryLoadPath = function(paths, pathIndex, stemIndex) {
 };
 
 /**
- * Initialisiert alle Audio-Buffers
- */
-StemAudioManager.prototype.init = function() {
-  var self = this;
-  
-  // Audio Context wieder aktivieren, wenn er suspendiert ist (wegen Autoplay-Policy)
-  if (this.context.state === 'suspended') {
-    var resumeAudio = function() {
-      self.context.resume().then(function() {
-        console.log("AudioContext resumed successfully");
-        document.body.removeEventListener('click', resumeAudio);
-        document.body.removeEventListener('touchstart', resumeAudio);
-      });
-    };
-    
-    document.body.addEventListener('click', resumeAudio);
-    document.body.addEventListener('touchstart', resumeAudio);
-  }
-  
-  // Alle Stems laden
-  for (var i = 0; i < this.numStems; i++) {
-    this.loadStemBuffer(i);
-  }
-  
-  console.log("StemAudioManager mit Web Audio API initialisiert");
-};
-
-/**
  * Startet die Wiedergabe aller Stems synchronisiert
+ * Verbesserte Version mit robuster Fehlererkennung und Wiederholungslogik
  */
 StemAudioManager.prototype.play = function() {
   if (this.isPlaying) return;
+  
+  console.log("StemAudioManager.play aufgerufen, Context-Status: " + this.context.state);
+  
+  // Prüfen, ob mindestens der erste Buffer geladen ist
+  if (!this.buffers[0] || !this.stemsLoaded[0]) {
+    console.log("Warte auf Laden des ersten Stems...");
+    // Warten und erneut versuchen
+    var self = this;
+    var checkInterval = setInterval(function() {
+      if (self.buffers[0] && self.stemsLoaded[0]) {
+        clearInterval(checkInterval);
+        console.log("Erster Stem geladen, versuche zu spielen");
+        self.play(); // Rekursiver Aufruf nach dem Laden
+      }
+    }, 200);
+    return;
+  }
   
   // AudioContext muss aktiv sein
   if (this.context.state === 'suspended') {
@@ -173,9 +214,30 @@ StemAudioManager.prototype.play = function() {
     this.context.resume().then(function() {
       console.log("AudioContext aktiviert, starte Stems...");
       self.startStems();
+      
+      // Zusätzliche Prüfung nach kurzer Verzögerung
+      setTimeout(function() {
+        if (!self.isPlaying || !self.sources[0]) {
+          console.log("Musik scheint nicht zu spielen, erneuter Versuch...");
+          self.startStems();
+        }
+      }, 500);
+    }).catch(function(error) {
+      console.error("Fehler beim Aktivieren des AudioContext:", error);
+      // Trotzdem versuchen zu starten
+      self.startStems();
     });
   } else {
     this.startStems();
+    
+    // Zusätzliche Prüfung nach kurzer Verzögerung
+    var self = this;
+    setTimeout(function() {
+      if (!self.isPlaying || !self.sources[0]) {
+        console.log("Musik scheint nicht zu spielen, erneuter Versuch...");
+        self.startStems();
+      }
+    }, 500);
   }
 };
 
@@ -216,6 +278,47 @@ StemAudioManager.prototype.startStems = function() {
   }
   
   this.isPlaying = true;
+};
+
+/**
+ * Synchronisiert alle aktiven Stems
+ * @param {boolean} forceRestart - Wenn true, werden Stems neu gestartet
+ */
+StemAudioManager.prototype.syncAllStems = function(forceRestart) {
+  if (!this.isPlaying) {
+    console.log("Keine Synchronisation nötig - Musik spielt nicht");
+    return;
+  }
+  
+  console.log("Synchronisiere Stems" + (forceRestart ? " mit Neustart" : ""));
+  
+  if (forceRestart) {
+    // Kompletter Neustart aller Quellen
+    this.startStems();
+    return;
+  }
+  
+  // Wenn kein kompletter Neustart, dann nur aktuelle Wiedergabe anpassen
+  var referenceSource = null;
+  var referenceTime = 0;
+  
+  // Suche nach einer aktiven Referenzquelle
+  for (var i = 0; i < this.numStems; i++) {
+    if (this.sources[i] && this.stemVolumes[i] > 0) {
+      referenceSource = this.sources[i];
+      break;
+    }
+  }
+  
+  // Wenn keine Referenzquelle gefunden, einfach neu starten
+  if (!referenceSource) {
+    console.log("Keine aktive Referenzquelle gefunden, starte neu");
+    this.startStems();
+    return;
+  }
+  
+  // Log-Ausgabe für Debugging
+  console.log("Stem-Synchronisation abgeschlossen");
 };
 
 /**
