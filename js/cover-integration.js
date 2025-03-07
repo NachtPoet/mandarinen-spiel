@@ -1,7 +1,14 @@
 /**
  * cover-integration.js - Erweiterte Interaktionen mit dem Album-Cover
  * Verbesserte Version mit großem Plattenspieler neben dem Songtext
+ * Optimierte Vinyl-Animation mit verbesserter Statusverwaltung
  */
+
+// Globale Statusvariablen für die Vinyl-Animation
+let vinylRotationAnimationId = null;
+let isVinylAnimationActive = false;
+let vinylPlayerElement = null;
+let lastProcessedOverlayVisibility = false;
 
 // Cover-Bild vorladen
 const preloadCoverImage = function() {
@@ -19,22 +26,19 @@ const isCoverLoaded = function() {
          document.getElementById('fullCoverImage').complete;
 };
 
-// Variable für die Animation-ID, damit wir sie später stoppen können
-let vinylRotationAnimationId = null;
-
+/**
+ * Erstellt einen Vinyl-Player und startet die Animation
+ */
 const createVinylPlayer = function() {
   try {
-    // Prüfen, ob ein Vinyl-Player bereits existiert und entfernen
-    const existingPlayer = document.querySelector('.vinyl-player');
-    if (existingPlayer) {
-      existingPlayer.remove();
-      
-      // Falls eine Animation läuft, diese stoppen
-      if (vinylRotationAnimationId) {
-        cancelAnimationFrame(vinylRotationAnimationId);
-        vinylRotationAnimationId = null;
-      }
+    // Wenn bereits eine aktive Animation läuft, nicht neu erstellen
+    if (isVinylAnimationActive && vinylPlayerElement) {
+      console.log('Vinyl-Animation läuft bereits, keine neue Animation wird gestartet');
+      return vinylPlayerElement;
     }
+    
+    // Bestehenden Player entfernen und Animation stoppen
+    stopVinylAnimation();
 
     // Finde den Songtext-Container
     const lyricsContainer = document.querySelector('#lyricDisplay');
@@ -51,10 +55,8 @@ const createVinylPlayer = function() {
     const vinylDisc = document.createElement('div');
     vinylDisc.className = 'vinyl-disc';
     
-    // Alle CSS-Klassen entfernen, die Animation enthalten könnten
+    // Alle CSS-Klassen und Stile zurücksetzen
     vinylDisc.classList.remove('spinning');
-    
-    // Alle Inline-Stile zurücksetzen, die die Animation beeinflussen könnten
     vinylDisc.style.animation = 'none';
     vinylDisc.style.transform = 'none';
     vinylDisc.style.transition = 'none';
@@ -63,7 +65,7 @@ const createVinylPlayer = function() {
     const coverLabel = document.createElement('div');
     coverLabel.className = 'vinyl-label';
     
-    // Setze verschiedene mögliche Pfade und eine Fallback-Farbe
+    // Setze Fallback-Farbe
     coverLabel.style.backgroundColor = '#FF8C00'; // Mandarine als Fallback
 
     // Versuche diese Pfade für das Hintergrundbild
@@ -89,38 +91,89 @@ const createVinylPlayer = function() {
     vinylDisc.appendChild(coverLabel);
     playerContainer.appendChild(vinylDisc);
     
-    // Zum Lyrics-Container hinzufügen (direkt im Container)
+    // Zum Lyrics-Container hinzufügen
     lyricsContainer.appendChild(playerContainer);
     
-    // Animation mit requestAnimationFrame starten (statt CSS-Animation)
+    // Speichere Referenz auf das erstellte Element
+    vinylPlayerElement = playerContainer;
+    
+    // Animation starten - mit einer Verzögerung um sicherzustellen,
+    // dass DOM-Aktualisierungen abgeschlossen sind
     setTimeout(() => {
-      // Rotationswinkel
-      let rotationAngle = 0;
-      
-      // Rotation pro Frame
-      const rotationSpeed = 0.5; // Anpassbar - höherer Wert = schnellere Rotation
-      
-      // Animationsfunktion
-      function animateRotation() {
-        // Winkel erhöhen
-        rotationAngle += rotationSpeed;
-        
-        // Rotation setzen - nur transform, kein CSS Animation property
-        vinylDisc.style.transform = `rotate(${rotationAngle}deg)`;
-        
-        // Nächsten Frame anfordern
-        vinylRotationAnimationId = requestAnimationFrame(animateRotation);
+      // Nur starten, wenn noch keine Animation läuft
+      if (!isVinylAnimationActive) {
+        startVinylAnimation(vinylDisc);
       }
-      
-      // Animation starten
-      vinylRotationAnimationId = requestAnimationFrame(animateRotation);
-      console.log('JavaScript-basierte Vinyl-Rotation gestartet');
     }, 500);
     
     return playerContainer;
   } catch (e) {
     console.warn('Fehler beim Erstellen des Vinyl-Players:', e);
     return null;
+  }
+};
+
+/**
+ * Startet die Vinyl-Animation mit einem eigenen, unabhängigen Frame-Loop
+ */
+const startVinylAnimation = function(vinylDisc) {
+  // Animation nur starten, wenn noch keine läuft
+  if (isVinylAnimationActive || !vinylDisc) {
+    return;
+  }
+  
+  console.log('JavaScript-basierte Vinyl-Rotation wird gestartet');
+  
+  // Status setzen
+  isVinylAnimationActive = true;
+  
+  // Rotationswinkel
+  let rotationAngle = 0;
+  
+  // Rotation pro Frame
+  const rotationSpeed = 0.5;
+  
+  // Animationsfunktion
+  function animateRotation() {
+    // Prüfen, ob das Element noch existiert
+    if (!vinylDisc || !document.body.contains(vinylDisc)) {
+      stopVinylAnimation();
+      return;
+    }
+    
+    // Winkel erhöhen
+    rotationAngle += rotationSpeed;
+    
+    // Rotation setzen
+    vinylDisc.style.transform = `rotate(${rotationAngle}deg)`;
+    
+    // Nächsten Frame anfordern, wenn die Animation noch aktiv ist
+    if (isVinylAnimationActive) {
+      vinylRotationAnimationId = requestAnimationFrame(animateRotation);
+    }
+  }
+  
+  // Animation starten
+  vinylRotationAnimationId = requestAnimationFrame(animateRotation);
+};
+
+/**
+ * Animation anhalten und Ressourcen freigeben
+ */
+const stopVinylAnimation = function() {
+  if (vinylRotationAnimationId) {
+    console.log('Vinyl-Rotation wird gestoppt');
+    cancelAnimationFrame(vinylRotationAnimationId);
+    vinylRotationAnimationId = null;
+  }
+  
+  // Status zurücksetzen
+  isVinylAnimationActive = false;
+  
+  // Vinyl-Player entfernen, wenn vorhanden
+  if (vinylPlayerElement && vinylPlayerElement.parentNode) {
+    vinylPlayerElement.parentNode.removeChild(vinylPlayerElement);
+    vinylPlayerElement = null;
   }
 };
 
@@ -274,34 +327,26 @@ const createCoverParticles = function() {
 };
 
 /**
- * Animation anhalten, wenn der Overlay nicht mehr sichtbar ist
+ * Verbesserte Methode zur Überwachung des Level-Overlays
+ * Nutzt einen einzelnen Timer und Zustandsprüfung
  */
-const stopVinylAnimation = function() {
-  if (vinylRotationAnimationId) {
-    console.log('Vinyl-Rotation wird gestoppt');
-    cancelAnimationFrame(vinylRotationAnimationId);
-    vinylRotationAnimationId = null;
-  }
-};
-
-/**
- * Warten auf den Abschluss eines Levels mit verbesserter Sicherheit
- */
-const waitForLevelCompletion = function() {
-  // Mehr Kontrolle - den Original-GameManager-Prozess nicht stören
-  const checkLevelOverlay = function() {
-    const levelOverlay = document.getElementById('levelOverlay');
+const monitorLevelOverlay = function() {
+  const levelOverlay = document.getElementById('levelOverlay');
+  
+  if (levelOverlay) {
+    const isOverlayVisible = !levelOverlay.classList.contains('hidden');
     
-    if (levelOverlay) {
-      if (!levelOverlay.classList.contains('hidden')) {
-        console.log('Level-Overlay erkannt, Cover-Funktionen werden initialisiert');
-        
+    // Nur handeln, wenn sich der Zustand geändert hat
+    if (isOverlayVisible !== lastProcessedOverlayVisibility) {
+      console.log(`Level-Overlay ist jetzt ${isOverlayVisible ? 'sichtbar' : 'versteckt'}`);
+      
+      if (isOverlayVisible) {
         // Level-Overlay wurde sichtbar
         try {
           // Cover-Hintergrund aktivieren
           levelOverlay.classList.add('show-cover');
           
-          // Warten, bevor der Vinyl-Player erstellt wird, um Konflikte zu vermeiden
+          // Verzögert Vinyl-Player erstellen
           setTimeout(() => {
             const player = createVinylPlayer();
             
@@ -321,22 +366,68 @@ const waitForLevelCompletion = function() {
                 }
               });
             }
-          }, 1500); // Längere Verzögerung für mehr Stabilität
+          }, 1000);
         } catch (e) {
           console.warn('Fehler bei Level-Abschluss-Verarbeitung:', e);
         }
       } else {
-        // Wenn Overlay versteckt ist, Animation stoppen um Ressourcen zu sparen
+        // Overlay versteckt - Animation stoppen
         stopVinylAnimation();
       }
+      
+      // Status aktualisieren
+      lastProcessedOverlayVisibility = isOverlayVisible;
     }
-    
-    // Weiteres Prüfen, aber nicht zu häufig (Performance-Gründe)
-    setTimeout(checkLevelOverlay, 1000);
-  };
+  }
   
-  // Starten der Prüfung
-  setTimeout(checkLevelOverlay, 1000);
+  // Regelmäßige Prüfung fortsetzen
+  setTimeout(monitorLevelOverlay, 1000);
+};
+
+/**
+ * Verbesserte Methode zur Überwachung des Level-Overlays
+ */
+const waitForLevelCompletion = function() {
+  // Initialen Status setzen
+  lastProcessedOverlayVisibility = false;
+  
+  // Überwachung starten
+  setTimeout(monitorLevelOverlay, 1000);
+};
+
+/**
+ * Warten auf den End-Screen
+ */
+const checkEndScreen = function() {
+  const endScreen = document.getElementById('endScreen');
+  if (endScreen && !endScreen.classList.contains('hidden')) {
+    console.log('End-Screen erkannt, Cover-Partikel werden initialisiert');
+    setTimeout(createCoverParticles, 2000);
+  } else {
+    setTimeout(checkEndScreen, 1000);
+  }
+};
+
+/**
+ * Diese Funktion optimiert die Vinyl-Player-Verwaltung
+ * Entfernt alte Observer und implementiert den verbesserten Ansatz
+ */
+const optimizeVinylPlayerHandling = function() {
+  // Bestehende Animation stoppen
+  stopVinylAnimation();
+  
+  // Vorhandene MutationObserver entfernen
+  const levelOverlay = document.getElementById('levelOverlay');
+  if (levelOverlay && window._vinylObserver) {
+    window._vinylObserver.disconnect();
+    window._vinylObserver = null;
+  }
+  
+  // Überwachung mit verbessertem Ansatz starten
+  waitForLevelCompletion();
+  
+  // Event Listener für Seitenwechsel hinzufügen
+  window.addEventListener('beforeunload', stopVinylAnimation);
 };
 
 /**
@@ -389,38 +480,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // MutationObserver zur Erkennung von Änderungen am Level-Overlay
-  const levelOverlay = document.getElementById('levelOverlay');
-  if (levelOverlay) {
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'class') {
-          if (levelOverlay.classList.contains('hidden')) {
-            // Overlay versteckt - Animation stoppen
-            stopVinylAnimation();
-          }
-        }
-      });
-    });
-    
-    // Überwachung starten
-    observer.observe(levelOverlay, { attributes: true });
-  }
-  
-  // Verbesserte Methode für Level-Abschluss-Erkennung
-  waitForLevelCompletion();
-  
-  // Cover-Partikel beim vollständigen Spielabschluss - verwendet den robusteren Polling-Ansatz
-  const checkEndScreen = function() {
-    const endScreen = document.getElementById('endScreen');
-    if (endScreen && !endScreen.classList.contains('hidden')) {
-      console.log('End-Screen erkannt, Cover-Partikel werden initialisiert');
-      setTimeout(createCoverParticles, 2000);
-    } else {
-      setTimeout(checkEndScreen, 1000);
-    }
-  };
-  
+  // End-Screen-Überwachung für Cover-Partikel
   setTimeout(checkEndScreen, 1000);
   
   // Spezielle Tastenkombination für Easteregg
@@ -489,6 +549,9 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log('GameManager.nextLevel erfolgreich erweitert');
     }
   }
+  
+  // Optimierte Vinyl-Player-Behandlung aktivieren
+  optimizeVinylPlayerHandling();
   
   // Bei Seiten-Navigation oder Entladen Animation stoppen
   window.addEventListener('beforeunload', stopVinylAnimation);
