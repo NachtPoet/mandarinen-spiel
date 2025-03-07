@@ -1,12 +1,20 @@
 /**
- * StemAudioManager - Vereinfachte Version, die alle Stems gleichzeitig abspielt
- * und nur die Lautstärke regelt. Mit automatischer Loop-Synchronisation.
+ * Verbesserte StemAudioManager-Implementierung mit Web Audio API
+ * für bessere Synchronisation auf allen Geräten (inkl. Mobilgeräte)
  */
 function StemAudioManager() {
+  // Audio Context erstellen
+  this.context = new (window.AudioContext || window.webkitAudioContext)();
+  
+  // Buffer-Quellen und Nodes für jeden Stem
+  this.buffers = new Array(6).fill(null);
+  this.sources = new Array(6).fill(null);
+  this.gainNodes = new Array(6).fill(null);
+  
   // Anzahl der Stems
   this.numStems = 6;
   
-  // Array für Audio-Elemente
+  // DOM-Audio-Elemente (nur als Fallback)
   this.stems = [
     document.getElementById('stem-piano'),
     document.getElementById('stem-bass'),
@@ -16,7 +24,7 @@ function StemAudioManager() {
     document.getElementById('stem-vocals')
   ];
   
-  // Welche Stems sind aktiv (für Lautstärke-Regelung)
+  // Welche Stems sind aktiv
   this.activeStems = 1; // Anfangs nur Piano
   
   // Flag für den Musikstatus
@@ -44,277 +52,184 @@ function StemAudioManager() {
   // Fade-Status (für Animation)
   this.fadingStems = new Set();
   
-  // Loop-Sync-Status
-  this.loopSyncInitialized = false;
+  // Startzeit und Dauer für die Synchronisation
+  this.startTime = 0;
+  this.bufferDuration = 0;
   
   // Initialisieren
   this.init();
 }
 
 /**
- * Versucht, eine Audio-Datei mit verschiedenen Pfadvarianten zu laden
- * @param {HTMLAudioElement} audioElement - Das Audio-Element
- * @param {String} filename - Der Dateiname
+ * Versucht, eine Audio-Datei zu laden und in einen Buffer zu dekodieren
  */
-StemAudioManager.prototype.tryLoadWithDifferentPaths = function(audioElement, filename, callback) {
+StemAudioManager.prototype.loadStemBuffer = function(index) {
+  var self = this;
+  var filename = this.stemFiles[index];
+  
   // Verschiedene Pfade versuchen
   var possiblePaths = [
-    'assets/audio/stems/' + filename,  // Relativer Pfad
-    './assets/audio/stems/' + filename, // Mit führendem ./
-    '/assets/audio/stems/' + filename,  // Mit führendem /
-    'https://mandarinenspiel.alexandrajanzen.de/assets/audio/stems/' + filename // Absoluter URL
+    'assets/audio/stems/' + filename,
+    './assets/audio/stems/' + filename,
+    '/assets/audio/stems/' + filename,
+    'https://mandarinenspiel.alexandrajanzen.de/assets/audio/stems/' + filename
   ];
   
-  console.log("Versuche, Stem zu laden mit Pfaden:", possiblePaths);
+  console.log("Versuche, Stem " + (index + 1) + " zu laden");
   
-  // Verwende den ersten Pfad und lade die Datei vor
-  audioElement.src = possiblePaths[0];
-  audioElement.load();
-  
-  var attemptCount = 0;
-  var self = this;
-  
-  // Bei Erfolg Callback aufrufen
-  var successHandler = function() {
-    console.log("Erfolg mit Pfad:", possiblePaths[attemptCount]);
-    audioElement.removeEventListener('canplaythrough', successHandler);
-    if (callback) callback(true);
-  };
-  
-  // Bei Fehler nächsten Pfad versuchen
-  var errorHandler = function(e) {
-    console.log("Fehler mit Pfad " + possiblePaths[attemptCount] + ":", e);
-    audioElement.removeEventListener('error', errorHandler);
-    
-    attemptCount++;
-    if (attemptCount < possiblePaths.length) {
-      console.log("Versuche nächsten Pfad:", possiblePaths[attemptCount]);
-      audioElement.src = possiblePaths[attemptCount];
-      audioElement.load();
-      
-      // Event-Handler neu hinzufügen
-      audioElement.addEventListener('canplaythrough', successHandler);
-      audioElement.addEventListener('error', errorHandler);
-    } else {
-      console.error("Alle Pfade für " + filename + " gescheitert.");
-      if (callback) callback(false);
-    }
-  };
-  
-  // Event-Handler hinzufügen
-  audioElement.addEventListener('canplaythrough', successHandler);
-  audioElement.addEventListener('error', errorHandler);
+  // Ersten Pfad versuchen
+  this.tryLoadPath(possiblePaths, 0, index);
 };
 
 /**
- * Initialisiert alle Audio-Elemente
+ * Rekursiv verschiedene Pfade für den Stem-Load versuchen
+ */
+StemAudioManager.prototype.tryLoadPath = function(paths, pathIndex, stemIndex) {
+  var self = this;
+  
+  if (pathIndex >= paths.length) {
+    console.error("Alle Pfade für Stem " + (stemIndex + 1) + " gescheitert.");
+    return;
+  }
+  
+  var path = paths[pathIndex];
+  console.log("Versuche Pfad: " + path + " für Stem " + (stemIndex + 1));
+  
+  fetch(path)
+    .then(function(response) {
+      if (!response.ok) {
+        throw new Error("HTTP Fehler: " + response.status);
+      }
+      return response.arrayBuffer();
+    })
+    .then(function(arrayBuffer) {
+      return self.context.decodeAudioData(arrayBuffer);
+    })
+    .then(function(audioBuffer) {
+      console.log("Stem " + (stemIndex + 1) + " erfolgreich geladen");
+      self.buffers[stemIndex] = audioBuffer;
+      self.stemsLoaded[stemIndex] = true;
+      
+      // Wenn es der erste Stem ist, die Dauer für alle speichern
+      if (stemIndex === 0) {
+        self.bufferDuration = audioBuffer.duration;
+        console.log("Audio-Dauer: " + self.bufferDuration + " Sekunden");
+      }
+      
+      // GainNode erstellen
+      if (!self.gainNodes[stemIndex]) {
+        self.gainNodes[stemIndex] = self.context.createGain();
+        self.gainNodes[stemIndex].connect(self.context.destination);
+      }
+      
+      // Lautstärke setzen (nur Piano hat anfangs Lautstärke > 0)
+      self.gainNodes[stemIndex].gain.value = self.stemVolumes[stemIndex];
+    })
+    .catch(function(error) {
+      console.warn("Fehler beim Laden von " + path + ": " + error.message);
+      // Nächsten Pfad versuchen
+      self.tryLoadPath(paths, pathIndex + 1, stemIndex);
+    });
+};
+
+/**
+ * Initialisiert alle Audio-Buffers
  */
 StemAudioManager.prototype.init = function() {
   var self = this;
   
-  // Prüfe, ob Audio-Elemente existieren und lade sie
-  var allStemsFound = true;
-  
-  for (var i = 0; i < this.numStems; i++) {
-    if (!this.stems[i]) {
-      console.error("Audio-Element für Stem " + (i+1) + " konnte nicht gefunden werden");
-      allStemsFound = false;
-      continue;
-    }
-    
-    // Setze Anfangslautstärke
-    this.stems[i].volume = (i === 0) ? this.volume : 0;
-    
-    // Loop-Einstellung für alle Stems
-    this.stems[i].loop = true;
-    
-    // Versuche verschiedene Pfade für jedes Stem
-    (function(index, manager) {
-      manager.tryLoadWithDifferentPaths(manager.stems[index], manager.stemFiles[index], function(success) {
-        manager.stemsLoaded[index] = success;
-        console.log("Stem " + (index+1) + " Ladestatus:", success);
+  // Audio Context wieder aktivieren, wenn er suspendiert ist (wegen Autoplay-Policy)
+  if (this.context.state === 'suspended') {
+    var resumeAudio = function() {
+      self.context.resume().then(function() {
+        console.log("AudioContext resumed successfully");
+        document.body.removeEventListener('click', resumeAudio);
+        document.body.removeEventListener('touchstart', resumeAudio);
       });
-    })(i, this);
+    };
+    
+    document.body.addEventListener('click', resumeAudio);
+    document.body.addEventListener('touchstart', resumeAudio);
   }
   
-  if (!allStemsFound) {
-    console.warn("Einige Stems fehlen. Eingeschränkte Funktionalität.");
+  // Alle Stems laden
+  for (var i = 0; i < this.numStems; i++) {
+    this.loadStemBuffer(i);
   }
   
-  console.log("StemAudioManager initialisiert");
+  console.log("StemAudioManager mit Web Audio API initialisiert");
 };
 
 /**
- * Initialisiert die Loop-Synchronisation, die automatisch
- * die Stems am Loop-Übergang synchronisiert
- */
-StemAudioManager.prototype.initLoopSynchronization = function() {
-  var self = this;
-  var lastTime = 0;
-  var loopCheckId = null;
-  var loopSyncActive = false;
-  
-  // Funktion, die den Loop-Check startet, sobald Dauer bekannt ist
-  function startLoopCheck() {
-    if (loopCheckId) {
-      clearInterval(loopCheckId);
-    }
-    
-    // Prüfen, ob die Dauer bekannt ist
-    var duration = self.stems[0].duration;
-    if (isNaN(duration) || duration === Infinity || duration === 0) {
-      // Dauer noch nicht bekannt, später erneut versuchen
-      console.log("Dauer der Audio-Datei noch nicht bekannt, warte...");
-      setTimeout(startLoopCheck, 500);
-      return;
-    }
-    
-    // Dauer gefunden, Schwellenwert für Loop-Erkennung setzen (10% der Gesamtlänge)
-    var loopThreshold = Math.min(duration * 0.1, 10); // Max. 10 Sekunden, min. 10% der Gesamtlänge
-    console.log("Loop-Synchronisation initialisiert. Audio-Länge: " + duration.toFixed(2) + "s, Erkennungsschwelle: " + loopThreshold.toFixed(2) + "s");
-    
-    // Regelmäßig auf Loop-Übergänge prüfen
-    loopCheckId = setInterval(function() {
-      if (!self.isPlaying || !self.stems[0]) return;
-      
-      var currentTime = self.stems[0].currentTime;
-      
-      // Loop-Erkennung: wenn die Zeit von nahe am Ende zu nahe am Anfang springt
-      if (lastTime > (duration - loopThreshold) && currentTime < loopThreshold) {
-        console.log("Loop-Übergang erkannt! Von " + lastTime.toFixed(2) + "s zu " + currentTime.toFixed(2) + "s");
-        
-        // Synchronisation während der ersten 500ms nach Loop-Rücksprung deaktivieren
-        if (!loopSyncActive) {
-          loopSyncActive = true;
-          
-          // Alle Stems auf die gleiche Zeit setzen
-          for (var i = 1; i < self.numStems; i++) {
-            if (self.stems[i] && !self.stems[i].paused) {
-              var beforeSync = self.stems[i].currentTime;
-              self.stems[i].currentTime = currentTime;
-              console.log("Stem " + i + " synchronisiert von " + beforeSync.toFixed(2) + "s auf " + currentTime.toFixed(2) + "s");
-            }
-          }
-          
-          // Nach einer kurzen Zeit wieder Synchronisation erlauben
-          setTimeout(function() {
-            loopSyncActive = false;
-          }, 500);
-        }
-      }
-      
-      lastTime = currentTime;
-    }, 50); // Alle 50ms prüfen (hohe Abtastrate für präzise Erkennung)
-  }
-  
-  // Loop-Check starten, sobald die Dauer bekannt ist
-  startLoopCheck();
-  
-  // Zusätzlich auf loadedmetadata-Event reagieren
-  this.stems[0].addEventListener('loadedmetadata', function() {
-    console.log("Metadaten geladen, Audio-Länge: " + self.stems[0].duration + "s");
-    startLoopCheck();
-  });
-  
-  // Falls die Datei bereits geladen ist
-  if (this.stems[0].readyState >= 1) {
-    startLoopCheck();
-  }
-};
-
-/**
- * Startet die Wiedergabe ALLER Stems (inaktive mit Lautstärke 0)
+ * Startet die Wiedergabe aller Stems synchronisiert
  */
 StemAudioManager.prototype.play = function() {
   if (this.isPlaying) return;
   
-  var self = this;
-  var startPromises = [];
+  // AudioContext muss aktiv sein
+  if (this.context.state === 'suspended') {
+    console.log("AudioContext ist suspendiert. Versuche, ihn zu aktivieren...");
+    var self = this;
+    this.context.resume().then(function() {
+      console.log("AudioContext aktiviert, starte Stems...");
+      self.startStems();
+    });
+  } else {
+    this.startStems();
+  }
+};
+
+/**
+ * Interne Methode zum Starten aller Stem-Quellen
+ */
+StemAudioManager.prototype.startStems = function() {
+  // Aktuelle Zeit als Referenzpunkt
+  this.startTime = this.context.currentTime;
   
-  console.log("Starte alle Stems gleichzeitig...");
+  console.log("Starte alle Stems synchronisiert bei: " + this.startTime);
   
-  // Alle Stems starten, egal ob aktiv oder nicht
+  // Alle vorhandenen Quellen stoppen
+  this.stopAllSources();
+  
+  // Für jeden Stem eine neue Source erstellen und starten
   for (var i = 0; i < this.numStems; i++) {
-    if (!this.stems[i] || !this.stemsLoaded[i]) continue;
-    
-    // Lautstärke setzen (nur Piano hat Anfangs Lautstärke > 0)
-    this.stems[i].volume = this.stemVolumes[i];
-    
-    // Stem starten
-    var playPromise = this.stems[i].play();
-    
-    if (playPromise !== undefined) {
-      startPromises.push(playPromise);
+    if (!this.buffers[i] || !this.stemsLoaded[i]) {
+      console.log("Stem " + (i + 1) + " ist nicht verfügbar oder nicht geladen");
+      continue;
     }
+    
+    // Source erstellen und konfigurieren
+    var source = this.context.createBufferSource();
+    source.buffer = this.buffers[i];
+    source.loop = true;
+    
+    // Mit GainNode verbinden
+    source.connect(this.gainNodes[i]);
+    
+    // Für späteren Zugriff speichern
+    this.sources[i] = source;
+    
+    // Gleichzeitig starten - perfekte Synchronisation
+    source.start(0);
+    
+    console.log("Stem " + (i + 1) + " gestartet");
   }
   
-  // Warten, bis alle Stems gestartet wurden
-  if (startPromises.length > 0) {
-    Promise.all(startPromises)
-      .then(function() {
-        console.log("Alle Stems erfolgreich gestartet");
-        self.isPlaying = true;
-        
-        // Loop-Synchronisation initialisieren
-        if (!self.loopSyncInitialized) {
-          self.initLoopSynchronization();
-          self.loopSyncInitialized = true;
-        }
-      })
-      .catch(function(error) {
-        console.warn("Einige Stems konnten nicht automatisch gestartet werden:", error);
-        
-        // Bei Fehlern (AutoPlay-Policy) einen manuellen Start-Button anzeigen
-        if (!document.getElementById('manual-play-button')) {
-          var playButton = document.createElement('button');
-          playButton.id = 'manual-play-button';
-          playButton.textContent = 'Musik starten';
-          playButton.className = 'btn primary';
-          playButton.style.position = 'fixed';
-          playButton.style.top = '20px';
-          playButton.style.left = '50%';
-          playButton.style.transform = 'translateX(-50%)';
-          playButton.style.zIndex = '1000';
-          
-          playButton.addEventListener('click', function() {
-            var restartPromises = [];
-            
-            for (var i = 0; i < self.numStems; i++) {
-              if (!self.stems[i] || !self.stemsLoaded[i]) continue;
-              
-              var restartPromise = self.stems[i].play();
-              if (restartPromise !== undefined) {
-                restartPromises.push(restartPromise);
-              }
-            }
-            
-            Promise.all(restartPromises)
-              .then(function() {
-                console.log("Alle Stems manuell gestartet");
-                self.isPlaying = true;
-                playButton.remove();
-                
-                // Loop-Synchronisation initialisieren
-                if (!self.loopSyncInitialized) {
-                  self.initLoopSynchronization();
-                  self.loopSyncInitialized = true;
-                }
-              })
-              .catch(function(err) {
-                console.error("Fehler beim manuellen Start:", err);
-              });
-          });
-          
-          document.body.appendChild(playButton);
-        }
-      });
-  } else {
-    this.isPlaying = true;
-    
-    // Loop-Synchronisation initialisieren
-    if (!this.loopSyncInitialized) {
-      this.initLoopSynchronization();
-      this.loopSyncInitialized = true;
+  this.isPlaying = true;
+};
+
+/**
+ * Stoppt alle aktiven Audio-Quellen
+ */
+StemAudioManager.prototype.stopAllSources = function() {
+  for (var i = 0; i < this.numStems; i++) {
+    if (this.sources[i]) {
+      try {
+        this.sources[i].stop();
+      } catch (e) {
+        // Ignorieren (kann auftreten, wenn Source bereits gestoppt ist)
+      }
+      this.sources[i] = null;
     }
   }
 };
@@ -323,16 +238,9 @@ StemAudioManager.prototype.play = function() {
  * Pausiert alle Stems
  */
 StemAudioManager.prototype.pause = function() {
-  for (var i = 0; i < this.numStems; i++) {
-    if (this.stems[i] && !this.stems[i].paused) {
-      try {
-        this.stems[i].pause();
-      } catch (e) {
-        console.warn("Konnte Stem nicht pausieren:", e);
-      }
-    }
-  }
+  if (!this.isPlaying) return;
   
+  this.stopAllSources();
   this.isPlaying = false;
   console.log("Alle Stems pausiert");
 };
@@ -347,7 +255,7 @@ StemAudioManager.prototype.activateStem = function(stemIndex) {
     return false; // Ungültiger Index
   }
   
-  if (!this.stems[stemIndex] || !this.stemsLoaded[stemIndex]) {
+  if (!this.buffers[stemIndex] || !this.stemsLoaded[stemIndex] || !this.gainNodes[stemIndex]) {
     console.warn("Stem " + stemIndex + " ist nicht verfügbar oder nicht geladen");
     return false;
   }
@@ -363,51 +271,22 @@ StemAudioManager.prototype.activateStem = function(stemIndex) {
   }
   
   console.log("Aktiviere Stem " + stemIndex + " (Lautstärke hochfahren)");
-  
-  var stem = this.stems[stemIndex];
-  var self = this;
   this.fadingStems.add(stemIndex);
   
-  // Sicherstellen, dass der Stem läuft (sollte er bereits, aber zur Sicherheit)
-  if (stem.paused && this.isPlaying) {
-    try {
-      var playPromise = stem.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(function(e) {
-          console.warn("Konnte Stem nicht starten:", e);
-          self.fadingStems.delete(stemIndex);
-        });
-      }
-    } catch (e) {
-      console.warn("Fehler beim Starten des Stems:", e);
-      this.fadingStems.delete(stemIndex);
-      return false;
-    }
-  }
+  // Aktuelle Zeit
+  var currentTime = this.context.currentTime;
   
-  // Fade-In Funktion
-  var startTime = null;
-  var duration = 1500; // 1.5 Sekunden
+  // Langsames Fade-In über 1.5 Sekunden
+  this.gainNodes[stemIndex].gain.setValueAtTime(0, currentTime);
+  this.gainNodes[stemIndex].gain.linearRampToValueAtTime(this.volume, currentTime + 1.5);
   
-  function fadeIn(timestamp) {
-    if (!startTime) startTime = timestamp;
-    
-    var elapsed = timestamp - startTime;
-    var progress = Math.min(elapsed / duration, 1);
-    
-    // Lautstärke sanft erhöhen
-    stem.volume = progress * self.volume;
-    self.stemVolumes[stemIndex] = stem.volume; 
-    
-    if (progress < 1) {
-      requestAnimationFrame(fadeIn);
-    } else {
-      console.log("Stem " + stemIndex + " vollständig aktiviert");
-      self.fadingStems.delete(stemIndex);
-    }
-  }
-  
-  requestAnimationFrame(fadeIn);
+  // Nach dem Fade-In Statusvariablen aktualisieren
+  var self = this;
+  setTimeout(function() {
+    self.stemVolumes[stemIndex] = self.volume;
+    self.fadingStems.delete(stemIndex);
+    console.log("Stem " + stemIndex + " vollständig aktiviert");
+  }, 1500);
   
   // Aktive Stems-Zahl aktualisieren
   this.activeStems = Math.max(this.activeStems, stemIndex + 1);
@@ -416,60 +295,31 @@ StemAudioManager.prototype.activateStem = function(stemIndex) {
 };
 
 /**
- * Aktiviert den nächsten Stem
- * @returns {boolean} True wenn ein neuer Stem aktiviert wurde, sonst False
- */
-StemAudioManager.prototype.activateNextStem = function() {
-  if (this.activeStems >= this.numStems) {
-    return false; // Alle Stems bereits aktiv
-  }
-  
-  return this.activateStem(this.activeStems);
-};
-
-/**
  * Setzt alle Stems außer dem ersten (Klavier) zurück
  */
 StemAudioManager.prototype.resetToBaseStem = function() {
   console.log("Setze Stems zurück auf Grundzustand (nur Piano)");
   
-  // Alle Stems außer Klavier auf 0 setzen
+  // Aktuelle Zeit
+  var currentTime = this.context.currentTime;
+  
+  // Alle Stems außer Klavier ausblenden
   for (var i = 1; i < this.numStems; i++) {
-    if (!this.stems[i]) continue;
+    if (!this.gainNodes[i]) continue;
     
-    // Bereits laufende Fades für diesen Stem abbrechen
-    this.fadingStems.delete(i);
+    // Fade-Out über 1 Sekunde
+    this.gainNodes[i].gain.setValueAtTime(this.stemVolumes[i], currentTime);
+    this.gainNodes[i].gain.linearRampToValueAtTime(0, currentTime + 1);
     
-    (function(index, manager) {
-      // Nur wenn der Stem aktiv ist (Lautstärke > 0)
-      if (manager.stems[index].volume <= 0) return;
-      
-      // Fade-Out Funktion
-      var startVolume = manager.stems[index].volume;
-      var startTime = null;
-      var duration = 1000; // 1 Sekunde
-      
-      manager.fadingStems.add(index);
-      
-      function fadeOut(timestamp) {
-        if (!startTime) startTime = timestamp;
-        
-        var elapsed = timestamp - startTime;
-        var progress = Math.min(elapsed / duration, 1);
-        
-        // Lautstärke sanft verringern
-        manager.stems[index].volume = startVolume * (1 - progress);
-        manager.stemVolumes[index] = manager.stems[index].volume;
-        
-        if (progress < 1) {
-          requestAnimationFrame(fadeOut);
-        } else {
-          manager.fadingStems.delete(index);
-        }
-      }
-      
-      requestAnimationFrame(fadeOut);
-    })(i, this);
+    // Status aktualisieren
+    this.stemVolumes[i] = 0;
+  }
+  
+  // Den Piano-Stem auf volle Lautstärke setzen
+  if (this.gainNodes[0]) {
+    this.gainNodes[0].gain.setValueAtTime(this.stemVolumes[0], currentTime);
+    this.gainNodes[0].gain.linearRampToValueAtTime(this.volume, currentTime + 0.5);
+    this.stemVolumes[0] = this.volume;
   }
   
   // Aktive Stems auf 1 zurücksetzen (nur Klavier)
@@ -489,10 +339,11 @@ StemAudioManager.prototype.setVolume = function(volume) {
     
     // Lautstärke aller derzeit aktiven Stems proportional anpassen
     for (var i = 0; i < this.numStems; i++) {
-      if (this.stems[i] && this.stemVolumes[i] > 0) {
-        // Neue Lautstärke: proportional zur bisherigen
-        this.stems[i].volume = this.stemVolumes[i] * ratio;
-        this.stemVolumes[i] = this.stems[i].volume;
+      if (this.gainNodes[i] && this.stemVolumes[i] > 0) {
+        // Neue Lautstärke proportional zur bisherigen setzen
+        var newVolume = this.stemVolumes[i] * ratio;
+        this.gainNodes[i].gain.setValueAtTime(newVolume, this.context.currentTime);
+        this.stemVolumes[i] = newVolume;
       }
     }
   }
@@ -502,12 +353,18 @@ StemAudioManager.prototype.setVolume = function(volume) {
  * Gibt Ressourcen frei
  */
 StemAudioManager.prototype.dispose = function() {
+  this.pause();
   this.fadingStems.clear();
   
+  // GainNodes trennen
   for (var i = 0; i < this.numStems; i++) {
-    if (this.stems[i]) {
-      this.stems[i].pause();
-      this.stems[i].src = '';
+    if (this.gainNodes[i]) {
+      this.gainNodes[i].disconnect();
     }
+  }
+  
+  // AudioContext schließen
+  if (this.context && this.context.state !== 'closed') {
+    this.context.close();
   }
 };

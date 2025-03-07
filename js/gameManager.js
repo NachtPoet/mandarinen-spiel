@@ -25,6 +25,13 @@ class GameManager {
     this.timerInterval = null;
 
     this.storageKey = 'mandarinenGameProgress';
+    
+    // Geräteerkennung für mobile Optimierungen
+    this.isMobileDevice = this.detectMobileDevice();
+    
+    if (this.isMobileDevice) {
+      console.log("Mobiles Gerät erkannt - aktiviere optimierte Audio-Behandlung");
+    }
 
     this.domElements = this.getDomElements();
 
@@ -38,6 +45,12 @@ class GameManager {
     document.body.appendChild(this.audioManager.bgMusic);
 
     initStarField();
+  }
+
+  // Methode zur Erkennung mobiler Geräte
+  detectMobileDevice() {
+    var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
   }
 
   // Getter für currentLevelIndex
@@ -127,61 +140,194 @@ class GameManager {
       this.domElements.rewardBox.addEventListener("click", () => this.openReward());
     }
 
+    // Event-Listener für Audio-Probleme hinzufügen, wenn es ein mobiles Gerät ist
+    if (this.isMobileDevice) {
+      this.initMobileAudioListeners();
+    }
+
     // Cheats für Entwicklung und Tests
     document.addEventListener("keydown", (e) => {
-  if (e.key === "L" && e.shiftKey) {
-    e.preventDefault();
-    console.log("Debug: Level-Skip aktiviert");
-    
-    // Alle Wörter als gefunden markieren und showLevelComplete auslösen
-    const remainingWords = this.targetWords.filter(word => !this.foundWords.has(word));
-    if (remainingWords.length > 0) {
-      console.log("Debug: Markiere alle verbliebenden Wörter als gefunden");
-      
-      // Workaround: Jedes verbleibende Wort mit geringem Zeitabstand als gefunden markieren
-      let delay = 0;
-      remainingWords.forEach(word => {
-        setTimeout(() => {
-          // Simuliere das Finden des Wortes
-          this.foundWords.add(word);
-          
-          // UI aktualisieren
-          let wordEl = document.getElementById("word-" + word);
-          if (wordEl) {
-            wordEl.classList.add("found");
-            wordEl.classList.add("word-just-found");
-            setTimeout(() => wordEl.classList.remove("word-just-found"), 700);
-            
-            if (this.currentDifficulty === "loose") {
-              wordEl.textContent = word;
-            }
-          }
-          
-          // Fortschrittsbalken aktualisieren
-          updateProgressBar(this.foundWords.size, this.targetWords.length, this.domElements.progressBar);
-          
-          // Sound abspielen
-          this.audioManager.playSound('wordFound');
-          
-          // Level als abgeschlossen markieren, wenn alle Wörter gefunden wurden
-          if (this.foundWords.size === this.targetWords.length) {
-            console.log("Debug: Level abgeschlossen durch Debug-Skip");
-            this.levelPending = true;
-            
-            // 800ms Verzögerung wie im normalen Spielablauf
-            setTimeout(() => this.showLevelComplete(), 800);
-          }
-        }, delay);
+      if (e.key === "L" && e.shiftKey) {
+        e.preventDefault();
+        console.log("Debug: Level-Skip aktiviert");
         
-        // Verzögere das nächste Wort um 300ms
-        delay += 300;
-      });
-    } else if (this.currentLevelIndex >= this.levels.length - 1) {
-      // Wenn wir im letzten Level sind, direkt das Ende anzeigen
-      this.showLevelComplete();
+        // Alle Wörter als gefunden markieren und showLevelComplete auslösen
+        const remainingWords = this.targetWords.filter(word => !this.foundWords.has(word));
+        if (remainingWords.length > 0) {
+          console.log("Debug: Markiere alle verbliebenden Wörter als gefunden");
+          
+          // Workaround: Jedes verbleibende Wort mit geringem Zeitabstand als gefunden markieren
+          let delay = 0;
+          remainingWords.forEach(word => {
+            setTimeout(() => {
+              // Simuliere das Finden des Wortes
+              this.foundWords.add(word);
+              
+              // UI aktualisieren
+              let wordEl = document.getElementById("word-" + word);
+              if (wordEl) {
+                wordEl.classList.add("found");
+                wordEl.classList.add("word-just-found");
+                setTimeout(() => wordEl.classList.remove("word-just-found"), 700);
+                
+                if (this.currentDifficulty === "loose") {
+                  wordEl.textContent = word;
+                }
+              }
+              
+              // Fortschrittsbalken aktualisieren
+              updateProgressBar(this.foundWords.size, this.targetWords.length, this.domElements.progressBar);
+              
+              // Sound abspielen
+              this.audioManager.playSound('wordFound');
+              
+              // Level als abgeschlossen markieren, wenn alle Wörter gefunden wurden
+              if (this.foundWords.size === this.targetWords.length) {
+                console.log("Debug: Level abgeschlossen durch Debug-Skip");
+                this.levelPending = true;
+                
+                // 800ms Verzögerung wie im normalen Spielablauf
+                setTimeout(() => this.showLevelComplete(), 800);
+              }
+            }, delay);
+            
+            // Verzögere das nächste Wort um 300ms
+            delay += 300;
+          });
+        } else if (this.currentLevelIndex >= this.levels.length - 1) {
+          // Wenn wir im letzten Level sind, direkt das Ende anzeigen
+          this.showLevelComplete();
+        }
+      }
+    });
+  }
+
+  // Neue Methode: Mobile-spezifische Audio-Event-Listener initialisieren
+  initMobileAudioListeners() {
+    // Alle Audio-Elemente im Dokument abrufen
+    const audioElements = document.querySelectorAll('audio');
+    
+    audioElements.forEach(audio => {
+      // Event-Listener für verschiedene Audio-Probleme hinzufügen
+      audio.addEventListener('stalled', () => this.handleAudioStall(audio));
+      audio.addEventListener('error', (e) => this.handleAudioError(audio, e));
+      audio.addEventListener('waiting', () => this.handleAudioWaiting(audio));
+      
+      // Qualitätsoptimierungen für mobile Browser
+      if (typeof audio.mozCacheStream !== 'undefined') {
+        // Firefox Mobile-spezifische Einstellungen
+        audio.mozPreservesPitch = false;
+      }
+      
+      // Preload-Einstellung auf 'auto' forcieren
+      audio.preload = "auto";
+    });
+    
+    // Globaler Listener für Web Audio API, falls verwendet
+    if (this.stemAudioManager.context) {
+      // Auf Audio-Kontext-Unterbrechungen reagieren
+      this.stemAudioManager.context.onstatechange = () => {
+        console.log("Audio-Kontext Statusänderung:", this.stemAudioManager.context.state);
+        
+        if (this.stemAudioManager.context.state === 'interrupted' || 
+            this.stemAudioManager.context.state === 'suspended') {
+          // Versuchen, den Kontext wieder zu aktivieren
+          this.stemAudioManager.context.resume().then(() => {
+            console.log("Audio-Kontext wieder aktiviert");
+            // Synchronisation erzwingen
+            if (this.stemAudioManager.syncAllStems) {
+              setTimeout(() => this.stemAudioManager.syncAllStems(true), 100);
+            }
+          }).catch(e => console.warn("Fehler beim Wiederaktivieren des Audio-Kontexts:", e));
+        }
+      };
     }
   }
-});
+
+  // Neue Methode: Behandlung von Audio-Verzögerungen (stalled event)
+  handleAudioStall(audioElement) {
+    console.log("Audio-Element verzögert:", audioElement.id);
+    
+    // Versuch, das Element neu zu starten
+    if (this.stemAudioManager && this.stemAudioManager.isPlaying) {
+      // Kurze Verzögerung
+      setTimeout(() => {
+        try {
+          // Zeit neu synchronisieren, wenn möglich
+          if (this.stemAudioManager.stems && this.stemAudioManager.stems[0] && 
+              !this.stemAudioManager.stems[0].paused) {
+            audioElement.currentTime = this.stemAudioManager.stems[0].currentTime;
+          }
+          
+          // Neu starten, wenn pausiert
+          if (audioElement.paused) {
+            audioElement.play().catch(e => console.warn("Fehler beim Neustart:", e));
+          }
+        } catch (e) {
+          console.warn("Fehler bei der Audio-Wiederherstellung:", e);
+        }
+      }, 100);
+    }
+  }
+
+  // Neue Methode: Behandlung von Audio-Fehlern
+  handleAudioError(audioElement, error) {
+    console.warn("Audio-Fehler aufgetreten:", error, audioElement.id);
+    
+    // Bei nicht behebbaren Fehlern versuchen, das Audio neu zu laden
+    setTimeout(() => {
+      try {
+        const src = audioElement.src;
+        audioElement.src = "";
+        audioElement.load();
+        audioElement.src = src;
+        audioElement.load();
+        
+        if (this.stemAudioManager && this.stemAudioManager.isPlaying) {
+          audioElement.play().catch(e => console.warn("Fehler beim Neustart nach Fehler:", e));
+        }
+      } catch (e) {
+        console.warn("Fehler bei der Audio-Wiederherstellung nach Fehler:", e);
+      }
+    }, 500);
+  }
+
+  // Neue Methode: Behandlung von Audio-Wartezuständen (buffering)
+  handleAudioWaiting(audioElement) {
+    console.log("Audio-Element buffert:", audioElement.id);
+    
+    // Bei lang anhaltendem Buffering versuchen, die Wiedergabe fortzusetzen
+    const bufferingTimeout = setTimeout(() => {
+      // Wenn das Element immer noch im Wartezustand ist
+      if (audioElement.readyState < 3) {
+        console.log("Lang anhaltendes Buffering, versuche Wiederherstellung:", audioElement.id);
+        
+        // Synchronisation mit dem ersten Stem versuchen
+        if (this.stemAudioManager && this.stemAudioManager.stems && 
+            this.stemAudioManager.stems[0] && !this.stemAudioManager.stems[0].paused) {
+          
+          try {
+            // Aktuelle Zeit vom ersten Stem übernehmen
+            audioElement.currentTime = this.stemAudioManager.stems[0].currentTime;
+            
+            // Wiedergabe erzwingen
+            if (audioElement.paused) {
+              audioElement.play().catch(e => console.warn("Fehler beim Fortsetzten der Wiedergabe:", e));
+            }
+          } catch (e) {
+            console.warn("Fehler bei der Buffering-Wiederherstellung:", e);
+          }
+        }
+      }
+    }, 3000); // 3 Sekunden Wartezeit für Buffering
+    
+    // Event-Listener für das Ende des Wartezustands
+    const playingHandler = () => {
+      clearTimeout(bufferingTimeout);
+      audioElement.removeEventListener('playing', playingHandler);
+    };
+    
+    audioElement.addEventListener('playing', playingHandler);
   }
 
   openReward() {
@@ -253,8 +399,32 @@ class GameManager {
     this.timerInterval = setInterval(() => this.updateTimerDisplay(), 1000);
     this.initLevel();
     
-    // Stem-Audio starten (nach Benutzerinteraktion)
-    this.stemAudioManager.play();
+    // Spezielle Behandlung für Mobilgeräte
+    if (this.isMobileDevice) {
+      // Falls der StemAudioManager eine Mobile-Option unterstützt
+      if (typeof this.stemAudioManager.setMobileOptions === 'function') {
+        this.stemAudioManager.setMobileOptions(true);
+      }
+      
+      // Audio Context aktivieren falls vorhanden
+      if (this.stemAudioManager.context && 
+          this.stemAudioManager.context.state === 'suspended') {
+        this.stemAudioManager.context.resume();
+      }
+      
+      // Bei mobilen Geräten verzögert starten, um sicherzustellen, dass UI bereit ist
+      setTimeout(() => {
+        this.stemAudioManager.play();
+        
+        // Nach dem Start eine zusätzliche Synchronisation erzwingen
+        if (typeof this.stemAudioManager.syncAllStems === 'function') {
+          setTimeout(() => this.stemAudioManager.syncAllStems(true), 500);
+        }
+      }, 100);
+    } else {
+      // Stem-Audio direkt starten (nach Benutzerinteraktion)
+      this.stemAudioManager.play();
+    }
     
     this.saveGameProgress();
   }
@@ -280,9 +450,22 @@ class GameManager {
 
     this.initLevel();
     
-    // Stem-Audio starten
+    // Stem-Audio zurücksetzen und starten
     this.stemAudioManager.resetToBaseStem();
-    this.stemAudioManager.play();
+    
+    // Bei Mobilgeräten verzögert starten und Synchronisation erzwingen
+    if (this.isMobileDevice) {
+      setTimeout(() => {
+        this.stemAudioManager.play();
+        
+        // Nach dem Start eine zusätzliche Synchronisation erzwingen
+        if (typeof this.stemAudioManager.syncAllStems === 'function') {
+          setTimeout(() => this.stemAudioManager.syncAllStems(true), 500);
+        }
+      }, 100);
+    } else {
+      this.stemAudioManager.play();
+    }
 
     this.resetGameProgress();
     this.saveGameProgress();
@@ -344,9 +527,6 @@ class GameManager {
     renderGrid(this.grid, this.gridSize, this.domElements.grid);
     renderWordList(this.targetWords, this.foundWords, this.currentDifficulty, this.domElements.wordList);
     this.addCellListeners();
-    
-    // Alte Musik-Routine entfernt:
-    // this.audioManager.setMusicForLevel(this.currentLevelIndex);
 
     if (this.currentLevelIndex > 0) {
       // Flash-Effekt mit nur Sound-Effekt
@@ -356,6 +536,11 @@ class GameManager {
         flash.style.animation = 'flash 1.5s forwards';
         this.audioManager.playSound('flash');
       }, 10);
+    }
+    
+    // Bei Mobilgeräten eine Synchronisation erzwingen
+    if (this.isMobileDevice && typeof this.stemAudioManager.syncAllStems === 'function') {
+      setTimeout(() => this.stemAudioManager.syncAllStems(true), 300);
     }
   }
 
@@ -543,87 +728,93 @@ class GameManager {
     return (minDist <= threshold) ? nearest : null;
   }
 
+  checkSelectedWord() {
+    if (this.selectedCells.length === 0 || this.levelPending) return;
 
-checkSelectedWord() {
-  if (this.selectedCells.length === 0 || this.levelPending) return;
+    const word = this.selectedCells.map(c => c.letter).join("");
+    const reversed = this.selectedCells.map(c => c.letter).reverse().join("");
 
-  const word = this.selectedCells.map(c => c.letter).join("");
-  const reversed = this.selectedCells.map(c => c.letter).reverse().join("");
+    if (this.targetWords.includes(word) || this.targetWords.includes(reversed)) {
+      const foundWord = this.targetWords.includes(word) ? word : reversed;
 
-  if (this.targetWords.includes(word) || this.targetWords.includes(reversed)) {
-    const foundWord = this.targetWords.includes(word) ? word : reversed;
-
-    if (!this.foundWords.has(foundWord)) {
-      this.foundWords.add(foundWord);
-      
-      // Stem-Index für das Wort bestimmen
-      const wordIndex = this.targetWords.indexOf(foundWord);
-      const stemIndex = (wordIndex >= 0 && wordIndex < 5) ? wordIndex + 1 : 0;
-
-      // Jede Zelle markieren
-      this.selectedCells.forEach(c => {
-        // Standard-Klasse "found" hinzufügen
-        c.el.classList.add("found");
+      if (!this.foundWords.has(foundWord)) {
+        this.foundWords.add(foundWord);
         
-        // Falls ein Stem-Index existiert, diesen als Datenattribut setzen
-        if (stemIndex > 0) {
-          c.el.setAttribute('data-stem', stemIndex);
+        // Stem-Index für das Wort bestimmen
+        const wordIndex = this.targetWords.indexOf(foundWord);
+        const stemIndex = (wordIndex >= 0 && wordIndex < 5) ? wordIndex + 1 : 0;
+
+        // Jede Zelle markieren
+        this.selectedCells.forEach(c => {
+          // Standard-Klasse "found" hinzufügen
+          c.el.classList.add("found");
           
-          // Prüfen, ob die Zelle bereits Teil eines anderen Wortes ist
-          if (c.el.hasAttribute('data-word')) {
-            c.el.classList.add('multi-word');
+          // Falls ein Stem-Index existiert, diesen als Datenattribut setzen
+          if (stemIndex > 0) {
+            c.el.setAttribute('data-stem', stemIndex);
+            
+            // Prüfen, ob die Zelle bereits Teil eines anderen Wortes ist
+            if (c.el.hasAttribute('data-word')) {
+              c.el.classList.add('multi-word');
+            }
+            
+            // Aktuelles Wort der Zelle zuordnen
+            c.el.setAttribute('data-word', foundWord);
           }
           
-          // Aktuelles Wort der Zelle zuordnen
-          c.el.setAttribute('data-word', foundWord);
+          // Pulse-Animation
+          c.el.style.animation = "none";
+          setTimeout(() => {
+            c.el.style.animation = "pulse 0.6s ease-in-out, cell-glow 1.5s infinite alternate";
+          }, 5);
+        });
+
+        let wordEl = document.getElementById("word-" + foundWord);
+        if (wordEl) {
+          wordEl.classList.add("found");
+          wordEl.classList.add("word-just-found");
+          setTimeout(() => wordEl.classList.remove("word-just-found"), 700);
+          
+          if (this.currentDifficulty === "loose") {
+            wordEl.textContent = foundWord;
+          }
         }
+
+        this.audioManager.playSound('wordFound');
         
-        // Pulse-Animation
-        c.el.style.animation = "none";
-        setTimeout(() => {
-          c.el.style.animation = "pulse 0.6s ease-in-out, cell-glow 1.5s infinite alternate";
-        }, 5);
-      });
-
-      let wordEl = document.getElementById("word-" + foundWord);
-      if (wordEl) {
-        wordEl.classList.add("found");
-        wordEl.classList.add("word-just-found");
-        setTimeout(() => wordEl.classList.remove("word-just-found"), 700);
-        
-        if (this.currentDifficulty === "loose") {
-          wordEl.textContent = foundWord;
-        }
-      }
-
-      this.audioManager.playSound('wordFound');
-      
-      // Stem-Audio basierend auf Wortposition aktualisieren
-      if (wordIndex >= 0 && wordIndex < 5) {
-        this.stemAudioManager.activateStem(stemIndex);
-        const stemName = getStemName(stemIndex);
-        showStemActivation(stemName, stemIndex);
-      }
-
-      createConfetti(5);
-
-      updateProgressBar(this.foundWords.size, this.targetWords.length, this.domElements.progressBar);
-
-      if (this.foundWords.size === this.targetWords.length) {
-        console.log("Alle Wörter gefunden!");
-
-        if (this.hintsUsed === 0) {
-          this.domElements.epicBadge.classList.add('visible');
+        // Stem-Audio basierend auf Wortposition aktualisieren
+        if (wordIndex >= 0 && wordIndex < 5) {
+          this.stemAudioManager.activateStem(stemIndex);
+          const stemName = getStemName(stemIndex);
+          showStemActivation(stemName, stemIndex);
+          
+          // Bei Mobilgeräten nach Stem-Aktivierung eine Synchronisation erzwingen
+          if (this.isMobileDevice && typeof this.stemAudioManager.syncAllStems === 'function') {
+            // Kurze Verzögerung für die Animation
+            setTimeout(() => {
+              this.stemAudioManager.syncAllStems(false);
+            }, 1000);
+          }
         }
 
-        this.levelPending = true;
+        createConfetti(5);
 
-        setTimeout(() => this.showLevelComplete(), 800);
+        updateProgressBar(this.foundWords.size, this.targetWords.length, this.domElements.progressBar);
+
+        if (this.foundWords.size === this.targetWords.length) {
+          console.log("Alle Wörter gefunden!");
+
+          if (this.hintsUsed === 0) {
+            this.domElements.epicBadge.classList.add('visible');
+          }
+
+          this.levelPending = true;
+
+          setTimeout(() => this.showLevelComplete(), 800);
+        }
       }
     }
   }
-}
-
 
   showLevelComplete() {
     console.log("Zeige Level-Abschluss");
@@ -705,6 +896,14 @@ checkSelectedWord() {
     // Stems auf Grundzustand zurücksetzen (nur Klavier)
     this.stemAudioManager.resetToBaseStem();
 
+    // Bei Mobilgeräten zusätzliche Synchronisation erzwingen
+    if (this.isMobileDevice && typeof this.stemAudioManager.syncAllStems === 'function') {
+      // Kurze Verzögerung, damit die UI-Änderungen abgeschlossen sind
+      setTimeout(() => {
+        this.stemAudioManager.syncAllStems(true);
+      }, 200);
+    }
+
     this.currentLevelIndex++;  // Hier wird der Setter verwendet, der die DOM-Elemente aktualisiert
 
     if (this.currentLevelIndex < this.levels.length) {
@@ -729,6 +928,13 @@ checkSelectedWord() {
     
     // Stems zurücksetzen
     this.stemAudioManager.resetToBaseStem();
+    
+    // Bei Mobilgeräten zusätzliche Synchronisation erzwingen
+    if (this.isMobileDevice && typeof this.stemAudioManager.syncAllStems === 'function') {
+      setTimeout(() => {
+        this.stemAudioManager.syncAllStems(true);
+      }, 200);
+    }
 
     this.saveGameProgress();
   }
@@ -740,6 +946,13 @@ checkSelectedWord() {
     // Auch den Stem-Manager steuern
     if (musicEnabled) {
       this.stemAudioManager.play();
+      
+      // Bei Mobilgeräten erzwingen wir eine Synchronisation
+      if (this.isMobileDevice && typeof this.stemAudioManager.syncAllStems === 'function') {
+        setTimeout(() => {
+          this.stemAudioManager.syncAllStems(true);
+        }, 300);
+      }
     } else {
       this.stemAudioManager.pause();
     }
