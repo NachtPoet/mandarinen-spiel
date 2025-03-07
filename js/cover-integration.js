@@ -14,7 +14,7 @@ let lastProcessedOverlayVisibility = false;
 const preloadCoverImage = function() {
   try {
     const coverImg = new Image();
-    coverImg.src = '../assets/images/mandarinen_cover.jpg';
+    coverImg.src = 'https://mandarinenspiel.alexandrajanzen.de/assets/images/mandarinen_cover.jpg';
   } catch (e) {
     console.warn('Cover-Bild konnte nicht vorgeladen werden:', e);
   }
@@ -70,10 +70,10 @@ const createVinylPlayer = function() {
 
     // Versuche diese Pfade für das Hintergrundbild
     const coverUrl = [
-      '../assets/images/mandarinen_cover.jpg',
-      './assets/images/mandarinen_cover.jpg',
-      'assets/images/mandarinen_cover.jpg', 
-      '/assets/images/mandarinen_cover.jpg'
+      'https://mandarinenspiel.alexandrajanzen.de/assets/images/mandarinen_cover.jpg',
+      'https://mandarinenspiel.alexandrajanzen.de/assets/images/mandarinen_cover.jpg',
+      'https://mandarinenspiel.alexandrajanzen.de/assets/images/mandarinen_cover.jpg', 
+      'https://mandarinenspiel.alexandrajanzen.de/assets/images/mandarinen_cover.jpg'
     ].find(path => {
       try {
         // Teste jeden Pfad
@@ -83,7 +83,7 @@ const createVinylPlayer = function() {
       } catch (e) {
         return false;
       }
-    }) || '../assets/images/mandarinen_cover.jpg'; // Fallback auf ersten Pfad
+    }) || 'https://mandarinenspiel.alexandrajanzen.de/assets/images/mandarinen_cover.jpg'; // Fallback auf ersten Pfad
 
     coverLabel.style.backgroundImage = `url('${coverUrl}')`;
     
@@ -217,7 +217,7 @@ const createCoverSplitEffect = function(container) {
           height: ${100 / rows}%;
           top: ${i * (100 / rows)}%;
           left: ${j * (100 / cols)}%;
-          background: url('../assets/images/mandarinen_cover.jpg');
+          background: url('https://mandarinenspiel.alexandrajanzen.de/assets/images/mandarinen_cover.jpg');
           background-size: ${cols * 100}% ${rows * 100}%;
           background-position: ${j * -100}% ${i * -100}%;
           transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -284,7 +284,7 @@ const createCoverParticles = function() {
         position: absolute;
         width: ${size}px;
         height: ${size}px;
-        background: url('../assets/images/mandarinen_cover.jpg');
+        background: url('https://mandarinenspiel.alexandrajanzen.de/assets/images/mandarinen_cover.jpg');
         background-size: cover;
         border-radius: 50%;
         box-shadow: 0 0 10px rgba(0,0,0,0.5);
@@ -538,16 +538,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Originale nextLevel-Funktion sichern und erweitern
     if (window.gameInstance.nextLevel) {
-      const originalNextLevel = window.gameInstance.nextLevel;
-      window.gameInstance.nextLevel = function() {
-        // Animation stoppen, bevor wir zum nächsten Level wechseln
-        stopVinylAnimation();
-        
-        // Originale Funktion aufrufen
-        originalNextLevel.apply(window.gameInstance);
-      };
-      console.log('GameManager.nextLevel erfolgreich erweitert');
-    }
+  const originalNextLevel = window.gameInstance.nextLevel;
+  window.gameInstance.nextLevel = function() {
+    // Animation stoppen, bevor wir zum nächsten Level wechseln
+    stopVinylAnimation();
+    
+    // Originale Funktion aufrufen
+    originalNextLevel.apply(window.gameInstance);
+    
+    // Nach einer längeren Verzögerung die Level-Nummer aktualisieren
+    setTimeout(updateLevelNumbers, 1000);
+    
+    console.log('nextLevel wurde aufgerufen, Level-Anzeige wird aktualisiert');
+  };
+  console.log('GameManager.nextLevel erfolgreich erweitert');
+}
   }
   
   // Optimierte Vinyl-Player-Behandlung aktivieren

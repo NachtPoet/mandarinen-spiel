@@ -5,7 +5,7 @@ class GameManager {
     this.levels = GAME_LEVELS;
     this.audioManager = new AudioManager();
     this.stemAudioManager = new StemAudioManager(); // Neue Stem-Manager-Instanz
-    this.currentLevelIndex = 0;
+    this._currentLevelIndex = 0;  // Geändert zu _currentLevelIndex (private Variable)
     this.currentLevel = null;
     this.gridSize = 12;
     this.grid = [];
@@ -38,6 +38,44 @@ class GameManager {
     document.body.appendChild(this.audioManager.bgMusic);
 
     initStarField();
+  }
+
+  // Getter für currentLevelIndex
+  get currentLevelIndex() {
+    return this._currentLevelIndex;
+  }
+
+  // Setter für currentLevelIndex
+  set currentLevelIndex(value) {
+    // Alte Wert speichern
+    const oldValue = this._currentLevelIndex;
+    
+    // Neuen Wert setzen
+    this._currentLevelIndex = value;
+    
+    // Nur ein Event auslösen, wenn sich der Wert tatsächlich geändert hat
+    if (oldValue !== value) {
+      console.log(`currentLevelIndex wurde von ${oldValue} auf ${value} geändert`);
+      
+      // Level-Anzeigen aktualisieren
+      // Elemente direkt aktualisieren
+      const currentLevelElem = document.getElementById('currentLevelNum');
+      const footerLevelElem = document.getElementById('levelFooterNum');
+      
+      if (currentLevelElem) {
+        currentLevelElem.textContent = value + 1; // Level-Index + 1 anzeigen
+        console.log(`currentLevelNum auf ${value + 1} gesetzt`);
+      }
+      
+      if (footerLevelElem) {
+        footerLevelElem.textContent = value + 1; // Level-Index + 1 anzeigen
+        console.log(`levelFooterNum auf ${value + 1} gesetzt`);
+      }
+      
+      // Event auslösen
+      const event = new CustomEvent('levelChanged', { detail: { levelIndex: value } });
+      window.dispatchEvent(event);
+    }
   }
 
   getDomElements() {
@@ -667,7 +705,7 @@ checkSelectedWord() {
     // Stems auf Grundzustand zurücksetzen (nur Klavier)
     this.stemAudioManager.resetToBaseStem();
 
-    this.currentLevelIndex++;
+    this.currentLevelIndex++;  // Hier wird der Setter verwendet, der die DOM-Elemente aktualisiert
 
     if (this.currentLevelIndex < this.levels.length) {
       this.initLevel();

@@ -1,5 +1,6 @@
 /**
  * cover-animations.js - Cover-inspirierte Animationen und Effekte
+ * Korrigierte Version mit verbesserter Level-Anzeige-Aktualisierung
  */
 
 /**
@@ -22,18 +23,34 @@ function initCoverDesignElements() {
 }
 
 /**
- * Aktualisiert die Levelnummern im Level-Overlay
+ * Aktualisiert die Levelnummern im Level-Overlay und im Footer
+ * Mit verbesserter Protokollierung und Fehlerbehebung
  */
 function updateLevelNumbers() {
   const currentLevelElem = document.getElementById('currentLevelNum');
   const footerLevelElem = document.getElementById('levelFooterNum');
   
-  if (currentLevelElem && window.gameInstance) {
-    currentLevelElem.textContent = (window.gameInstance.currentLevelIndex + 1);
-  }
-  
-  if (footerLevelElem && window.gameInstance) {
-    footerLevelElem.textContent = (window.gameInstance.currentLevelIndex + 1);
+  // Prüfe, ob das gameInstance-Objekt existiert und einen gültigen Level-Index enthält
+  if (window.gameInstance && typeof window.gameInstance.currentLevelIndex !== 'undefined') {
+    // Aktuelle Level-Nummer berechnen (Index + 1)
+    const currentLevelNumber = window.gameInstance.currentLevelIndex + 1;
+    console.log(`Aktualisiere Level-Anzeige auf Level ${currentLevelNumber}`);
+    
+    // Level-Nummer im Overlay aktualisieren
+    if (currentLevelElem) {
+      currentLevelElem.textContent = currentLevelNumber;
+    } else {
+      console.warn('Element für aktuelle Level-Nummer nicht gefunden (#currentLevelNum)');
+    }
+    
+    // Level-Nummer im Footer aktualisieren
+    if (footerLevelElem) {
+      footerLevelElem.textContent = currentLevelNumber;
+    } else {
+      console.warn('Element für Footer-Level-Nummer nicht gefunden (#levelFooterNum)');
+    }
+  } else {
+    console.warn('Game-Instance nicht gefunden oder currentLevelIndex undefiniert');
   }
 }
 
@@ -135,10 +152,86 @@ function createMandarinGlowEffect(element) {
   }, 800);
 }
 
+/**
+ * Prüft periodisch, ob sich die Level-Nummer geändert hat
+ * und aktualisiert die Anzeige entsprechend
+ */
+function startLevelNumberPolling() {
+  let lastKnownLevelIndex = -1;
+  
+  // Prüffunktion für die aktuelle Level-Nummer
+  function checkLevelNumber() {
+    if (window.gameInstance && typeof window.gameInstance.currentLevelIndex !== 'undefined') {
+      const currentIndex = window.gameInstance.currentLevelIndex;
+      
+      // Nur aktualisieren, wenn sich der Level-Index geändert hat
+      if (currentIndex !== lastKnownLevelIndex) {
+        console.log(`Level-Änderung erkannt: ${lastKnownLevelIndex} -> ${currentIndex}`);
+        lastKnownLevelIndex = currentIndex;
+        updateLevelNumbers();
+      }
+    }
+    
+    // Weiter prüfen
+    setTimeout(checkLevelNumber, 500);
+  }
+  
+  // Erstmalige Prüfung starten
+  checkLevelNumber();
+}
+
+/**
+ * Erweitert die GameManager-Klasse um Level-Aktualisierungsfunktionen,
+ * falls sie existiert.
+ */
+function enhanceGameManager() {
+  if (window.gameInstance) {
+    console.log('GameManager gefunden, erweitere Level-Aktualisierungsfunktionen');
+    
+    // Original nextLevel-Funktion erweitern
+    if (typeof window.gameInstance.nextLevel === 'function') {
+      const originalNextLevel = window.gameInstance.nextLevel;
+      window.gameInstance.nextLevel = function() {
+        // Original-Funktion ausführen
+        originalNextLevel.apply(window.gameInstance);
+        
+        // Nach einer Verzögerung die Level-Nummer aktualisieren
+        setTimeout(updateLevelNumbers, 100);
+        
+        console.log('nextLevel wurde aufgerufen, Level-Anzeige wird aktualisiert');
+      };
+      console.log('GameManager.nextLevel erfolgreich erweitert');
+    }
+    
+    // Original setLevel-Funktion erweitern (falls vorhanden)
+    if (typeof window.gameInstance.setLevel === 'function') {
+      const originalSetLevel = window.gameInstance.setLevel;
+      window.gameInstance.setLevel = function(levelIndex) {
+        // Original-Funktion ausführen
+        originalSetLevel.apply(window.gameInstance, [levelIndex]);
+        
+        // Nach einer Verzögerung die Level-Nummer aktualisieren
+        setTimeout(updateLevelNumbers, 100);
+        
+        console.log(`setLevel(${levelIndex}) wurde aufgerufen, Level-Anzeige wird aktualisiert`);
+      };
+      console.log('GameManager.setLevel erfolgreich erweitert');
+    }
+  } else {
+    console.warn('GameManager nicht gefunden, Level-Aktualisierung erfolgt über Polling');
+  }
+}
+
 // Event-Handler für Levelwechsel
 document.addEventListener('DOMContentLoaded', () => {
   // Erstinitialisierung
   initCoverDesignElements();
+  
+  // GameManager-Funktionen erweitern
+  enhanceGameManager();
+  
+  // Level-Nummer-Polling starten
+  startLevelNumberPolling();
   
   // Event-Listener für die GameManager-Klasse hinzufügen
   // Da wir keinen direkten Event für den Levelwechsel haben,
@@ -147,23 +240,44 @@ document.addEventListener('DOMContentLoaded', () => {
   if (levelOverlay) {
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'class' && 
-            !levelOverlay.classList.contains('hidden')) {
-          // Level-Overlay wurde angezeigt, Level wurde gewechselt
-          updateLevelNumbers();
+        if (mutation.attributeName === 'class') {
+          if (!levelOverlay.classList.contains('hidden')) {
+            // Level-Overlay wurde angezeigt, Level wurde gewechselt
+            console.log('Level-Overlay ist jetzt sichtbar, aktualisiere Level-Anzeige');
+            updateLevelNumbers();
+          }
         }
       });
     });
     
     observer.observe(levelOverlay, { attributes: true });
+    console.log('MutationObserver für levelOverlay eingerichtet');
+  } else {
+    console.warn('levelOverlay-Element nicht gefunden, MutationObserver nicht eingerichtet');
   }
   
   // Event-Listener für den nextLevelButton
   const nextLevelButton = document.getElementById('nextLevelButton');
   if (nextLevelButton) {
     nextLevelButton.addEventListener('click', () => {
+      console.log('nextLevelButton wurde geklickt');
+      
+      // WICHTIG: Level-Nummern aktualisieren
+      // Verzögerung, da der gameInstance.currentLevelIndex eventuell
+      // nicht sofort aktualisiert wird
+      setTimeout(updateLevelNumbers, 500);
+      
       // Nach kurzer Verzögerung Mandarinen neu initialisieren
       setTimeout(initMandarinAnimations, 500);
     });
+    console.log('Event-Listener für nextLevelButton eingerichtet');
+  } else {
+    console.warn('nextLevelButton nicht gefunden, Event-Listener nicht eingerichtet');
   }
+  
+  // Event-Listener zum Aktualisieren der Level-Nummern nach Levelwechsel
+  window.addEventListener('levelChanged', function(e) {
+    console.log('levelChanged-Event erkannt, aktualisiere Level-Anzeige');
+    updateLevelNumbers();
+  });
 });
