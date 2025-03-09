@@ -155,7 +155,16 @@
         
         <div class="loading">
             <h2>Lade Mandarinen Stem Mixer...</h2>
-            <p>Bitte erlaube den Zugriff auf deine Kamera</p>
+            <p>Bitte erlaube den Zugriff auf deine Kamera, wenn du dazu aufgefordert wirst</p>
+            <div style="margin-top: 20px; text-align: left;">
+                <p><b>Auf Android:</b></p>
+                <ol>
+                    <li>Tippe auf "Erlauben", wenn die Berechtigungsanfrage erscheint</li>
+                    <li>Falls keine Anfrage erscheint, überprüfe das Kamerasymbol in der Adressleiste</li>
+                    <li>Falls die Kamera bereits blockiert wurde, tippe auf das 🔒-Symbol in der Adressleiste und aktiviere die Kamera</li>
+                </ol>
+                <button id="startCameraBtn" style="margin-top: 15px; padding: 10px 20px; background-color: #FF7F00; color: white; border: none; border-radius: 5px; cursor: pointer;">Kamera starten</button>
+            </div>
         </div>
     </div>
 
@@ -331,15 +340,41 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             
+            // Start-Button-Event-Listener hinzufügen
+            document.getElementById('startCameraBtn').addEventListener('click', startCamera);
+        }
+        
+        function startCamera() {
             // Kamera-Zugriff anfragen
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => {
-                    video.srcObject = stream;
-                })
-                .catch(err => {
-                    console.error("Fehler beim Zugriff auf die Kamera: ", err);
-                    alert("Bitte erlaube den Zugriff auf deine Kamera, um den Mandarinen Stem Mixer zu nutzen.");
-                });
+            navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: "user",
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 } 
+                } 
+            })
+            .then(stream => {
+                video.srcObject = stream;
+                document.querySelector('.loading').innerHTML = '<h2>Kamera gestartet!</h2><p>Wird geladen...</p>';
+                setTimeout(() => {
+                    document.querySelector('.loading').style.display = 'none';
+                }, 1500);
+            })
+            .catch(err => {
+                console.error("Fehler beim Zugriff auf die Kamera: ", err);
+                document.querySelector('.loading').innerHTML = `
+                    <h2>Kamera-Zugriff fehlgeschlagen</h2>
+                    <p>Fehler: ${err.message}</p>
+                    <p>Bitte überprüfe deine Browser-Einstellungen:</p>
+                    <ol>
+                        <li>Tippe auf das Schloss- oder Info-Symbol in der Adressleiste</li>
+                        <li>Gehe zu "Seiteneinstellungen" oder "Berechtigungen"</li>
+                        <li>Aktiviere den Kamerazugriff</li>
+                        <li>Lade die Seite neu</li>
+                    </ol>
+                    <button onclick="window.location.reload()" style="margin-top: 15px; padding: 10px 20px; background-color: #FF7F00; color: white; border: none; border-radius: 5px; cursor: pointer;">Seite neu laden</button>
+                `;
+            });
             
             // Fenster-Resize-Handler
             window.addEventListener('resize', () => {
@@ -613,8 +648,30 @@
             }
         }
         
-        // Bei Laden der Seite initialisieren
-        window.addEventListener('load', init);
+        // Initialisierungsfunktion bei Laden der Seite
+        window.addEventListener('load', () => {
+            // Prüfen, ob Browser Kamerazugriff unterstützt
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                document.querySelector('.loading').innerHTML = `
+                    <h2>Dein Browser unterstützt keine Kamera-API</h2>
+                    <p>Bitte verwende einen modernen Browser wie Chrome, Firefox, Safari oder Edge.</p>
+                `;
+                return;
+            }
+            
+            // Normale Initialisierung
+            setupVideoAndCanvas();
+            
+            // Rest der Initialisierung erst nach Kamerastart
+            setupThreeJS();
+            document.getElementById('startCameraBtn').addEventListener('click', async () => {
+                await setupAudio();
+                handposeModel = await handpose.load();
+                console.log("Handpose model loaded");
+                createMandarines();
+                animate();
+            });
+        });
     </script>
 </body>
 </html>
