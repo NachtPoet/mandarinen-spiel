@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mandarinen Stem Mixer</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
     <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.min.js"></script>
     <style>
@@ -77,15 +79,41 @@
         .stem-list {
             display: flex;
             justify-content: center;
+            flex-wrap: wrap;
             gap: 10px;
             margin-top: 10px;
         }
         
         .stem-item {
-            padding: 5px 10px;
+            padding: 10px 15px;
             background-color: rgba(255, 165, 0, 0.3);
             border-radius: 15px;
             border: 1px solid orange;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        /* Mobile-spezifische Anpassungen */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 18px;
+            }
+            
+            .title span {
+                margin: 0 10px;
+                display: block;
+            }
+            
+            .stem-item {
+                padding: 12px 20px;
+                margin: 5px;
+                font-size: 16px;
+            }
+            
+            .control-info {
+                font-size: 12px;
+            }
         }
         
         .stem-item.active {
@@ -141,7 +169,7 @@
         </div>
         
         <div class="ui-overlay">
-            <div class="control-info">Greife nach den Mandarinen, um die Stems zu steuern! ✋🍊</div>
+            <div id="controlInfo" class="control-info">Greife nach den Mandarinen, um die Stems zu steuern! ✋🍊</div>
             <div class="control-info">↕️ Hoch/Runter = Lautstärke | ↔️ Links/Rechts = Stereo Position</div>
             
             <div class="stem-list">
@@ -150,6 +178,13 @@
                 <div class="stem-item" data-stem="bass">Bass</div>
                 <div class="stem-item" data-stem="drums">Drums</div>
                 <div class="stem-item" data-stem="strings">Strings</div>
+            </div>
+            
+            <div style="margin-top: 15px;">
+                <label style="margin-right: 10px; user-select: none;">
+                    <input type="checkbox" id="handTrackingToggle" style="margin-right: 5px;"> Hand-Tracking verwenden
+                </label>
+                <button id="resetButton" style="padding: 8px 15px; background-color: #FF7F00; color: white; border: none; border-radius: 5px; margin-left: 10px;">Reset</button>
             </div>
         </div>
         
@@ -180,6 +215,10 @@
         let isGrabbing = false;
         let grabbedMandarine = null;
         let initialGrabPosition = null;
+        let isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        let useHandTracking = !isMobileDevice; // Standardmäßig Handtracking nur auf Desktop aktivieren
+        let lastPredictionTime = 0;
+        let predictionInterval = isMobileDevice ? 200 : 50; // Langsamere Updates auf Mobilgeräten
         
         // Mandarine Klasse zur Verwaltung der 3D-Objekte und Audio-Stems
         class Mandarine {
@@ -394,13 +433,20 @@
             // Szene erstellen
             scene = new THREE.Scene();
             
-            // Kamera einstellen
+            // Kamera einstellen - weiter weg für mobile Geräte
+            const cameraDistance = isMobileDevice ? 7 : 5;
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 5;
+            camera.position.z = cameraDistance;
             
-            // Renderer erstellen
-            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            // Renderer erstellen mit niedrigerer Auflösung auf mobilen Geräten
+            const pixelRatio = isMobileDevice ? Math.min(window.devicePixelRatio, 1) : window.devicePixelRatio;
+            renderer = new THREE.WebGLRenderer({ 
+                alpha: true, 
+                antialias: !isMobileDevice, // Kein Antialiasing auf Mobilgeräten für bessere Performance
+                powerPreference: "high-performance"
+            });
             renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(pixelRatio);
             renderer.setClearColor(0x000000, 0);
             document.body.appendChild(renderer.domElement);
             renderer.domElement.style.position = 'absolute';
@@ -415,6 +461,12 @@
             const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
             directionalLight.position.set(0, 1, 1);
             scene.add(directionalLight);
+            
+            // Auf Mobil: Kamera etwas nach oben schwenken und verschiedene Y-Positionen für Mandarinen
+            if (isMobileDevice) {
+                camera.position.y = -1;
+                camera.lookAt(0, 0, 0);
+            }
         }
         
         async function setupAudio() {
@@ -472,13 +524,40 @@
         
         function createMandarines() {
             const stemNames = ['vocals', 'piano', 'bass', 'drums', 'strings'];
-            const positions = [
-                { x: -4, y: 0, z: 0 },
-                { x: -2, y: 0, z: 0 },
-                { x: 0, y: 0, z: 0 },
-                { x: 2, y: 0, z: 0 },
-                { x: 4, y: 0, z: 0 }
-            ];
+            
+            // Angepasste Positionen für verschiedene Geräte
+            let positions;
+            
+            if (isMobileDevice) {
+                if (window.innerWidth < window.innerHeight) {
+                    // Hochformat: Mandarinen vertikal anordnen
+                    positions = [
+                        { x: 0, y: 2, z: 0 },
+                        { x: 0, y: 1, z: 0 },
+                        { x: 0, y: 0, z: 0 },
+                        { x: 0, y: -1, z: 0 },
+                        { x: 0, y: -2, z: 0 }
+                    ];
+                } else {
+                    // Querformat: Engere horizontale Anordnung
+                    positions = [
+                        { x: -3, y: 0, z: 0 },
+                        { x: -1.5, y: 0, z: 0 },
+                        { x: 0, y: 0, z: 0 },
+                        { x: 1.5, y: 0, z: 0 },
+                        { x: 3, y: 0, z: 0 }
+                    ];
+                }
+            } else {
+                // Desktop: Standard-Layout
+                positions = [
+                    { x: -4, y: 0, z: 0 },
+                    { x: -2, y: 0, z: 0 },
+                    { x: 0, y: 0, z: 0 },
+                    { x: 2, y: 0, z: 0 },
+                    { x: 4, y: 0, z: 0 }
+                ];
+            }
             
             for (let i = 0; i < stemNames.length; i++) {
                 const mandarine = new Mandarine(scene, stemNames[i], positions[i]);
@@ -510,18 +589,36 @@
         }
         
         async function detectHands() {
-            if (handposeModel && video.readyState === 4) {
-                const predictions = await handposeModel.estimateHands(video);
+            // Nur ausführen, wenn Handtracking aktiviert ist und nicht zu oft auf Mobilgeräten
+            if (useHandTracking && handposeModel && video.readyState === 4) {
+                const currentTime = Date.now();
+                if (currentTime - lastPredictionTime < predictionInterval) {
+                    return; // Zu früh für ein neues Update
+                }
                 
-                if (predictions.length > 0) {
-                    handLandmarks = predictions[0].landmarks;
-                } else {
-                    handLandmarks = null;
-                    if (isGrabbing) {
-                        // Hand ist nicht mehr im Bild, Greifzustand zurücksetzen
-                        isGrabbing = false;
-                        grabbedMandarine = null;
-                        initialGrabPosition = null;
+                lastPredictionTime = currentTime;
+                
+                try {
+                    const predictions = await handposeModel.estimateHands(video);
+                    
+                    if (predictions.length > 0) {
+                        handLandmarks = predictions[0].landmarks;
+                    } else {
+                        handLandmarks = null;
+                        if (isGrabbing) {
+                            // Hand ist nicht mehr im Bild, Greifzustand zurücksetzen
+                            isGrabbing = false;
+                            grabbedMandarine = null;
+                            initialGrabPosition = null;
+                        }
+                    }
+                } catch (error) {
+                    console.error("Fehler bei der Handerkennung:", error);
+                    // Bei Fehlern Handtracking deaktivieren, um weitere Probleme zu vermeiden
+                    if (error.message.includes("memory") || error.message.includes("resources")) {
+                        console.warn("Handtracking wegen Ressourcenproblemen deaktiviert");
+                        useHandTracking = false;
+                        document.getElementById('handTrackingToggle').checked = false;
                     }
                 }
             }
@@ -648,6 +745,115 @@
             }
         }
         
+        // Mobile Touch-Handler für die Mandarinen
+        function setupTouchInteraction() {
+            // Event-Listener für Buttons
+            document.querySelector('.stem-list').addEventListener('click', (event) => {
+                const stemItem = event.target.closest('.stem-item');
+                if (!stemItem) return;
+                
+                const stemName = stemItem.getAttribute('data-stem');
+                const mandarine = mandarines.find(m => m.stemName === stemName);
+                
+                if (mandarine) {
+                    mandarine.toggleActive();
+                }
+            });
+            
+            // Touch-Steuerung für 3D-Szene
+            renderer.domElement.addEventListener('touchstart', handleTouchStart, false);
+            renderer.domElement.addEventListener('touchmove', handleTouchMove, false);
+            renderer.domElement.addEventListener('touchend', handleTouchEnd, false);
+            
+            let touchStartX, touchStartY;
+            let touchedMandarine = null;
+            
+            function handleTouchStart(event) {
+                event.preventDefault();
+                const touch = event.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+                
+                // Prüfen, ob eine Mandarine berührt wurde
+                const raycaster = new THREE.Raycaster();
+                const mouse = new THREE.Vector2();
+                
+                mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, camera);
+                
+                const intersects = raycaster.intersectObjects(scene.children);
+                
+                for (let i = 0; i < intersects.length; i++) {
+                    const mandarine = mandarines.find(m => m.mesh === intersects[i].object);
+                    if (mandarine) {
+                        touchedMandarine = mandarine;
+                        mandarine.highlight(true);
+                        break;
+                    }
+                }
+            }
+            
+            function handleTouchMove(event) {
+                if (!touchedMandarine) return;
+                
+                event.preventDefault();
+                const touch = event.touches[0];
+                
+                // Vertikale Bewegung für Lautstärke
+                const deltaY = (touchStartY - touch.clientY) / 100;
+                const newVolume = Math.max(0, Math.min(1, touchedMandarine.volume + deltaY * 0.1));
+                touchedMandarine.updateVolume(newVolume);
+                
+                // Horizontale Bewegung für Stereo-Panning
+                const deltaX = (touch.clientX - touchStartX) / 100;
+                const newPan = Math.max(-1, Math.min(1, touchedMandarine.pan + deltaX * 0.1));
+                touchedMandarine.updatePan(newPan);
+                
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+            }
+            
+            function handleTouchEnd(event) {
+                if (touchedMandarine) {
+                    touchedMandarine.highlight(false);
+                    touchedMandarine = null;
+                }
+            }
+            
+            // Reset-Button-Handler
+            document.getElementById('resetButton').addEventListener('click', () => {
+                for (const mandarine of mandarines) {
+                    mandarine.reset();
+                    if (mandarine.active) {
+                        mandarine.toggleActive(); // Deaktiviere alle aktiven Stems
+                    }
+                }
+            });
+            
+            // Handtracking-Toggle
+            const handTrackingToggle = document.getElementById('handTrackingToggle');
+            handTrackingToggle.checked = useHandTracking;
+            
+            handTrackingToggle.addEventListener('change', () => {
+                useHandTracking = handTrackingToggle.checked;
+                if (useHandTracking && !handposeModel) {
+                    // Lade das Modell, wenn es noch nicht geladen ist
+                    document.getElementById('controlInfo').textContent = "Hand-Tracking wird geladen...";
+                    handpose.load().then(model => {
+                        handposeModel = model;
+                        document.getElementById('controlInfo').textContent = "Greife nach den Mandarinen, um die Stems zu steuern! ✋🍊";
+                    }).catch(err => {
+                        console.error("Fehler beim Laden des Handpose-Modells:", err);
+                        document.getElementById('controlInfo').textContent = "Hand-Tracking konnte nicht geladen werden.";
+                        handTrackingToggle.checked = false;
+                        useHandTracking = false;
+                    });
+                }
+            });
+        }
+        
         // Initialisierungsfunktion bei Laden der Seite
         window.addEventListener('load', () => {
             // Prüfen, ob Browser Kamerazugriff unterstützt
@@ -666,9 +872,28 @@
             setupThreeJS();
             document.getElementById('startCameraBtn').addEventListener('click', async () => {
                 await setupAudio();
-                handposeModel = await handpose.load();
-                console.log("Handpose model loaded");
+                
+                // Auf Mobilgeräten erst einmal ohne Handtracking starten
+                if (!isMobileDevice) {
+                    try {
+                        document.getElementById('controlInfo').textContent = "Hand-Tracking wird geladen...";
+                        handposeModel = await handpose.load();
+                        document.getElementById('controlInfo').textContent = "Greife nach den Mandarinen, um die Stems zu steuern! ✋🍊";
+                        console.log("Handpose model loaded");
+                    } catch (err) {
+                        console.error("Fehler beim Laden des Handpose-Modells:", err);
+                        document.getElementById('controlInfo').textContent = "Hand-Tracking konnte nicht geladen werden. Touch-Steuerung aktiviert.";
+                        document.getElementById('handTrackingToggle').checked = false;
+                        useHandTracking = false;
+                    }
+                } else {
+                    // Für Mobile-Geräte standardmäßig Touch-Steuerung
+                    document.getElementById('controlInfo').textContent = "Tippe auf die Mandarinen, um die Stems zu steuern! 🍊";
+                    document.getElementById('handTrackingToggle').checked = false;
+                }
+                
                 createMandarines();
+                setupTouchInteraction();
                 animate();
             });
         });
