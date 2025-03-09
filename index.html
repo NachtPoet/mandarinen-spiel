@@ -148,7 +148,7 @@
         du hast die Geschichte des Songs Stück für Stück entdeckt.
       </p>
       <div class="reward-box" id="rewardBox"></div>
-      <p id="couponCode">Dein Gutscheincode: MANDARINEN (10% Rabatt)</p>
+      <p id="couponCode">Dein Gutscheincode: MANDARINE10 (10% Rabatt)</p>
       <p><a href="https://shop.alexandrajanzen.de/" target="_blank" class="shop-link">Zum Shop</a></p>
       <div class="button-container">
         <button id="restartButton" class="btn primary">
@@ -207,7 +207,7 @@
       <img src="assets/images/mandarinen_cover.jpg" alt="Alexandra Janzen - Mandarinen Cover" id="fullCoverImage">
       <div class="cover-info">
         <h3>Alexandra Janzen - Mandarinen</h3>
-        <p>Der neue Song bald überall verfügbar</p>
+        <p>Das neue Album jetzt überall verfügbar</p>
       </div>
       <div class="cover-close" id="coverModalClose">&times;</div>
     </div>
@@ -222,18 +222,19 @@
   <audio id="stem-vocals" preload="auto" loop></audio>
 
   <!-- JavaScript Dateien einbinden -->
+<!-- Konfiguration -->
+<script src="js/config.js"></script>
   <script src="js/utils.js"></script>
-  <script src="js/levels.js"></script>
-  <!-- Erst die ursprüngliche AudioManager-Klasse laden: -->
-  <script src="js/audioManager.js"></script>
-  <!-- Dann die Stem-Audio-Manager-Klasse: -->
-  <script src="js/stemAudioManager.js"></script>
-  <script src="js/ui.js"></script>
-  <!-- GameManager muss nach AudioManager und StemAudioManager geladen werden: -->
-  <script src="js/gameManager.js"></script>
-  <script src="js/main.js"></script>
-  <!-- Neue Cover-Animations und Integration hinzufügen -->
-  <script src="js/cover-integration.js"></script>
-  <script src="js/cover-animations.js"></script>
+<script src="js/levels.js"></script>
+<!-- Erst ui.js laden, dann Audio-Manager und GameManager -->
+<script src="js/ui.js"></script>
+<script src="js/audioManager.js"></script>
+<script src="js/stemAudioManager.js"></script>
+<script src="js/gameManager.js"></script>
+<script src="js/main.js"></script>
+<script src="js/cover-integration.js"></script>
+<script src="js/cover-animations.js"></script>
+<!-- Modusverwaltung -->
+<script src="js/mode-manager.js"></script>
 </body>
 </html>
