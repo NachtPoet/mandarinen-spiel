@@ -4,7 +4,7 @@
  */
 const APP_CONFIG = {
   // Modus: "BETA", "PRE_RELEASE" oder "RELEASE"
-  MODE: "BETA",
+  MODE: "PRE_RELEASE",
   
   // Release-Datum
   RELEASE_DATE: new Date("2025-03-21T00:00:00"),
