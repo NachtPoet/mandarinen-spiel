@@ -2470,4 +2470,36 @@ body::after {
 
 .admin-buttons button:hover {
   background: rgba(99, 29, 118, 0.3);
+
+.reward-box {
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, var(--color-yellow), var(--color-violet));
+  border-radius: 10px;
+  margin: 20px auto;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 0 30px rgba(253, 200, 64, 0.7);
+  transition: all 0.3s ease;
+  animation: float 3s infinite ease-in-out;
+  transform-style: preserve-3d;
+}
+
+.reward-box:hover {
+  transform: scale(1.05) rotate(5deg);
+  box-shadow: 0 0 40px rgba(99, 29, 118, 0.9);
+}
+
+#couponCode {
+  display: none;
+  margin-top: 20px;
+  font-size: 0.9rem;
+  padding: 10px 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  border: 1px solid var(--color-mandarin-bright);
+  text-shadow: 0 0 5px rgba(255, 140, 0, 0.4);
+  position: relative;
+  z-index: 10;
+}
 }
