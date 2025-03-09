@@ -40,14 +40,7 @@ function StemAudioManager() {
   this.stemsLoaded = [false, false, false, false, false, false];
   
   // Stem-Dateinamen
-  this.stemFiles = [
-    '01_piano.mp3',
-    '02_bass.mp3',
-    '03_drums.mp3',
-    '04_guitars.mp3',
-    '05_others.mp3',
-    '06_vocals.mp3'
-  ];
+  this.stemFiles = APP_CONFIG.STEMS[APP_CONFIG.MODE].map(stem => stem.file);
   
   // Fade-Status (für Animation)
   this.fadingStems = new Set();
