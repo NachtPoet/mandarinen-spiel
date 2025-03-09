@@ -77,22 +77,15 @@ function renderGrid(grid, gridSize, gridContainer) {
 function renderWordList(targetWords, foundWords, difficulty, wordListDiv) {
   wordListDiv.innerHTML = "";
 
-  // Icons für jeden Stem
-  const stemIcons = [
-    '',
-    '<svg class="stem-icon bass-icon" viewBox="0 0 24 24"><path d="M6 18V6h12v12H6z" class="stem-icon-base" /><path d="M11 8h2v8h-2v-8z" class="stem-icon-detail" /></svg>',
-    '<svg class="stem-icon drums-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5.5" class="stem-icon-base" /><circle cx="12" cy="12" r="2" class="stem-icon-detail" /></svg>',
-    '<svg class="stem-icon guitar-icon" viewBox="0 0 24 24"><path d="M7 19l10-14 M10 19.5l7-15" class="stem-icon-detail" /></svg>',
-    '<svg class="stem-icon other-icon" viewBox="0 0 24 24"><rect x="8" y="8" width="8" height="8" class="stem-icon-base" /><path d="M8 12h8 M12 8v8" class="stem-icon-detail" /></svg>',
-    '<svg class="stem-icon vocal-icon" viewBox="0 0 24 24"><circle cx="12" cy="10" r="3" class="stem-icon-base" /><path d="M8 16c0-2 2-3 4-3s4 1 4 3" class="stem-icon-detail" /></svg>'
-  ];
+  // Icons für jeden Stem - dynamisch basierend auf dem Modus
+  const stemIcons = getStemIcons();
 
   targetWords.forEach((word, index) => {
     const span = document.createElement("span");
     span.classList.add("word");
     span.id = "word-" + word;
     
-    // Stem-Index für dieses Wort (maximal 5 Stems zu aktivieren, wie in gameManager.js)
+    // Stem-Index für dieses Wort (maximal 5 Stems zu aktivieren)
     const stemIndex = index < 5 ? index + 1 : 0;
     
     if (stemIndex > 0) {
@@ -132,11 +125,68 @@ function renderWordList(targetWords, foundWords, difficulty, wordListDiv) {
 }
 
 /**
+ * Gibt die Stem-Icons basierend auf dem aktuellen Modus zurück
+ * @returns {Array} Array mit SVG-Icons für jeden Stem
+ */
+function getStemIcons() {
+  // Standard-Icons (BETA-Modus)
+  const defaultIcons = [
+    '', // Leeres erstes Icon (für den Index 0)
+    '<svg class="stem-icon bass-icon" viewBox="0 0 24 24"><path d="M6 18V6h12v12H6z" class="stem-icon-base" /><path d="M11 8h2v8h-2v-8z" class="stem-icon-detail" /></svg>', // Bass
+    '<svg class="stem-icon drums-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5.5" class="stem-icon-base" /><circle cx="12" cy="12" r="2" class="stem-icon-detail" /></svg>', // Drums
+    '<svg class="stem-icon guitar-icon" viewBox="0 0 24 24"><path d="M7 19l10-14 M10 19.5l7-15" class="stem-icon-detail" /></svg>', // Guitar
+    '<svg class="stem-icon other-icon" viewBox="0 0 24 24"><rect x="8" y="8" width="8" height="8" class="stem-icon-base" /><path d="M8 12h8 M12 8v8" class="stem-icon-detail" /></svg>', // Others
+    '<svg class="stem-icon vocal-icon" viewBox="0 0 24 24"><circle cx="12" cy="10" r="3" class="stem-icon-base" /><path d="M8 16c0-2 2-3 4-3s4 1 4 3" class="stem-icon-detail" /></svg>' // Vocals
+  ];
+  
+  // PRE_RELEASE-Modus Icons
+  const preReleaseIcons = [
+    '', // Leeres erstes Icon
+    '<svg class="stem-icon bass-icon" viewBox="0 0 24 24"><path d="M6 18V6h12v12H6z" class="stem-icon-base" /><path d="M11 8h2v8h-2v-8z" class="stem-icon-detail" /></svg>', // Bass
+    '<svg class="stem-icon drums-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5.5" class="stem-icon-base" /><circle cx="12" cy="12" r="2" class="stem-icon-detail" /></svg>', // Drums
+    '<svg class="stem-icon guitar-icon" viewBox="0 0 24 24"><path d="M7 19l10-14 M10 19.5l7-15" class="stem-icon-detail" /></svg>', // Guitar
+    '<svg class="stem-icon strings-icon" viewBox="0 0 24 24"><path d="M5 19c0-5 14-5 14-10" class="stem-icon-detail" /><path d="M5 10c0 5 14 5 14 10" class="stem-icon-detail" /></svg>', // Strings
+    '<svg class="stem-icon synth-icon" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1" class="stem-icon-base" /><circle cx="12" cy="12" r="2" class="stem-icon-detail" /></svg>' // Synths & FX
+  ];
+  
+  // RELEASE-Modus Icons
+  const releaseIcons = [
+    '', // Leeres erstes Icon
+    '<svg class="stem-icon bass-drums-icon" viewBox="0 0 24 24"><path d="M6 18V6h12v12H6z" class="stem-icon-base" /><circle cx="12" cy="12" r="4" class="stem-icon-detail" /></svg>', // Bass+Drums
+    '<svg class="stem-icon guitar-icon" viewBox="0 0 24 24"><path d="M7 19l10-14 M10 19.5l7-15" class="stem-icon-detail" /></svg>', // Guitar
+    '<svg class="stem-icon strings-icon" viewBox="0 0 24 24"><path d="M5 19c0-5 14-5 14-10" class="stem-icon-detail" /><path d="M5 10c0 5 14 5 14 10" class="stem-icon-detail" /></svg>', // Strings
+    '<svg class="stem-icon synth-icon" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1" class="stem-icon-base" /><circle cx="12" cy="12" r="2" class="stem-icon-detail" /></svg>', // Synths & FX
+    '<svg class="stem-icon vocal-icon" viewBox="0 0 24 24"><circle cx="12" cy="10" r="3" class="stem-icon-base" /><path d="M8 16c0-2 2-3 4-3s4 1 4 3" class="stem-icon-detail" /></svg>' // Vocals
+  ];
+  
+  // Je nach aktuellem Modus die entsprechenden Icons zurückgeben
+  if (window.APP_CONFIG) {
+    if (APP_CONFIG.MODE === 'PRE_RELEASE') {
+      return preReleaseIcons;
+    } else if (APP_CONFIG.MODE === 'RELEASE') {
+      return releaseIcons;
+    }
+  }
+  
+  // Fallback zu Standard-Icons (BETA)
+  return defaultIcons;
+}
+
+/**
  * Gibt den Namen eines Stems basierend auf seinem Index zurück
  * @param {number} stemIndex - Index des Stems (1-5)
  * @returns {string} - Name des Stems
  */
 function getStemName(stemIndex) {
+  if (window.APP_CONFIG && APP_CONFIG.STEMS && APP_CONFIG.STEMS[APP_CONFIG.MODE]) {
+    // Stem-Namen aus der Konfiguration laden
+    const stems = APP_CONFIG.STEMS[APP_CONFIG.MODE];
+    if (stemIndex >= 0 && stemIndex < stems.length) {
+      return stems[stemIndex].name;
+    }
+  }
+  
+  // Fallback zu den Standard-Namen
   const stemNames = [
     "Piano (Basis)",
     "Bass",
@@ -171,7 +221,8 @@ function openReward(rewardBoxElement, audioManager) {
   rewardBoxElement.style.animation = 'none';
 
   setTimeout(() => {
-    rewardBoxElement.style.transform = 'scale(1.5) rotateY(180deg)';
+    // Verkleinerte Skalierung (1.2 statt 1.5)
+    rewardBoxElement.style.transform = 'scale(1.2) rotateY(180deg)';
     rewardBoxElement.style.background = 'radial-gradient(circle, #ffdc00, #ff851b)';
     rewardBoxElement.style.boxShadow = '0 0 50px rgba(255, 140, 0, 0.9)';
 
@@ -179,6 +230,8 @@ function openReward(rewardBoxElement, audioManager) {
     const couponCodeElement = document.getElementById('couponCode');
     if (couponCodeElement) {
       couponCodeElement.style.display = 'block';
+      // Mehr Abstand nach oben hinzufügen
+      couponCodeElement.style.marginTop = '80px';
     }
 
     setTimeout(() => {
@@ -246,12 +299,18 @@ function giveWordHint(targetWords, foundWords, audioManager) {
 
 /**
  * Zeigt visuell an, dass ein neuer Stem aktiviert wurde
+ * Angepasst für unterschiedliche Modi
  * @param {string} stemName - Name des aktivierten Stems
- * @param {number} stemIndex - Index des Stems (1-5)
+ * @param {number} stemIndex - Index des Stems
  */
 function showStemActivation(stemName, stemIndex) {
   const gameContainer = document.getElementById('gameContainer');
   if (!gameContainer) return;
+  
+  // Stem-Namen aus dem aktuellen Modus beziehen
+  const currentStemName = window.APP_CONFIG ? 
+    (APP_CONFIG.STEMS[APP_CONFIG.MODE][stemIndex]?.name || stemName) : 
+    stemName;
   
   // Erstelle ein temporäres Element zur Anzeige
   const notification = document.createElement('div');
@@ -265,7 +324,7 @@ function showStemActivation(stemName, stemIndex) {
   
   notification.innerHTML = `
     <div class="stem-notification-icon"></div>
-    ${randomNote} ${stemName} aktiviert ${endNote}
+    ${randomNote} ${currentStemName} aktiviert ${endNote}
   `;
   
   // Füge es zum Spielbereich hinzu
