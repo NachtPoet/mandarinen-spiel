@@ -1,73 +1,6 @@
 /**
- * Verwaltet den Spielmodus und aktualisiert die UI
- */
-
-// UI-Elemente nach Modus aktualisieren
-function updateUIByMode() {
-  const mode = APP_CONFIG.MODE;
-  const texts = APP_CONFIG.TEXTS[mode];
-  
-  // Album-Info aktualisieren
-  const coverInfo = document.querySelector('.cover-info p');
-  if (coverInfo) {
-    coverInfo.textContent = texts.ALBUM_INFO;
-  }
-  
-  // End-Message aktualisieren
-  const endMessage = document.getElementById('endMessage');
-  if (endMessage) {
-    endMessage.innerHTML = texts.END_MESSAGE;
-  }
-  
-  console.log(`UI für Modus aktualisiert: ${mode}`);
-}
-
-// Admin-Panel zum Umschalten zwischen Modi anzeigen
-function showAdminPanel() {
-  const modal = document.createElement('div');
-  modal.className = 'admin-modal';
-  modal.innerHTML = `
-    <div class="admin-panel">
-      <h3>Admin-Einstellungen</h3>
-      <label>
-        Spielmodus:
-        <select id="mode-selector">
-          <option value="BETA" ${APP_CONFIG.MODE === 'BETA' ? 'selected' : ''}>Beta</option>
-          <option value="PRE_RELEASE" ${APP_CONFIG.MODE === 'PRE_RELEASE' ? 'selected' : ''}>Pre-Release</option>
-          <option value="RELEASE" ${APP_CONFIG.MODE === 'RELEASE' ? 'selected' : ''}>Release</option>
-        </select>
-      </label>
-      <div class="admin-buttons">
-        <button id="save-mode">Speichern</button>
-        <button id="cancel-mode">Abbrechen</button>
-      </div>
-    </div>
-  `;
-  
-  document.body.appendChild(modal);
-  
-  // Event-Handler
-  document.getElementById('save-mode').addEventListener('click', function() {
-    const newMode = document.getElementById('mode-selector').value;
-    localStorage.setItem('app_mode', newMode);
-    location.reload(); // Seite neu laden
-  });
-  
-  document.getElementById('cancel-mode').addEventListener('click', function() {
-    document.body.removeChild(modal);
-  });
-}
-
-// Strg+Shift+A öffnet das Admin-Panel
-document.addEventListener('keydown', function(e) {
-  if (e.ctrlKey && e.shiftKey && e.key === 'A') {
-    showAdminPanel();
-  }
-});
-
-/**
- * Ergänzungen für mode-manager.js
- * Diese Funktionen sorgen dafür, dass die Benutzeroberfläche komplett aktualisiert wird
+ * mode-manager.js - Verwaltet die verschiedenen Modi des Spiels
+ * Steuert die UI-Anpassungen und das Admin-Panel
  */
 
 /**
@@ -122,37 +55,75 @@ function updateUIByMode() {
 }
 
 /**
- * Aktualisiert die Wortliste und Icons im aktuellen Spiel
- * Dies ist entscheidend, um die modusspezifischen Icons anzuzeigen
+ * Zeigt ein dezentes Badge an, das den aktuellen Modus anzeigt
  */
-function refreshWordList() {
-  // Prüfen, ob ein Spiel läuft
-  if (window.gameInstance) {
-    console.log("Aktualisiere Wortliste für Modus: " + APP_CONFIG.MODE);
-    
-    // Wenn renderWordList und die erforderlichen Eigenschaften existieren
-    if (typeof renderWordList === 'function' && 
-        gameInstance.targetWords && 
-        gameInstance.foundWords && 
-        gameInstance.currentDifficulty && 
-        gameInstance.domElements && 
-        gameInstance.domElements.wordList) {
-      
-      // Wortliste mit den aktuellen Spielwerten neu rendern
-      renderWordList(
-        gameInstance.targetWords,
-        gameInstance.foundWords,
-        gameInstance.currentDifficulty,
-        gameInstance.domElements.wordList
-      );
-      
-      console.log("Wortliste erfolgreich aktualisiert");
-    } else {
-      console.warn("Kann Wortliste nicht aktualisieren - nicht alle erforderlichen Eigenschaften verfügbar");
-    }
-  } else {
-    console.log("Kein laufendes Spiel gefunden, Wortliste nicht aktualisiert");
+function showModeBadge(mode) {
+  // Vorhandenes Badge entfernen, falls es existiert
+  const existingBadge = document.getElementById('mode-badge');
+  if (existingBadge) {
+    existingBadge.remove();
   }
+  
+  // Nur im BETA oder PRE_RELEASE Modus ein Badge anzeigen
+  if (mode === 'RELEASE') {
+    return;
+  }
+  
+  // Badge erstellen
+  const badge = document.createElement('div');
+  badge.id = 'mode-badge';
+  badge.className = 'mode-badge';
+  
+  // Text und Farbe je nach Modus
+  if (mode === 'BETA') {
+    badge.textContent = 'BETA';
+    badge.style.backgroundColor = 'rgba(99, 29, 118, 0.7)';
+  } else {
+    badge.textContent = 'PRE-RELEASE';
+    badge.style.backgroundColor = 'rgba(255, 140, 0, 0.7)';
+  }
+  
+  // Zum Dokument hinzufügen
+  document.body.appendChild(badge);
+  
+  // Nach Klick auf Badge Admin-Panel öffnen
+  badge.addEventListener('click', function(e) {
+    if (e.shiftKey || e.ctrlKey) {
+      showAdminPanel();
+    }
+  });
+}
+
+/**
+ * Zeigt einen Countdown zum Release an
+ */
+function addReleaseCountdown() {
+  if (!APP_CONFIG.RELEASE_DATE) return;
+  
+  const releaseDate = new Date(APP_CONFIG.RELEASE_DATE);
+  const now = new Date();
+  
+  // Wenn das Release-Datum bereits vorbei ist, nichts anzeigen
+  if (now >= releaseDate) return;
+  
+  // Tage bis zum Release berechnen
+  const diffTime = releaseDate - now;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  // Vorhandenen Countdown entfernen, falls er existiert
+  const existingCountdown = document.getElementById('release-countdown');
+  if (existingCountdown) {
+    existingCountdown.remove();
+  }
+  
+  // Countdown-Element erstellen
+  const countdown = document.createElement('div');
+  countdown.id = 'release-countdown';
+  countdown.className = 'release-countdown';
+  countdown.innerHTML = `<span>Release in ${diffDays} Tagen</span>`;
+  
+  // Zum Dokument hinzufügen
+  document.body.appendChild(countdown);
 }
 
 /**
@@ -253,6 +224,40 @@ function showAdminPanel() {
 }
 
 /**
+ * Aktualisiert die Wortliste und Icons im aktuellen Spiel
+ * Dies ist entscheidend, um die modusspezifischen Icons anzuzeigen
+ */
+function refreshWordList() {
+  // Prüfen, ob ein Spiel läuft
+  if (window.gameInstance) {
+    console.log("Aktualisiere Wortliste für Modus: " + APP_CONFIG.MODE);
+    
+    // Wenn renderWordList und die erforderlichen Eigenschaften existieren
+    if (typeof renderWordList === 'function' && 
+        gameInstance.targetWords && 
+        gameInstance.foundWords && 
+        gameInstance.currentDifficulty && 
+        gameInstance.domElements && 
+        gameInstance.domElements.wordList) {
+      
+      // Wortliste mit den aktuellen Spielwerten neu rendern
+      renderWordList(
+        gameInstance.targetWords,
+        gameInstance.foundWords,
+        gameInstance.currentDifficulty,
+        gameInstance.domElements.wordList
+      );
+      
+      console.log("Wortliste erfolgreich aktualisiert");
+    } else {
+      console.warn("Kann Wortliste nicht aktualisieren - nicht alle erforderlichen Eigenschaften verfügbar");
+    }
+  } else {
+    console.log("Kein laufendes Spiel gefunden, Wortliste nicht aktualisiert");
+  }
+}
+
+/**
  * Zeigt eine kurze Nachricht an
  * @param {string} message - Die anzuzeigende Nachricht
  */
@@ -273,6 +278,24 @@ function showModalMessage(message) {
     }, 500);
   }, 2000);
 }
+
+/**
+ * Tastenkombination Ctrl+Shift+A öffnet das Admin-Panel
+ */
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+    e.preventDefault(); // Browser-Standardverhalten verhindern
+    showAdminPanel();
+  }
+});
+
+/**
+ * UI aktualisieren, wenn das Dokument geladen ist
+ */
+document.addEventListener('DOMContentLoaded', function() {
+  // Kurze Verzögerung, um sicherzustellen, dass alle Komponenten geladen sind
+  setTimeout(updateUIByMode, 500);
+});
 
 /**
  * Hinzufügen eines CSS-Styles für die Nachrichtenbox
@@ -355,8 +378,3 @@ stemIconStyle.textContent = `
   }
 `;
 document.head.appendChild(stemIconStyle);
-
-// UI beim Laden initialisieren
-document.addEventListener('DOMContentLoaded', function() {
-  updateUIByMode();
-});
