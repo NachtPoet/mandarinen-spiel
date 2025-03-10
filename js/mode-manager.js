@@ -44,19 +44,13 @@ function updateUIByMode() {
     endMessage.innerHTML = texts.END_MESSAGE;
   }
   
-  // Wenn im PRE_RELEASE oder BETA Modus, Release-Countdown anzeigen
+  // Wenn im PRE_RELEASE oder BETA Modus, evtl. Release-Datum anzeigen
   if (mode === 'BETA' || mode === 'PRE_RELEASE') {
-    // Release-Countdown im Spielbereich anzeigen
-    updateReleaseCountdown();
-  } else {
-    // Im RELEASE-Modus den Countdown ausblenden
-    const countdownBadge = document.getElementById('countdown-badge');
-    if (countdownBadge) {
-      countdownBadge.style.display = 'none';
-    }
+    // Optional: Release-Countdown hinzufügen
+    addReleaseCountdown();
   }
   
-  // Modus-Badge anzeigen (nur im BETA-Modus)
+  // Modus-Badge anzeigen (optional)
   showModeBadge(mode);
   
   // WICHTIG: Wortliste neu rendern, wenn GameInstance existiert
@@ -66,39 +60,92 @@ function updateUIByMode() {
 }
 
 /**
- * Erstellt oder aktualisiert den Countdown zum Release mit RELEASE-Text
+ * Zeigt ein dezentes Badge an, das den aktuellen Modus anzeigt
  */
-function updateReleaseCountdown() {
-  if (!window.APP_CONFIG || !window.APP_CONFIG.RELEASE_DATE) return;
+function showModeBadge(mode) {
+  // Vorhandenes Badge entfernen, falls es existiert
+  const existingBadge = document.getElementById('mode-badge');
+  if (existingBadge) {
+    existingBadge.remove();
+  }
+  
+  // Nur im BETA oder PRE_RELEASE Modus ein Badge anzeigen
+  if (mode === 'RELEASE') {
+    return;
+  }
+  
+  // Badge erstellen
+  const badge = document.createElement('div');
+  badge.id = 'mode-badge';
+  badge.className = 'mode-badge';
+  
+  // Text und Farbe je nach Modus
+  if (mode === 'BETA') {
+    badge.textContent = 'BETA';
+    badge.style.backgroundColor = 'rgba(99, 29, 118, 0.7)';
+  } else {
+    badge.textContent = 'PRE-RELEASE';
+    badge.style.backgroundColor = 'rgba(255, 140, 0, 0.7)';
+  }
+  
+  // Zum Dokument hinzufügen
+  document.body.appendChild(badge);
+  
+  // Nach Klick auf Badge Admin-Panel öffnen
+  badge.addEventListener('click', function(e) {
+    if (e.shiftKey || e.ctrlKey) {
+      showAdminPanel();
+    }
+  });
+}
+
+/**
+ * Zeigt einen Countdown zum Release an - KORRIGIERTE VERSION
+ */
+function addReleaseCountdown() {
+  if (!window.APP_CONFIG || !window.APP_CONFIG.RELEASE_DATE) {
+    console.warn("Release-Datum nicht verfügbar, Countdown wird nicht angezeigt");
+    return;
+  }
   
   const releaseDate = new Date(window.APP_CONFIG.RELEASE_DATE);
   const now = new Date();
   
   // Wenn das Release-Datum bereits vorbei ist, nichts anzeigen
-  if (now >= releaseDate) return;
+  if (now >= releaseDate) {
+    console.log("Release-Datum bereits vergangen, Countdown wird nicht angezeigt");
+    return;
+  }
   
   // Tage bis zum Release berechnen
   const diffTime = releaseDate - now;
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   
   // Vorhandenen Countdown entfernen, falls er existiert
-  const existingCountdown = document.querySelector('.release-countdown');
+  const existingCountdown = document.getElementById('release-countdown');
   if (existingCountdown) {
     existingCountdown.remove();
   }
   
-  // Countdown-Badge im Spielbereich aktualisieren
-  const countdownBadge = document.getElementById('countdown-badge');
-  if (countdownBadge) {
-    // Zweizeiligen Text mit RELEASE explizit einfügen
-    countdownBadge.innerHTML = `<strong>RELEASE</strong><br>in ${diffDays} Tagen`;
-    countdownBadge.style.display = 'block';
-    countdownBadge.style.lineHeight = '1.2';
-  }
+  // Countdown-Element erstellen
+  const countdown = document.createElement('div');
+  countdown.id = 'release-countdown';
+  countdown.className = 'release-countdown';
+  
+  // Aktuellen Modus als data-Attribut für CSS speichern
+  countdown.setAttribute('data-mode', window.APP_CONFIG.MODE);
+  
+  // Nur "Release in X Tagen" - ohne PRE-RELEASE (kommt per CSS)
+  countdown.innerHTML = `<span>Release in ${diffDays} Tagen</span>`;
+  
+  // Zum Dokument hinzufügen
+  document.body.appendChild(countdown);
+  
+  console.log(`Release-Countdown wurde erstellt: noch ${diffDays} Tage bis zum Release am ${releaseDate.toLocaleDateString()}`);
 }
 
 /**
- * Zeigt das Admin-Panel zum Umschalten zwischen Modi an
+ * Öffnet das Admin-Panel zum Umschalten zwischen Modi an
  */
 function showAdminPanel() {
   // Vorhandenes Panel entfernen, falls es existiert
@@ -214,6 +261,14 @@ function showAdminPanel() {
         console.error("Fehler beim manuellen Rendern:", err);
         showModalMessage("Fehler beim Update: " + err.message);
       }
+    }
+    
+    // Countdown manuell aktualisieren
+    try {
+      addReleaseCountdown();
+      console.log("Release-Countdown manuell aktualisiert");
+    } catch (err) {
+      console.error("Fehler beim manuellen Countdown-Update:", err);
     }
   });
   
@@ -407,59 +462,6 @@ stemIconStyle.textContent = `
     stroke: var(--color-mandarin-dark);
     fill: none;
   }
-
-  /**
- * Direktes Hinzufügen des Release-Countdowns in das Game Container
- */
-function addReleaseCountdown() {
-  // Diese Funktion direkt aufrufen
-  if (!window.APP_CONFIG || !window.APP_CONFIG.RELEASE_DATE) return;
-  
-  const releaseDate = new Date(window.APP_CONFIG.RELEASE_DATE);
-  const now = new Date();
-  
-  // Wenn das Release-Datum bereits vorbei ist, nichts anzeigen
-  if (now >= releaseDate) return;
-  
-  // Tage bis zum Release berechnen
-  const diffTime = releaseDate - now;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
-  // Countdown-Badge finden oder erstellen
-  let countdownBadge = document.getElementById('countdown-badge');
-  
-  if (!countdownBadge) {
-    // Falls das Element nicht existiert, einfach ein neues erstellen und hinzufügen
-    countdownBadge = document.createElement('div');
-    countdownBadge.id = 'countdown-badge';
-    countdownBadge.className = 'countdown-badge';
-    
-    const gameContainer = document.getElementById('gameContainer');
-    if (gameContainer) {
-      gameContainer.appendChild(countdownBadge);
-    }
-  }
-  
-  // Den Text setzen mit RELEASE und Zeilenumbruch
-  countdownBadge.innerHTML = `<strong>RELEASE</strong><br>in ${diffDays} Tagen`;
-  countdownBadge.style.display = 'flex';
-}
-
-// DOM-Content-Loaded Event hinzufügen
-document.addEventListener('DOMContentLoaded', function() {
-  // Kurze Verzögerung hinzufügen, um sicherzustellen, dass alle Elemente geladen sind
-  setTimeout(function() {
-    addReleaseCountdown();
-    
-    // Zusätzlich ein Intervall für regelmäßige Aktualisierung setzen
-    setInterval(addReleaseCountdown, 60000); // Update jede Minute
-  }, 500);
-});
-
-// Zusätzlichen Listener hinzufügen für das Spielfeld, falls es dynamisch eingefügt wird
-document.addEventListener('gameContainerReady', function() {
-  setTimeout(addReleaseCountdown, 100);
-});
   
   /* Bass+Drums kombiniertes Icon */
   .stem-icon.bass-drums-icon .stem-icon-base {
