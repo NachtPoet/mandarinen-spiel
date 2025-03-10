@@ -2958,3 +2958,188 @@ body.fullscreen .fullscreen-btn {
   height: auto;
   display: inline-block;
 }
+
+
+/* Anpassungen für Titel und Countdown (März 2025 - Mobile Fix) */
+
+/* Titel-Änderungen */
+.cover-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 35px; 
+}
+
+.artist-name {
+  margin-bottom: 8px;
+}
+
+.song-title {
+  text-align: center;
+  letter-spacing: 3px;
+}
+
+/* Countdown unter dem Titel positionieren - KORRIGIERT */
+.release-countdown {
+  position: absolute;
+  top: 70px; /* Position unter dem Titel */
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  background-color: rgba(255, 140, 0, 0.7);
+  color: white;
+  font-size: 0.7rem;
+  border-radius: 12px;
+  z-index: 100;
+  box-shadow: 0 0 10px rgba(255, 140, 0, 0.4);
+  max-width: 160px;
+  width: auto;
+  height: auto; /* Automatische Höhe basierend auf Inhalt */
+  opacity: 0.85;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  display: inline-block;
+  line-height: 1.2;
+}
+
+.release-countdown::after {
+  content: attr(data-mode);
+  display: block;
+  font-size: 0.55rem;
+  padding: 2px 6px;
+  margin-top: 3px;
+  margin-bottom: 2px;
+  background-color: rgba(255, 140, 0, 0.8);
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+}
+
+/* Angepasstes Layout mit Timer links und Levelindikator rechts */
+#timer {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  margin: 0;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  box-shadow: 0 0 12px rgba(160, 216, 239, 0.4);
+  z-index: 90;
+}
+
+#levelIndicator {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  margin: 0;
+  z-index: 90;
+}
+
+/* Mehr Platz für das Grid */
+.grid {
+  margin-top: 60px;
+}
+
+/* Mobile Anpassungen */
+@media (max-width: 800px) {
+  .grid {
+    margin-top: 55px;
+  }
+  
+  /* Countdown für Tablets anpassen */
+  .release-countdown {
+    font-size: 0.65rem;
+    padding: 3px 10px;
+    max-width: 140px;
+    top: 65px;
+  }
+  
+  .release-countdown::after {
+    font-size: 0.5rem;
+    padding: 2px 5px;
+  }
+}
+
+/* Smartphone-Ansicht */
+@media (max-width: 600px) {
+  .release-countdown {
+    font-size: 0.55rem;
+    padding: 2px 8px;
+    max-width: 120px;
+    top: 60px;
+    border-radius: 10px;
+  }
+  
+  .release-countdown::after {
+    font-size: 0.45rem;
+    padding: 1px 4px;
+    margin-top: 2px;
+    border-radius: 6px;
+  }
+  
+  #timer {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    top: 10px;
+    left: 10px;
+  }
+  
+  #levelIndicator {
+    font-size: 0.65rem;
+    padding: 4px 8px;
+    top: 10px;
+    right: 10px;
+  }
+  
+  /* Name und Titel besser trennen */
+  .cover-title {
+    gap: 15px;
+  }
+  
+  .artist-name {
+    margin-bottom: 10px;
+  }
+}
+
+/* Sehr kleine Geräte */
+@media (max-width: 400px) {
+  .release-countdown {
+    font-size: 0.5rem;
+    padding: 2px 6px;
+    max-width: 100px;
+    top: 55px;
+  }
+  
+  .release-countdown::after {
+    font-size: 0.4rem;
+    padding: 1px 3px;
+    margin-top: 1px;
+  }
+}
+
+/* Spezifische Anpassung für den Startbildschirm */
+#startScreen .cover-title {
+  margin-top: 15px;
+  margin-bottom: 40px;
+}
+
+/* Im Startbildschirm anders positionieren */
+#startScreen .release-countdown {
+  position: absolute;
+  top: auto;
+  bottom: 80px;
+  max-width: 140px;
+  font-size: 0.65rem;
+  height: auto;
+  display: inline-block;
+}
+
+/* Startbildschirm auf kleinen Geräten */
+@media (max-width: 600px) {
+  #startScreen .release-countdown {
+    bottom: 60px;
+    max-width: 120px;
+    font-size: 0.55rem;
+  }
+}
