@@ -2938,8 +2938,8 @@ body.fullscreen .fullscreen-btn {
   top: 15px;
   z-index: 10;
   white-space: nowrap;
-  overflow: hidden;
-  max-width: 25%;
+  overflow: visible; /* Wichtig: Text nicht abschneiden */
+  min-width: 95px; /* Mindestbreite für kompletten Text */
 }
 
 #timer::after {
@@ -2953,7 +2953,7 @@ body.fullscreen .fullscreen-btn {
   animation: shine 3s infinite linear;
 }
 
-/* Countdown-Badge */
+/* Countdown-Badge mit explizitem RELEASE-Text */
 .countdown-badge {
   position: absolute;
   top: 15px;
@@ -2964,15 +2964,19 @@ body.fullscreen .fullscreen-btn {
     rgba(230, 115, 0, 0.5));
   color: white;
   font-size: 0.7rem;
-  padding: 5px 10px;
+  padding: 6px 12px;
   border-radius: 20px;
   z-index: 11;
   box-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
   border: 1px solid rgba(255, 140, 0, 0.5);
   text-align: center;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  min-width: 90px;
-  max-width: 110px;
+  width: auto;
+  min-width: 110px;
+  max-width: 130px;
+  line-height: 1.2;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Level-Anzeige */
@@ -2990,7 +2994,8 @@ body.fullscreen .fullscreen-btn {
   border: 1px solid rgba(247, 193, 187, 0.3);
   z-index: 10;
   white-space: nowrap;
-  max-width: 25%;
+  overflow: visible; /* Wichtig: Text nicht abschneiden */
+  min-width: 95px; /* Mindestbreite für kompletten Text */
 }
 
 /* Spielfeld-Raster nach unten verschieben */
@@ -2998,7 +3003,7 @@ body.fullscreen .fullscreen-btn {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: 5px;
-  margin-top: 80px !important; /* Mehr Platz für die UI-Elemente */
+  margin-top: 75px !important; /* Mehr Platz für die UI-Elemente */
   margin-bottom: 20px;
   user-select: none;
   touch-action: none;
@@ -3018,15 +3023,15 @@ body.fullscreen .fullscreen-btn {
     font-size: 0.75rem;
     top: 15px;
     left: 10px;
-    max-width: 25%;
+    min-width: 85px;
   }
   
   .countdown-badge {
     padding: 5px 10px;
     font-size: 0.7rem;
     top: 15px;
-    min-width: 80px;
-    max-width: 100px;
+    min-width: 100px;
+    max-width: 120px;
   }
   
   #levelIndicator {
@@ -3034,7 +3039,7 @@ body.fullscreen .fullscreen-btn {
     font-size: 0.7rem;
     top: 15px;
     right: 10px;
-    max-width: 25%;
+    min-width: 85px;
   }
   
   .grid {
@@ -3048,23 +3053,23 @@ body.fullscreen .fullscreen-btn {
     font-size: 0.7rem;
     top: 15px;
     left: 8px;
-    max-width: 22%;
+    min-width: 80px;
   }
   
   .countdown-badge {
     padding: 4px 8px;
     font-size: 0.65rem;
     top: 15px;
-    min-width: 70px;
-    max-width: 90px;
+    min-width: 90px;
+    max-width: 110px;
   }
   
   #levelIndicator {
     padding: 5px 10px;
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     top: 15px;
     right: 8px;
-    max-width: 22%;
+    min-width: 80px;
   }
   
   .grid {
@@ -3079,23 +3084,23 @@ body.fullscreen .fullscreen-btn {
     font-size: 0.65rem;
     top: 15px;
     left: 5px;
-    max-width: 20%;
+    min-width: 75px;
   }
   
   .countdown-badge {
     padding: 3px 8px;
     font-size: 0.6rem;
     top: 15px;
-    min-width: 60px;
-    max-width: 80px;
+    min-width: 80px;
+    max-width: 100px;
   }
   
   #levelIndicator {
     padding: 4px 8px;
-    font-size: 0.6rem;
+    font-size: 0.65rem;
     top: 15px;
     right: 5px;
-    max-width: 20%;
+    min-width: 75px;
   }
   
   .grid {
@@ -3105,16 +3110,22 @@ body.fullscreen .fullscreen-btn {
 
 /* Für extrem schmale Geräte */
 @media (max-width: 360px) {
-  #timer, #levelIndicator {
+  #timer {
     padding: 3px 6px;
     font-size: 0.6rem;
-    max-width: 18%;
+    min-width: 70px;
   }
   
   .countdown-badge {
     padding: 3px 6px;
     font-size: 0.55rem;
-    min-width: 50px;
-    max-width: 70px;
+    min-width: 70px;
+    max-width: 90px;
+  }
+  
+  #levelIndicator {
+    padding: 3px 6px;
+    font-size: 0.6rem;
+    min-width: 70px;
   }
 }
