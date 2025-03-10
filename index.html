@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mandarinen: Erinnerungen im Gepäck</title>
+  <title>Mandarinen im Gepäck</title>
   <!-- Retro Pixel-Font -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <!-- Ergänzende Schriftart für Lyrics -->
@@ -35,7 +35,7 @@
         <div class="mandarin-right"></div>
       </div>
       
-      <h2>Mandarinen im Gepäck</h2>
+      <h2>Erinnerungen im Gepäck</h2>
       
       <p>
         Tauche ein in die Welt der Mandarinen und entdecke verschüttete Erinnerungen. Jedes gefundene Wort
@@ -173,6 +173,20 @@
       </div>
       <p class="save-notice">Die Erinnerungen bleiben - du kannst jederzeit mit einem anderen Schwierigkeitsgrad spielen.</p>
       
+      <!-- NEUER CODE: Credits im Endscreen -->
+      <div class="mandarin-credits">
+        <h3>Erinnerungen & Danksagungen</h3>
+        <div class="credit-line">
+          <span class="credit-label">Musik:</span>
+          <span class="credit-names">"Mandarinen" von Alexandra Janzen</span>
+        </div>
+        <div class="credit-line">
+          <span class="credit-label">Idee & Code:</span>
+          <span class="credit-names">Claude 3.7 und "Der NachtPoet" Stefan Brinkmann</span>
+        </div>
+        <p class="special-thanks">Extra Mandarinen-Dankeschön für die gemeinsame Reise durch Code und Kreativität!</p>
+      </div>
+      
       <!-- Cover-Footer mit goldenem Dreieck -->
       <div class="cover-footer">
         <span class="gold-triangle"></span>
@@ -228,6 +242,26 @@
     </div>
   </div>
 
+  <!-- NEUER CODE: Credits Modal -->
+  <div class="credits-modal" id="creditsModal">
+    <div class="credits-content">
+      <div class="credits-title">Mandarinen im Gepäck</div>
+      <div class="credits-section">
+        <h3>Musik</h3>
+        <p>"Mandarinen" von Alexandra Janzen</p>
+      </div>
+      <div class="credits-section">
+        <h3>Idee und Programmierung</h3>
+        <p>Claude 3.7 und "Der NachtPoet" Stefan Brinkmann</p>
+      </div>
+      <div class="credits-footer">
+        Extra Mandarinen-Dankeschön für die gemeinsame Reise<br>
+        durch Code und Kreativität!
+      </div>
+      <div class="credits-close" id="creditsModalClose">&times;</div>
+    </div>
+  </div>
+
   <!-- Audio-Elemente -->
   <audio id="stem-piano" preload="auto" loop></audio>
   <audio id="stem-bass" preload="auto" loop></audio>
@@ -253,5 +287,7 @@
 <script src="js/mode-manager.js"></script>
 <!-- Fullscreen-Support für Mobilgeräte -->
 <script src="js/fullscreen.js"></script>
+<!-- NEUER CODE: Credits JavaScript -->
+<script src="js/credits.js"></script>
 </body>
 </html>
