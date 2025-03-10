@@ -2920,3 +2920,159 @@ body.fullscreen .fullscreen-btn {
     font-size: 0.7rem;
   }
 }
+
+/* UI-Layout-Optimierungen für das Spielfeld */
+
+/* Timer nach links und höher setzen */
+#timer {
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  color: #fff;
+  background: linear-gradient(to right, 
+    rgba(160, 216, 239, 0.2), 
+    rgba(105, 179, 203, 0.3));
+  padding: 8px 15px;
+  border-radius: 20px;
+  box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
+  transition: all 0.3s ease;
+  position: absolute;
+  left: 15px;
+  top: 10px;
+  z-index: 10;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* Countdown-Badge optimieren */
+.countdown-badge {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(to right, 
+    rgba(255, 140, 0, 0.4), 
+    rgba(230, 115, 0, 0.5));
+  color: white;
+  font-size: 0.8rem;
+  padding: 8px 15px;
+  border-radius: 20px;
+  z-index: 11;
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
+  border: 1px solid rgba(255, 140, 0, 0.5);
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  min-width: 160px; /* Minimale Breite */
+  max-width: 50%; /* Maximale Breite */
+}
+
+/* Level-Indikator nach rechts und höher setzen */
+#levelIndicator {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 0.7rem;
+  background: linear-gradient(to right, 
+    rgba(160, 216, 239, 0.2), 
+    rgba(105, 179, 203, 0.3));
+  padding: 8px 15px;
+  border-radius: 20px;
+  box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
+  border: 1px solid rgba(247, 193, 187, 0.3);
+  z-index: 10;
+  white-space: nowrap;
+}
+
+/* Abstand zum Grid vergrößern */
+.grid {
+  margin-top: 50px !important; /* Mehr Platz für die UI-Elemente */
+}
+
+/* Mobile Optimierungen verfeinern */
+@media (max-width: 800px) {
+  .countdown-badge {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+  
+  #timer {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+  
+  #levelIndicator {
+    padding: 6px 10px;
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .countdown-badge {
+    padding: 5px 8px;
+    font-size: 0.7rem;
+    min-width: 140px;
+  }
+  
+  #timer {
+    padding: 5px 8px;
+    font-size: 0.7rem;
+    left: 10px;
+  }
+  
+  #levelIndicator {
+    padding: 5px 8px;
+    font-size: 0.65rem;
+    right: 10px;
+  }
+  
+  /* Mehr Platz für die drei Elemente schaffen */
+  .grid {
+    margin-top: 55px !important;
+  }
+}
+
+/* Für sehr kleine Geräte */
+@media (max-width: 450px) {
+  /* Gestaffelte Anordnung für kleine Displays */
+  .countdown-badge {
+    padding: 4px 8px;
+    font-size: 0.65rem;
+    min-width: 130px;
+    max-width: 70%;
+  }
+  
+  /* Timer und Level um 3px nach unten verschieben */
+  #timer {
+    top: 35px;
+    left: 5px;
+    padding: 4px 8px;
+    font-size: 0.65rem;
+  }
+  
+  #levelIndicator {
+    top: 35px;
+    right: 5px;
+    padding: 4px 8px;
+    font-size: 0.65rem;
+  }
+  
+  /* Noch mehr Platz für UI-Elemente */
+  .grid {
+    margin-top: 70px !important;
+  }
+}
+
+/* Für sehr schmale Geräte */
+@media (max-width: 370px) {
+  .countdown-badge {
+    font-size: 0.6rem;
+    padding: 3px 6px;
+    min-width: 120px;
+    max-width: 80%;
+  }
+  
+  #timer, #levelIndicator {
+    font-size: 0.6rem;
+    padding: 3px 6px;
+  }
+}
