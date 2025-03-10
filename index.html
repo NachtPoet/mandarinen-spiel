@@ -10,6 +10,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600&display=swap" rel="stylesheet">
   <!-- Stylesheet einbinden -->
   <link rel="stylesheet" href="css/style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 </head>
 <body>
   <div id="star-field"></div>
@@ -50,12 +53,16 @@
       </div>
       
       <div class="button-container">
-        <button id="startButton" class="btn primary">
-          <span class="gold-triangle"></span>Spiel fortsetzen
-        </button>
-        <button id="startNewButton" class="btn secondary">Neue Reise beginnen</button>
-        <button id="helpButton" class="btn">Spielanleitung</button>
-      </div>
+  <button id="startButton" class="btn primary">
+    <span class="gold-triangle"></span>Spiel fortsetzen
+  </button>
+  <button id="startNewButton" class="btn secondary">Neue Reise beginnen</button>
+  <button id="helpButton" class="btn">Spielanleitung</button>
+  <!-- Fullscreen-Button für Mobilgeräte -->
+  <button id="fullscreenButton" class="btn fullscreen-btn">
+    <span class="fullscreen-icon"></span>Vollbild
+  </button>
+</div>
 
       <div id="loadingIndicator" class="loading-indicator" style="display: none;">
   <div class="loading-spinner"></div>
@@ -244,5 +251,7 @@
 <script src="js/cover-animations.js"></script>
 <!-- Modusverwaltung -->
 <script src="js/mode-manager.js"></script>
+<!-- Fullscreen-Support für Mobilgeräte -->
+<script src="js/fullscreen.js"></script>
 </body>
 </html>
