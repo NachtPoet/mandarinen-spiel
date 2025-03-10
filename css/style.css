@@ -1,5 +1,5 @@
 /* 
- * Mandarinen: Erinnerungen im Gepäck 
+ * Mandarinen im Gepäck 
  * Vollständige CSS mit Cover-Integration
  */
 
@@ -823,7 +823,10 @@ p {
   border-radius: 20px;
   box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
   transition: all 0.3s ease;
-  position: relative;
+  position: absolute;
+  left: 15px;
+  top: 10px;
+  z-index: 10;
   overflow: hidden;
 }
 
@@ -836,6 +839,26 @@ p {
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   animation: shine 3s infinite linear;
+}
+
+/* Countdown Badge */
+.countdown-badge {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+  background: linear-gradient(to right, 
+    rgba(255, 140, 0, 0.4), 
+    rgba(230, 115, 0, 0.5));
+  padding: 7px 12px;
+  border-radius: 15px;
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
+  border: 1px solid rgba(255, 140, 0, 0.5);
+  z-index: 11;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
 }
 
 /* Level-Anzeige */
@@ -851,6 +874,7 @@ p {
   border-radius: 15px;
   box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
   border: 1px solid rgba(247, 193, 187, 0.3);
+  z-index: 10;
 }
 
 /* Fortschrittsanzeige */
@@ -1409,7 +1433,19 @@ p {
   text-shadow: 0 0 10px rgba(255, 240, 172, 0.3);
 }
 
+/* Verbesserte Darstellung des Künstlernamens */
+.artist-name-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .artist-name {
+  text-align: left;
+  margin-bottom: 5px;
+}
+
+.artist-lastname {
   text-align: left;
 }
 
@@ -2062,6 +2098,21 @@ select:focus {
   .level-number {
     font-size: 0.8rem;
   }
+  
+  /* Verbesserte mobile Ansicht für den Countdown-Badge */
+  .countdown-badge {
+    padding: 5px 10px;
+    font-size: 0.7rem;
+    top: 5px;
+  }
+  
+  /* Timer nach links verschieben */
+  #timer {
+    left: 10px;
+    top: 35px; /* Unter dem Countdown-Badge */
+    font-size: 0.75rem;
+    padding: 5px 10px;
+  }
 }
 
 @media (max-width: 600px) {
@@ -2082,23 +2133,20 @@ select:focus {
   }
 
   #timer {
-    font-size: 0.75rem;
-    margin-bottom: 10px;
-    position: absolute;
-    left: 10px;
-    top: 10px;
+    font-size: 0.7rem;
+    top: 35px;
+    left: 5px;
     width: auto;
     min-width: 80px;
     text-align: left;
-    padding: 4px 10px;
+    padding: 3px 8px;
   }
 
   #levelIndicator {
-    top: 10px;
-    right: 10px;
-    font-size: 0.65rem;
-    padding: 4px 8px;
-    margin-bottom: 15px;
+    top: 35px;
+    right: 5px;
+    font-size: 0.6rem;
+    padding: 3px 8px;
   }
 
   .word {
@@ -2157,9 +2205,9 @@ select:focus {
     max-width: 95%;
   }
 
-  /* Abstand zwischen Spielfeld und Level-Anzeige */
+  /* Abstand zwischen Spielfeld und UI-Elementen */
   .grid {
-    margin-top: 35px;
+    margin-top: 60px; /* Mehr Platz für die UI-Elemente */
   }
 
   /* Stem-Icon-Größe */
@@ -2231,6 +2279,16 @@ select:focus {
     left: 10px;
     font-size: 0.55rem;
   }
+  
+  /* Countdown Badge auf Mobilgeräten */
+  .countdown-badge {
+    width: auto;
+    max-width: 90%;
+    white-space: normal;
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    top: 3px;
+  }
 }
 
 /* Sehr kleine Geräte */
@@ -2248,6 +2306,27 @@ select:focus {
   .vinyl-player {
     width: 40px;
     height: 40px;
+  }
+  
+  /* Noch kleinere Countdown Badge */
+  .countdown-badge {
+    font-size: 0.6rem;
+    padding: 2px 6px;
+  }
+  
+  /* Timer und Level-Anzeige noch kleiner */
+  #timer, #levelIndicator {
+    font-size: 0.6rem;
+    padding: 2px 6px;
+  }
+  
+  /* Countdown Badge unterhalb von Timer & Level */
+  #timer {
+    top: 30px;
+  }
+  
+  #levelIndicator {
+    top: 30px;
   }
 }
 
@@ -2745,51 +2824,34 @@ body.fullscreen .fullscreen-btn {
   }
 }
 
-/* Versions-Badge im Spielfeld deutlich dezenter machen */
-.release-countdown {
-  position: fixed;
-  bottom: 10px;
+/* Countdown-Badge im Spielfeld */
+.countdown-badge {
+  position: absolute;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 4px 10px; /* Kleineres Padding */
-  background-color: rgba(255, 140, 0, 0.5); /* Transparenter */
+  background: linear-gradient(to right, 
+    rgba(255, 140, 0, 0.4), 
+    rgba(230, 115, 0, 0.5));
   color: white;
-  font-size: 0.6rem; /* Kleinere Schrift */
-  border-radius: 12px;
-  z-index: 800; /* Niedriger als andere wichtige Elemente */
-  box-shadow: 0 0 8px rgba(255, 140, 0, 0.3); /* Weniger Schatten */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 150px; /* Begrenzte Breite */
-  opacity: 0.8; /* Leicht transparent */
-}
-
-/* PRE-RELEASE Badge kleiner und dezenter */
-.release-countdown::after {
-  content: attr(data-mode); /* Dynamischer Modus */
-  display: block;
-  font-size: 0.55rem;
-  padding: 2px 6px;
-  background-color: rgba(255, 140, 0, 0.8);
-  border-radius: 8px;
-  margin-top: 2px;
-  letter-spacing: 0.5px;
-  transform: scale(0.9); /* Leicht verkleinert */
+  font-size: 0.8rem;
+  padding: 7px 12px;
+  border-radius: 15px;
+  z-index: 11;
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
+  border: 1px solid rgba(255, 140, 0, 0.5);
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
 }
 
 /* Bei sehr kleinen Bildschirmen noch dezenter */
 @media (max-height: 600px), (max-width: 350px) {
-  .release-countdown {
-    bottom: 5px;
-    font-size: 0.5rem;
+  .countdown-badge {
+    font-size: 0.6rem;
     padding: 3px 8px;
-    opacity: 0.7;
-  }
-  
-  .release-countdown::after {
-    font-size: 0.45rem;
-    padding: 1px 5px;
+    opacity: 0.9;
+    top: 5px;
   }
 }
 
@@ -2827,5 +2889,34 @@ body.fullscreen .fullscreen-btn {
   .word {
     padding: 4px 8px;
     font-size: 0.6rem;
+  }
+  
+  /* Countdown-Badge im Landscape-Modus */
+  .countdown-badge {
+    top: 5px;
+    font-size: 0.65rem;
+    padding: 2px 8px;
+  }
+}
+
+/* Spezifische Anpassungen für das Start-Screen-Layout */
+@media (max-width: 450px) {
+  /* Verbesserte Gestaltung des Künstlernamens */
+  .artist-name-container {
+    margin-right: 10px;
+  }
+  
+  .artist-name {
+    font-size: 0.7rem;
+    line-height: 1.2;
+  }
+  
+  .artist-lastname {
+    font-size: 0.7rem;
+    line-height: 1.2;
+  }
+  
+  .song-title {
+    font-size: 0.7rem;
   }
 }
