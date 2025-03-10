@@ -2712,3 +2712,120 @@ body.fullscreen .fullscreen-btn {
     gap: 8px;
   }
 }
+
+
+/* Anpassungen für den Startbildschirm im Vollbildmodus */
+@media (max-height: 800px) {
+  /* Titelzeile etwas nach unten verschieben und verkleinern */
+  .cover-title {
+    margin-top: 30px; /* Mehr Platz oben */
+    font-size: 0.9rem;
+  }
+  
+  /* Mandarinen-Animation oben mehr Platz geben */
+  .cover-frame {
+    padding-top: 40px; /* Mehr Platz oben */
+  }
+  
+  /* Im Fullscreen zusätzlichen Platz */
+  body.fullscreen .cover-frame {
+    padding-top: 50px;
+  }
+}
+
+/* Anpassungen für sehr kleine Höhen */
+@media (max-height: 600px) {
+  .cover-title {
+    margin-top: 40px;
+    font-size: 0.8rem;
+  }
+  
+  .cover-frame {
+    padding-top: 50px;
+  }
+}
+
+/* Versions-Badge im Spielfeld deutlich dezenter machen */
+.release-countdown {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 10px; /* Kleineres Padding */
+  background-color: rgba(255, 140, 0, 0.5); /* Transparenter */
+  color: white;
+  font-size: 0.6rem; /* Kleinere Schrift */
+  border-radius: 12px;
+  z-index: 800; /* Niedriger als andere wichtige Elemente */
+  box-shadow: 0 0 8px rgba(255, 140, 0, 0.3); /* Weniger Schatten */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 150px; /* Begrenzte Breite */
+  opacity: 0.8; /* Leicht transparent */
+}
+
+/* PRE-RELEASE Badge kleiner und dezenter */
+.release-countdown::after {
+  content: attr(data-mode); /* Dynamischer Modus */
+  display: block;
+  font-size: 0.55rem;
+  padding: 2px 6px;
+  background-color: rgba(255, 140, 0, 0.8);
+  border-radius: 8px;
+  margin-top: 2px;
+  letter-spacing: 0.5px;
+  transform: scale(0.9); /* Leicht verkleinert */
+}
+
+/* Bei sehr kleinen Bildschirmen noch dezenter */
+@media (max-height: 600px), (max-width: 350px) {
+  .release-countdown {
+    bottom: 5px;
+    font-size: 0.5rem;
+    padding: 3px 8px;
+    opacity: 0.7;
+  }
+  
+  .release-countdown::after {
+    font-size: 0.45rem;
+    padding: 1px 5px;
+  }
+}
+
+/* Button für Admin-Panel besser platzieren */
+.mode-badge {
+  top: auto; /* Nicht oben */
+  bottom: 10px; /* Unten */
+  left: 10px;
+  font-size: 0.5rem;
+  padding: 3px 8px;
+  opacity: 0.7; /* Transparenter */
+  z-index: 800;
+  border-radius: 10px;
+}
+
+/* Kleine Geräte in Landscape-Modus */
+@media (max-height: 500px) and (orientation: landscape) {
+  /* Spielfeld besser nutzen */
+  #gameContainer {
+    padding: 5px;
+  }
+  
+  /* Timer und Level-Indicator kleiner */
+  #timer, #levelIndicator {
+    font-size: 0.65rem;
+    padding: 3px 8px;
+  }
+  
+  /* Wortliste näher am Spielfeld */
+  .word-list {
+    margin-top: 10px;
+  }
+  
+  /* Kleinere Wort-Badges */
+  .word {
+    padding: 4px 8px;
+    font-size: 0.6rem;
+  }
+}
