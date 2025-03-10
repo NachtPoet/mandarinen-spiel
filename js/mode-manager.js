@@ -99,6 +99,9 @@ function showModeBadge(mode) {
 /**
  * Erstellt oder aktualisiert den Countdown zum Release
  */
+/**
+ * Erstellt oder aktualisiert den Countdown zum Release
+ */
 function updateReleaseCountdown() {
   if (!window.APP_CONFIG || !window.APP_CONFIG.RELEASE_DATE) return;
   
@@ -118,11 +121,12 @@ function updateReleaseCountdown() {
     existingCountdown.remove();
   }
   
-  // Countdown-Badge im Spielbereich anzeigen
+  // Countdown-Badge im Spielbereich aktualisieren
   const countdownBadge = document.getElementById('countdown-badge');
   if (countdownBadge) {
-    countdownBadge.textContent = `Release in ${diffDays} Tagen`;
-    countdownBadge.style.display = 'block';
+    // Nur die Tage-Anzahl anzeigen, "RELEASE" wird per CSS hinzugefügt
+    countdownBadge.textContent = `in ${diffDays} Tagen`;
+    countdownBadge.style.display = 'flex';
   }
 }
 
