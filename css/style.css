@@ -2503,3 +2503,57 @@ body::after {
   z-index: 10;
 }
 }
+
+/* Ladebildschirm */
+.loading-indicator {
+  margin-top: 20px;
+  text-align: center;
+  width: 100%;
+  max-width: 300px;
+  animation: fadeIn 0.5s ease;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 15px;
+  border: 3px solid rgba(255, 140, 0, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--color-mandarin-bright);
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  margin-bottom: 10px;
+  font-size: 0.8rem;
+  color: var(--color-cover-gold);
+}
+
+.loading-progress-container {
+  height: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 10px;
+  border: 1px solid rgba(255, 140, 0, 0.3);
+}
+
+.loading-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--color-mandarin-dark), var(--color-mandarin-bright));
+  transition: width 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: progressShine 2s infinite;
+}
