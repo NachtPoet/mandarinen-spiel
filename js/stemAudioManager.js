@@ -1,6 +1,7 @@
 /**
  * Verbesserte StemAudioManager-Implementierung mit Web Audio API
  * für bessere Synchronisation auf allen Geräten (inkl. Mobilgeräte)
+ * Mit Ladebildschirm-Unterstützung
  */
 function StemAudioManager() {
   // Audio Context erstellen
@@ -39,8 +40,23 @@ function StemAudioManager() {
   // Stems erfolgreich geladen
   this.stemsLoaded = [false, false, false, false, false, false];
   
-  // Stem-Dateinamen
-  this.stemFiles = APP_CONFIG.STEMS[APP_CONFIG.MODE].map(stem => stem.file);
+  // Stem-Dateinamen - Prüfe, ob APP_CONFIG verfügbar ist
+  if (window.APP_CONFIG && APP_CONFIG.STEMS && APP_CONFIG.STEMS[APP_CONFIG.MODE]) {
+    // Stem-Dateinamen aus der Konfiguration laden
+    console.log(`Lade Stems für Modus: ${APP_CONFIG.MODE}`);
+    this.stemFiles = APP_CONFIG.STEMS[APP_CONFIG.MODE].map(stem => stem.file);
+  } else {
+    // Fallback zu den Standard-Dateinamen
+    console.warn("APP_CONFIG nicht verfügbar, verwende Standard-Stems");
+    this.stemFiles = [
+      '01B_piano.mp3',
+      '02B_bass.mp3',
+      '03B_drums.mp3',
+      '04B_guitars.mp3',
+      '05B_others.mp3',
+      '06B_vocals.mp3'
+    ];
+  }
   
   // Fade-Status (für Animation)
   this.fadingStems = new Set();
@@ -48,6 +64,11 @@ function StemAudioManager() {
   // Startzeit und Dauer für die Synchronisation
   this.startTime = 0;
   this.bufferDuration = 0;
+  
+  // Neue Eigenschaften für den Ladefortschritt
+  this.onLoadProgressCallback = null;
+  this.stemsTotalCount = this.numStems;
+  this.stemsLoadedCount = 0;
   
   // Initialisieren
   this.init();
@@ -105,6 +126,13 @@ StemAudioManager.prototype.init = function() {
 };
 
 /**
+ * Setzt den Callback für Fortschrittsaktualisierungen
+ */
+StemAudioManager.prototype.setLoadProgressCallback = function(callback) {
+  this.onLoadProgressCallback = callback;
+};
+
+/**
  * Versucht, eine Audio-Datei zu laden und in einen Buffer zu dekodieren
  */
 StemAudioManager.prototype.loadStemBuffer = function(index) {
@@ -133,6 +161,11 @@ StemAudioManager.prototype.tryLoadPath = function(paths, pathIndex, stemIndex) {
   
   if (pathIndex >= paths.length) {
     console.error("Alle Pfade für Stem " + (stemIndex + 1) + " gescheitert.");
+    
+    // Stems-Ladefortschritt aktualisieren (auch bei Fehler)
+    this.stemsLoadedCount++;
+    this.updateLoadProgress();
+    
     return;
   }
   
@@ -168,12 +201,48 @@ StemAudioManager.prototype.tryLoadPath = function(paths, pathIndex, stemIndex) {
       
       // Lautstärke setzen (nur Piano hat anfangs Lautstärke > 0)
       self.gainNodes[stemIndex].gain.value = self.stemVolumes[stemIndex];
+      
+      // Stems-Ladefortschritt aktualisieren
+      self.stemsLoadedCount++;
+      self.updateLoadProgress();
     })
     .catch(function(error) {
       console.warn("Fehler beim Laden von " + path + ": " + error.message);
       // Nächsten Pfad versuchen
       self.tryLoadPath(paths, pathIndex + 1, stemIndex);
+      
+      // Wenn alle Pfade erschöpft sind (in der äußeren Methode)
+      if (pathIndex >= paths.length - 1) {
+        // Stems-Ladefortschritt auch bei Fehler aktualisieren
+        self.stemsLoadedCount++;
+        self.updateLoadProgress();
+      }
     });
+};
+
+/**
+ * Aktualisiert den Ladefortschritt und ruft den Callback auf
+ */
+StemAudioManager.prototype.updateLoadProgress = function() {
+  if (this.onLoadProgressCallback) {
+    var progress = this.stemsLoadedCount / this.stemsTotalCount;
+    this.onLoadProgressCallback(progress, this.stemsLoadedCount, this.stemsTotalCount);
+  }
+};
+
+/**
+ * Setzt den Ladefortschritt zurück
+ */
+StemAudioManager.prototype.resetLoadProgress = function() {
+  this.stemsLoadedCount = 0;
+  this.updateLoadProgress();
+};
+
+/**
+ * Prüft, ob alle Stems geladen sind
+ */
+StemAudioManager.prototype.allStemsLoaded = function() {
+  return this.stemsLoadedCount >= this.stemsTotalCount;
 };
 
 /**
