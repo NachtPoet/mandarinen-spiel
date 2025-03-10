@@ -407,6 +407,59 @@ stemIconStyle.textContent = `
     stroke: var(--color-mandarin-dark);
     fill: none;
   }
+
+  /**
+ * Direktes Hinzufügen des Release-Countdowns in das Game Container
+ */
+function addReleaseCountdown() {
+  // Diese Funktion direkt aufrufen
+  if (!window.APP_CONFIG || !window.APP_CONFIG.RELEASE_DATE) return;
+  
+  const releaseDate = new Date(window.APP_CONFIG.RELEASE_DATE);
+  const now = new Date();
+  
+  // Wenn das Release-Datum bereits vorbei ist, nichts anzeigen
+  if (now >= releaseDate) return;
+  
+  // Tage bis zum Release berechnen
+  const diffTime = releaseDate - now;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  // Countdown-Badge finden oder erstellen
+  let countdownBadge = document.getElementById('countdown-badge');
+  
+  if (!countdownBadge) {
+    // Falls das Element nicht existiert, einfach ein neues erstellen und hinzufügen
+    countdownBadge = document.createElement('div');
+    countdownBadge.id = 'countdown-badge';
+    countdownBadge.className = 'countdown-badge';
+    
+    const gameContainer = document.getElementById('gameContainer');
+    if (gameContainer) {
+      gameContainer.appendChild(countdownBadge);
+    }
+  }
+  
+  // Den Text setzen mit RELEASE und Zeilenumbruch
+  countdownBadge.innerHTML = `<strong>RELEASE</strong><br>in ${diffDays} Tagen`;
+  countdownBadge.style.display = 'flex';
+}
+
+// DOM-Content-Loaded Event hinzufügen
+document.addEventListener('DOMContentLoaded', function() {
+  // Kurze Verzögerung hinzufügen, um sicherzustellen, dass alle Elemente geladen sind
+  setTimeout(function() {
+    addReleaseCountdown();
+    
+    // Zusätzlich ein Intervall für regelmäßige Aktualisierung setzen
+    setInterval(addReleaseCountdown, 60000); // Update jede Minute
+  }, 500);
+});
+
+// Zusätzlichen Listener hinzufügen für das Spielfeld, falls es dynamisch eingefügt wird
+document.addEventListener('gameContainerReady', function() {
+  setTimeout(addReleaseCountdown, 100);
+});
   
   /* Bass+Drums kombiniertes Icon */
   .stem-icon.bass-drums-icon .stem-icon-base {
