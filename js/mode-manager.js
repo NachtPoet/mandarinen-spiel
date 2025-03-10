@@ -44,10 +44,10 @@ function updateUIByMode() {
     endMessage.innerHTML = texts.END_MESSAGE;
   }
   
-  // Wenn im PRE_RELEASE oder BETA Modus, evtl. Release-Datum anzeigen
+  // Wenn im PRE_RELEASE oder BETA Modus, Release-Countdown anzeigen
   if (mode === 'BETA' || mode === 'PRE_RELEASE') {
-    // Optional: Release-Countdown hinzufügen
-    addReleaseCountdown();
+    // Release-Countdown im Spielbereich anzeigen
+    updateReleaseCountdown();
   }
   
   // Modus-Badge anzeigen (optional)
@@ -69,8 +69,8 @@ function showModeBadge(mode) {
     existingBadge.remove();
   }
   
-  // Nur im BETA oder PRE_RELEASE Modus ein Badge anzeigen
-  if (mode === 'RELEASE') {
+  // Nur im BETA Modus ein Badge anzeigen
+  if (mode !== 'BETA') {
     return;
   }
   
@@ -83,9 +83,6 @@ function showModeBadge(mode) {
   if (mode === 'BETA') {
     badge.textContent = 'BETA';
     badge.style.backgroundColor = 'rgba(99, 29, 118, 0.7)';
-  } else {
-    badge.textContent = 'PRE-RELEASE';
-    badge.style.backgroundColor = 'rgba(255, 140, 0, 0.7)';
   }
   
   // Zum Dokument hinzufügen
@@ -100,10 +97,10 @@ function showModeBadge(mode) {
 }
 
 /**
- * Zeigt einen Countdown zum Release an
+ * Erstellt oder aktualisiert den Countdown zum Release
  */
-function addReleaseCountdown() {
-  if (!window.APP_CONFIG.RELEASE_DATE) return;
+function updateReleaseCountdown() {
+  if (!window.APP_CONFIG || !window.APP_CONFIG.RELEASE_DATE) return;
   
   const releaseDate = new Date(window.APP_CONFIG.RELEASE_DATE);
   const now = new Date();
@@ -116,24 +113,17 @@ function addReleaseCountdown() {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   
   // Vorhandenen Countdown entfernen, falls er existiert
-  const existingCountdown = document.getElementById('release-countdown');
+  const existingCountdown = document.querySelector('.release-countdown');
   if (existingCountdown) {
     existingCountdown.remove();
   }
   
-  // Countdown-Element erstellen
-  const countdown = document.createElement('div');
-  countdown.id = 'release-countdown';
-  countdown.className = 'release-countdown';
-  
-  // Aktuellen Modus als data-Attribut für CSS speichern
-  countdown.setAttribute('data-mode', window.APP_CONFIG.MODE);
-  
-  // Nur "Release in X Tagen" - ohne PRE-RELEASE (kommt per CSS)
-  countdown.innerHTML = `<span>Release in ${diffDays} Tagen</span>`;
-  
-  // Zum Dokument hinzufügen
-  document.body.appendChild(countdown);
+  // Countdown-Badge im Spielbereich anzeigen
+  const countdownBadge = document.getElementById('countdown-badge');
+  if (countdownBadge) {
+    countdownBadge.textContent = `Release in ${diffDays} Tagen`;
+    countdownBadge.style.display = 'block';
+  }
 }
 
 /**
