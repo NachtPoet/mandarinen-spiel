@@ -48,9 +48,15 @@ function updateUIByMode() {
   if (mode === 'BETA' || mode === 'PRE_RELEASE') {
     // Release-Countdown im Spielbereich anzeigen
     updateReleaseCountdown();
+  } else {
+    // Im RELEASE-Modus den Countdown ausblenden
+    const countdownBadge = document.getElementById('countdown-badge');
+    if (countdownBadge) {
+      countdownBadge.style.display = 'none';
+    }
   }
   
-  // Modus-Badge anzeigen (optional)
+  // Modus-Badge anzeigen (nur im BETA-Modus)
   showModeBadge(mode);
   
   // WICHTIG: Wortliste neu rendern, wenn GameInstance existiert
@@ -60,44 +66,7 @@ function updateUIByMode() {
 }
 
 /**
- * Zeigt ein dezentes Badge an, das den aktuellen Modus anzeigt
- */
-function showModeBadge(mode) {
-  // Vorhandenes Badge entfernen, falls es existiert
-  const existingBadge = document.getElementById('mode-badge');
-  if (existingBadge) {
-    existingBadge.remove();
-  }
-  
-  // Nur im BETA Modus ein Badge anzeigen
-  if (mode !== 'BETA') {
-    return;
-  }
-  
-  // Badge erstellen
-  const badge = document.createElement('div');
-  badge.id = 'mode-badge';
-  badge.className = 'mode-badge';
-  
-  // Text und Farbe je nach Modus
-  if (mode === 'BETA') {
-    badge.textContent = 'BETA';
-    badge.style.backgroundColor = 'rgba(99, 29, 118, 0.7)';
-  }
-  
-  // Zum Dokument hinzufügen
-  document.body.appendChild(badge);
-  
-  // Nach Klick auf Badge Admin-Panel öffnen
-  badge.addEventListener('click', function(e) {
-    if (e.shiftKey || e.ctrlKey) {
-      showAdminPanel();
-    }
-  });
-}
-
-/**
- * Erstellt oder aktualisiert den Countdown zum Release
+ * Erstellt oder aktualisiert den Countdown zum Release mit RELEASE-Text
  */
 function updateReleaseCountdown() {
   if (!window.APP_CONFIG || !window.APP_CONFIG.RELEASE_DATE) return;
@@ -121,12 +90,12 @@ function updateReleaseCountdown() {
   // Countdown-Badge im Spielbereich aktualisieren
   const countdownBadge = document.getElementById('countdown-badge');
   if (countdownBadge) {
-    // Nur die Tage-Anzahl anzeigen, "RELEASE" wird per CSS hinzugefügt
-    countdownBadge.textContent = `in ${diffDays} Tagen`;
-    countdownBadge.style.display = 'flex';
+    // Zweizeiligen Text mit RELEASE explizit einfügen
+    countdownBadge.innerHTML = `<strong>RELEASE</strong><br>in ${diffDays} Tagen`;
+    countdownBadge.style.display = 'block';
+    countdownBadge.style.lineHeight = '1.2';
   }
 }
-
 
 /**
  * Zeigt das Admin-Panel zum Umschalten zwischen Modi an
