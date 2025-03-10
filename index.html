@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mandarinen: Erinnerungen im Gepäck</title>
+  <title>Mandarinen im Gepäck</title>
   <!-- Retro Pixel-Font -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <!-- Ergänzende Schriftart für Lyrics -->
@@ -18,14 +18,17 @@
   <div id="star-field"></div>
   <div class="memory-flash"></div>
 
-  <h1>Mandarinen: Erinnerungen im Gepäck</h1>
+  <h1>Mandarinen im Gepäck</h1>
 
   <!-- Startbildschirm mit Cover-Ästhetik -->
   <div id="startScreen" class="overlay">
     <div class="cover-frame">
       <!-- Goldene Überschrift wie auf dem Cover -->
       <div class="cover-title">
-        <span class="artist-name">ALEXANDRA JANZEN</span>
+        <div class="artist-name-container">
+          <span class="artist-name">ALEXANDRA</span>
+          <span class="artist-lastname">JANZEN</span>
+        </div>
         <span class="song-title">MANDARINEN</span>
       </div>
       
@@ -35,7 +38,7 @@
         <div class="mandarin-right"></div>
       </div>
       
-      <h2>Erinnerungen im Gepäck</h2>
+      <h2>Mandarinen im Gepäck</h2>
       
       <p>
         Tauche ein in die Welt der Mandarinen und entdecke verschüttete Erinnerungen. Jedes gefundene Wort
@@ -88,6 +91,7 @@
   <!-- Spielbereich -->
   <div id="gameContainer" class="container" style="display:none;">
     <div id="epicBadge" class="epic-badge">Perfekte Runde!</div>
+    <div id="countdown-badge" class="countdown-badge"></div>
     <div id="levelIndicator">Level: 1/10</div>
     <div id="timer">Zeit: 0:00</div>
     <div id="grid" class="grid"></div>
@@ -106,7 +110,10 @@
     <div class="cover-frame level-frame">
       <!-- Cover-Titel für konsistentes Design -->
       <div class="cover-title">
-        <span class="artist-name">ALEXANDRA JANZEN</span>
+        <div class="artist-name-container">
+          <span class="artist-name">ALEXANDRA</span>
+          <span class="artist-lastname">JANZEN</span>
+        </div>
         <span class="song-title">MANDARINEN</span>
       </div>
       
@@ -147,7 +154,10 @@
     <div class="cover-frame">
       <!-- Cover-Titel für konsistentes Design -->
       <div class="cover-title">
-        <span class="artist-name">ALEXANDRA JANZEN</span>
+        <div class="artist-name-container">
+          <span class="artist-name">ALEXANDRA</span>
+          <span class="artist-lastname">JANZEN</span>
+        </div>
         <span class="song-title">MANDARINEN</span>
       </div>
       
