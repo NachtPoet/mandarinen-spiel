@@ -293,8 +293,19 @@ document.addEventListener('keydown', function(e) {
  * UI aktualisieren, wenn das Dokument geladen ist
  */
 document.addEventListener('DOMContentLoaded', function() {
-  // Kurze Verzögerung, um sicherzustellen, dass alle Komponenten geladen sind
-  setTimeout(updateUIByMode, 500);
+  // Polling-Ansatz statt fester Verzögerung
+  function checkConfig() {
+    if (window.APP_CONFIG) {
+      console.log("APP_CONFIG gefunden, UI wird aktualisiert");
+      updateUIByMode();
+    } else {
+      console.log("Warte auf APP_CONFIG...");
+      setTimeout(checkConfig, 200);
+    }
+  }
+  
+  // Starte das Polling
+  checkConfig();
 });
 
 /**
