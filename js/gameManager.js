@@ -391,49 +391,105 @@ class GameManager {
  * Startet das Spiel und initialisiert Audio
  * Verbesserte Version mit robuster Audio-Behandlung
  */
+/**
+ * Startet das Spiel und initialisiert Audio
+ * Verbesserte Version mit Ladebildschirm
+ */
 startGame() {
   this.audioManager.playSound('click');
   this.currentDifficulty = this.domElements.difficultySelect.value;
   this.updateDifficultyVisual();
-  this.domElements.startScreen.classList.add("hidden");
-  this.domElements.gameContainer.style.display = "flex";
-  this.startTime = Date.now();
-  this.updateTimerDisplay();
-  clearInterval(this.timerInterval);
-  this.timerInterval = setInterval(() => this.updateTimerDisplay(), 1000);
-  this.initLevel();
   
-  // Audio Context für alle Geräte aktivieren
-  if (this.stemAudioManager.context) {
-    console.log("AudioContext Status beim Spielstart:", this.stemAudioManager.context.state);
-    this.stemAudioManager.context.resume().then(() => {
-      console.log("AudioContext erfolgreich aktiviert durch Benutzerinteraktion");
-    }).catch(e => console.warn("Fehler beim Aktivieren des AudioContext:", e));
+  // Lade-Indikator anzeigen und Start-Buttons ausblenden
+  const loadingIndicator = document.getElementById('loadingIndicator');
+  const buttonContainer = document.querySelector('#startScreen .button-container');
+  
+  if (loadingIndicator && buttonContainer) {
+    buttonContainer.style.display = 'none';
+    loadingIndicator.style.display = 'block';
+    
+    // Progressbar auf 0 setzen
+    const progressBar = document.getElementById('loadingProgressBar');
+    if (progressBar) {
+      progressBar.style.width = '0%';
+    }
   }
   
-  // Verzögerter Start für alle Geräte (nicht nur mobile)
-  // Dies gibt dem Audio-System Zeit, sich zu initialisieren
-  setTimeout(() => {
-    console.log("Starte Musik mit Verzögerung...");
-    this.stemAudioManager.play();
-    
-    // Nach dem Start eine zusätzliche Synchronisation für alle Geräte erzwingen
-    if (typeof this.stemAudioManager.syncAllStems === 'function') {
-      setTimeout(() => this.stemAudioManager.syncAllStems(true), 500);
-    }
-    
-    // Erneuter Versuch nach weiterer Verzögerung für den Fall, dass Musik nicht startet
-    setTimeout(() => {
-      if (!this.stemAudioManager.isPlaying) {
-        console.log("Musik scheint nicht zu spielen, erneuter Versuch...");
-        this.stemAudioManager.play();
+  // Ladefortschritt-Callback für StemAudioManager registrieren
+  if (this.stemAudioManager && typeof this.stemAudioManager.setLoadProgressCallback === 'function') {
+    this.stemAudioManager.setLoadProgressCallback((progress, loaded, total) => {
+      // Progressbar aktualisieren
+      const progressBar = document.getElementById('loadingProgressBar');
+      if (progressBar) {
+        progressBar.style.width = (progress * 100) + '%';
       }
+      
+      console.log(`Audio-Ladefortschritt: ${Math.round(progress * 100)}% (${loaded}/${total})`);
+      
+      // Wenn alle Stems geladen sind, Spiel starten
+      if (loaded >= total) {
+        setTimeout(() => {
+          // Startbildschirm ausblenden und Spielcontainer anzeigen
+          this.domElements.startScreen.classList.add("hidden");
+          this.domElements.gameContainer.style.display = "flex";
+          
+          // Timer starten und Spielfeld initialisieren
+          this.startTime = Date.now();
+          this.updateTimerDisplay();
+          clearInterval(this.timerInterval);
+          this.timerInterval = setInterval(() => this.updateTimerDisplay(), 1000);
+          this.initLevel();
+          
+          // Audio starten
+          if (this.stemAudioManager.context) {
+            this.stemAudioManager.context.resume().then(() => {
+              console.log("AudioContext erfolgreich aktiviert durch Benutzerinteraktion");
+              
+              // Verzögerter Start für alle Geräte
+              setTimeout(() => {
+                this.stemAudioManager.play();
+                
+                // Nach dem Start eine zusätzliche Synchronisation erzwingen
+                if (typeof this.stemAudioManager.syncAllStems === 'function') {
+                  setTimeout(() => this.stemAudioManager.syncAllStems(true), 500);
+                }
+              }, 300);
+            }).catch(e => console.warn("Fehler beim Aktivieren des AudioContext:", e));
+          }
+          
+          this.saveGameProgress();
+        }, 500); // Kurze Verzögerung für eine sanfte Animation
+      }
+    });
+    
+    // Ladevorgang starten/zurücksetzen
+    this.stemAudioManager.resetLoadProgress();
+    
+    // Alle Stems laden oder Fortschritt aktualisieren, wenn bereits geladen
+    for (let i = 0; i < this.stemAudioManager.numStems; i++) {
+      if (!this.stemAudioManager.stemsLoaded[i]) {
+        this.stemAudioManager.loadStemBuffer(i);
+      } else {
+        // Stem bereits geladen, Fortschritt aktualisieren
+        this.stemAudioManager.stemsLoadedCount++;
+        this.stemAudioManager.updateLoadProgress();
+      }
+    }
+  } else {
+    // Fallback, wenn kein StemAudioManager oder keine Callback-Funktion verfügbar ist
+    setTimeout(() => {
+      this.domElements.startScreen.classList.add("hidden");
+      this.domElements.gameContainer.style.display = "flex";
+      this.startTime = Date.now();
+      this.updateTimerDisplay();
+      clearInterval(this.timerInterval);
+      this.timerInterval = setInterval(() => this.updateTimerDisplay(), 1000);
+      this.initLevel();
+      this.stemAudioManager.play();
+      this.saveGameProgress();
     }, 1000);
-  }, 300);
-  
-  this.saveGameProgress();
+  }
 }
-
   startNewGame() {
     this.audioManager.playSound('click');
 
