@@ -1,10 +1,12 @@
 /**
- * Konfiguration für das Mandarinen-Spiel
- * Steuert den Spielmodus, die Stems und die Textinhalte
+ * Komplette überarbeitete config.js
+ * Das Hauptproblem: APP_CONFIG muss explizit global sein
  */
-const APP_CONFIG = {
+
+// WICHTIG: Explizit window.APP_CONFIG verwenden, um es global zu machen
+window.APP_CONFIG = {
   // Modus: "BETA", "PRE_RELEASE" oder "RELEASE"
-  MODE: "PRE_RELEASE",
+  MODE: "PRE_RELEASE",  // Setze den Default direkt auf PRE_RELEASE
   
   // Release-Datum
   RELEASE_DATE: new Date("2025-03-21T00:00:00"),
@@ -57,25 +59,52 @@ const APP_CONFIG = {
   }
 };
 
-// Konfiguration initialisieren und gespeicherten Modus laden
+// DEBUG-Log
+console.log("config.js: APP_CONFIG global initialisiert", window.APP_CONFIG);
+
+/**
+ * Initialisiert die Konfiguration aus URL-Parametern oder localStorage
+ */
 function initConfig() {
+  // FORCE PRE-RELEASE bei jedem Laden (BETA-KOMMENTAR entfernen, wenn alle auf PRE_RELEASE sein sollen)
+  //localStorage.setItem('app_mode', 'PRE_RELEASE');
+  
   // Modus aus URL-Parametern prüfen (für einfaches Testen)
   const urlParams = new URLSearchParams(window.location.search);
   const modeParam = urlParams.get('mode');
   
   if (modeParam && ['BETA', 'PRE_RELEASE', 'RELEASE'].includes(modeParam.toUpperCase())) {
-    APP_CONFIG.MODE = modeParam.toUpperCase();
-    console.log(`Modus aus URL gesetzt: ${APP_CONFIG.MODE}`);
+    window.APP_CONFIG.MODE = modeParam.toUpperCase();
+    console.log(`Modus aus URL gesetzt: ${window.APP_CONFIG.MODE}`);
+    localStorage.setItem('app_mode', window.APP_CONFIG.MODE); // Auch im Storage speichern
     return;
   }
   
   // Modus aus localStorage prüfen
   const savedMode = localStorage.getItem('app_mode');
   if (savedMode && ['BETA', 'PRE_RELEASE', 'RELEASE'].includes(savedMode)) {
-    APP_CONFIG.MODE = savedMode;
-    console.log(`Modus aus Speicher geladen: ${APP_CONFIG.MODE}`);
+    window.APP_CONFIG.MODE = savedMode;
+    console.log(`Modus aus Speicher geladen: ${window.APP_CONFIG.MODE}`);
+  } else {
+    console.log(`Standard-Modus verwendet: ${window.APP_CONFIG.MODE}`);
   }
+  
+  // Event auslösen, wenn die Konfiguration bereit ist
+  document.dispatchEvent(new CustomEvent('app-config-ready'));
 }
 
 // Konfiguration initialisieren
 initConfig();
+
+/**
+ * Event-Listener für den app-config-ready Event (für mode-manager.js)
+ */
+document.addEventListener('DOMContentLoaded', function() {
+  console.log("config.js: Dokument geladen, APP_CONFIG Status:", !!window.APP_CONFIG);
+  
+  // Nach kurzer Verzögerung das Event erneut auslösen (falls mode-manager das erste verpasst hat)
+  setTimeout(function() {
+    document.dispatchEvent(new CustomEvent('app-config-ready'));
+    console.log("config.js: app-config-ready Event erneut ausgelöst");
+  }, 500);
+});

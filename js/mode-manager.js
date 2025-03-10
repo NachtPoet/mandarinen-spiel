@@ -3,23 +3,28 @@
  * Steuert die UI-Anpassungen und das Admin-Panel
  */
 
+// DEBUG-Info
+console.log("mode-manager.js geladen, APP_CONFIG verfügbar:", !!window.APP_CONFIG);
+
 /**
  * Aktualisiert die UI basierend auf dem aktuellen Modus
- * Erweitert mit kompletter Aktualisierung der Wortliste
  */
 function updateUIByMode() {
+  // WICHTIG: Verwenden von window.APP_CONFIG statt APP_CONFIG
   if (!window.APP_CONFIG) {
     console.warn("APP_CONFIG nicht gefunden, UI-Update übersprungen");
     return;
   }
   
-  const mode = APP_CONFIG.MODE;
-  const texts = APP_CONFIG.TEXTS[mode];
+  const mode = window.APP_CONFIG.MODE;
+  const texts = window.APP_CONFIG.TEXTS[mode];
   
   if (!texts) {
     console.warn(`Texte für Modus ${mode} nicht gefunden`);
     return;
   }
+  
+  console.log(`UI wird für Modus ${mode} aktualisiert...`);
   
   // Album-Info im Cover-Modal aktualisieren
   const coverInfo = document.querySelector('.cover-info p');
@@ -51,7 +56,7 @@ function updateUIByMode() {
   // WICHTIG: Wortliste neu rendern, wenn GameInstance existiert
   refreshWordList();
   
-  console.log(`UI für Modus aktualisiert: ${mode}`);
+  console.log(`UI für Modus ${mode} aktualisiert`);
 }
 
 /**
@@ -98,9 +103,9 @@ function showModeBadge(mode) {
  * Zeigt einen Countdown zum Release an
  */
 function addReleaseCountdown() {
-  if (!APP_CONFIG.RELEASE_DATE) return;
+  if (!window.APP_CONFIG.RELEASE_DATE) return;
   
-  const releaseDate = new Date(APP_CONFIG.RELEASE_DATE);
+  const releaseDate = new Date(window.APP_CONFIG.RELEASE_DATE);
   const now = new Date();
   
   // Wenn das Release-Datum bereits vorbei ist, nichts anzeigen
@@ -128,7 +133,6 @@ function addReleaseCountdown() {
 
 /**
  * Zeigt das Admin-Panel zum Umschalten zwischen Modi an
- * Erweitert mit Wortlisten-Aktualisierung
  */
 function showAdminPanel() {
   // Vorhandenes Panel entfernen, falls es existiert
@@ -147,16 +151,16 @@ function showAdminPanel() {
       <label>
         Spielmodus:
         <select id="mode-selector">
-          <option value="BETA" ${APP_CONFIG.MODE === 'BETA' ? 'selected' : ''}>Beta</option>
-          <option value="PRE_RELEASE" ${APP_CONFIG.MODE === 'PRE_RELEASE' ? 'selected' : ''}>Pre-Release</option>
-          <option value="RELEASE" ${APP_CONFIG.MODE === 'RELEASE' ? 'selected' : ''}>Release</option>
+          <option value="BETA" ${window.APP_CONFIG.MODE === 'BETA' ? 'selected' : ''}>Beta</option>
+          <option value="PRE_RELEASE" ${window.APP_CONFIG.MODE === 'PRE_RELEASE' ? 'selected' : ''}>Pre-Release</option>
+          <option value="RELEASE" ${window.APP_CONFIG.MODE === 'RELEASE' ? 'selected' : ''}>Release</option>
         </select>
       </label>
       <div class="admin-info">
-        <p>Aktiver Modus: <strong>${APP_CONFIG.MODE}</strong></p>
+        <p>Aktiver Modus: <strong>${window.APP_CONFIG.MODE}</strong></p>
         <p>Aktuelle Stems:</p>
         <ul>
-          ${APP_CONFIG.STEMS[APP_CONFIG.MODE].map(stem => 
+          ${window.APP_CONFIG.STEMS[window.APP_CONFIG.MODE].map(stem => 
             `<li>${stem.name}: ${stem.file}</li>`
           ).join('')}
         </ul>
@@ -164,6 +168,7 @@ function showAdminPanel() {
       <div class="admin-buttons">
         <button id="save-mode">Speichern & Neu laden</button>
         <button id="apply-mode">Anwenden (ohne Neuladen)</button>
+        <button id="debug-mode">Debug-Update</button>
         <button id="cancel-mode">Schließen</button>
       </div>
     </div>
@@ -179,27 +184,31 @@ function showAdminPanel() {
     location.reload(); // Seite neu laden
   });
   
-  // Neuer Button: Modus anwenden ohne Neuladen
+  // Anwenden ohne Neuladen
   document.getElementById('apply-mode').addEventListener('click', function() {
     const newMode = document.getElementById('mode-selector').value;
-    if (newMode !== APP_CONFIG.MODE) {
+    if (newMode !== window.APP_CONFIG.MODE) {
       // Modus speichern
       localStorage.setItem('app_mode', newMode);
-      APP_CONFIG.MODE = newMode;
+      window.APP_CONFIG.MODE = newMode;
       
       // UI aktualisieren
       updateUIByMode();
       
       // StemAudioManager aktualisieren, falls ein Spiel läuft
       if (window.gameInstance && gameInstance.stemAudioManager) {
-        // Stems zurücksetzen (sonst könnten alte bestehen bleiben)
-        gameInstance.stemAudioManager.resetToBaseStem();
-        
-        // Stemfiles in der Konfiguration aktualisieren
-        gameInstance.stemAudioManager.stemFiles = APP_CONFIG.STEMS[APP_CONFIG.MODE].map(stem => stem.file);
-        
-        // Aktualisierung des Managers anzeigen
-        console.log("StemAudioManager für neuen Modus aktualisiert");
+        try {
+          // Stems zurücksetzen (sonst könnten alte bestehen bleiben)
+          gameInstance.stemAudioManager.resetToBaseStem();
+          
+          // Stemfiles in der Konfiguration aktualisieren
+          gameInstance.stemAudioManager.stemFiles = window.APP_CONFIG.STEMS[window.APP_CONFIG.MODE].map(stem => stem.file);
+          
+          // Aktualisierung des Managers anzeigen
+          console.log("StemAudioManager für neuen Modus aktualisiert");
+        } catch (err) {
+          console.error("Fehler bei StemAudioManager-Update:", err);
+        }
       }
       
       // Modal schließen und Erfolg anzeigen
@@ -208,6 +217,37 @@ function showAdminPanel() {
     } else {
       // Wenn der Modus gleich bleibt
       modal.remove();
+    }
+  });
+  
+  // Debug-Button hinzugefügt
+  document.getElementById('debug-mode').addEventListener('click', function() {
+    console.log("=== DEBUG INFO ===");
+    console.log("APP_CONFIG global verfügbar:", !!window.APP_CONFIG);
+    console.log("Aktueller Modus:", window.APP_CONFIG.MODE);
+    console.log("GameInstance verfügbar:", !!window.gameInstance);
+    
+    if (window.gameInstance) {
+      console.log("StemAudioManager verfügbar:", !!gameInstance.stemAudioManager);
+      console.log("Wortliste verfügbar:", !!gameInstance.domElements.wordList);
+      console.log("RenderWordList Funktion verfügbar:", typeof renderWordList === 'function');
+    }
+    
+    // Forciertes Update der Wortliste
+    if (typeof renderWordList === 'function' && window.gameInstance) {
+      try {
+        renderWordList(
+          gameInstance.targetWords,
+          gameInstance.foundWords,
+          gameInstance.currentDifficulty,
+          gameInstance.domElements.wordList
+        );
+        console.log("Wortliste manuell neu gerendert");
+        showModalMessage("Wortliste aktualisiert");
+      } catch (err) {
+        console.error("Fehler beim manuellen Rendern:", err);
+        showModalMessage("Fehler beim Update: " + err.message);
+      }
     }
   });
   
@@ -225,12 +265,11 @@ function showAdminPanel() {
 
 /**
  * Aktualisiert die Wortliste und Icons im aktuellen Spiel
- * Dies ist entscheidend, um die modusspezifischen Icons anzuzeigen
  */
 function refreshWordList() {
   // Prüfen, ob ein Spiel läuft
   if (window.gameInstance) {
-    console.log("Aktualisiere Wortliste für Modus: " + APP_CONFIG.MODE);
+    console.log("Versuche Wortliste zu aktualisieren für Modus:", window.APP_CONFIG.MODE);
     
     // Wenn renderWordList und die erforderlichen Eigenschaften existieren
     if (typeof renderWordList === 'function' && 
@@ -240,15 +279,19 @@ function refreshWordList() {
         gameInstance.domElements && 
         gameInstance.domElements.wordList) {
       
-      // Wortliste mit den aktuellen Spielwerten neu rendern
-      renderWordList(
-        gameInstance.targetWords,
-        gameInstance.foundWords,
-        gameInstance.currentDifficulty,
-        gameInstance.domElements.wordList
-      );
-      
-      console.log("Wortliste erfolgreich aktualisiert");
+      try {
+        // Wortliste mit den aktuellen Spielwerten neu rendern
+        renderWordList(
+          gameInstance.targetWords,
+          gameInstance.foundWords,
+          gameInstance.currentDifficulty,
+          gameInstance.domElements.wordList
+        );
+        
+        console.log("Wortliste erfolgreich aktualisiert");
+      } catch (err) {
+        console.error("Fehler beim Aktualisieren der Wortliste:", err);
+      }
     } else {
       console.warn("Kann Wortliste nicht aktualisieren - nicht alle erforderlichen Eigenschaften verfügbar");
     }
@@ -290,22 +333,56 @@ document.addEventListener('keydown', function(e) {
 });
 
 /**
+ * Event-Listener für den app-config-ready Event
+ * Wird in config.js ausgelöst, wenn die Konfiguration bereit ist
+ */
+document.addEventListener('app-config-ready', function() {
+  console.log("app-config-ready Event erkannt, starte UI-Update");
+  
+  // Kurze Verzögerung, um sicherzustellen, dass das DOM geladen ist
+  setTimeout(function() {
+    if (window.APP_CONFIG) {
+      updateUIByMode();
+    } else {
+      console.warn("APP_CONFIG immer noch nicht verfügbar trotz ready-Event");
+    }
+  }, 50);
+});
+
+/**
  * UI aktualisieren, wenn das Dokument geladen ist
  */
 document.addEventListener('DOMContentLoaded', function() {
-  // Polling-Ansatz statt fester Verzögerung
-  function checkConfig() {
-    if (window.APP_CONFIG) {
-      console.log("APP_CONFIG gefunden, UI wird aktualisiert");
-      updateUIByMode();
-    } else {
-      console.log("Warte auf APP_CONFIG...");
-      setTimeout(checkConfig, 200);
-    }
-  }
+  console.log("DOMContentLoaded in mode-manager.js");
   
-  // Starte das Polling
-  checkConfig();
+  // Versuche direktes Update, falls APP_CONFIG bereits verfügbar ist
+  if (window.APP_CONFIG) {
+    console.log("APP_CONFIG bereits verfügbar, starte direktes UI-Update");
+    setTimeout(updateUIByMode, 50);
+  } else {
+    console.log("APP_CONFIG noch nicht verfügbar, warte auf Event");
+    
+    // Falls das Event nicht ausgelöst wird, Fallback mit Polling
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    function checkConfig() {
+      attempts++;
+      
+      if (window.APP_CONFIG) {
+        console.log("APP_CONFIG gefunden nach " + attempts + " Versuchen, UI wird aktualisiert");
+        updateUIByMode();
+      } else if (attempts < maxAttempts) {
+        console.log("Warte auf APP_CONFIG... (Versuch " + attempts + "/" + maxAttempts + ")");
+        setTimeout(checkConfig, 300);
+      } else {
+        console.error("APP_CONFIG konnte nicht gefunden werden nach " + maxAttempts + " Versuchen");
+      }
+    }
+    
+    // Starte das Polling nach einer kurzen Verzögerung
+    setTimeout(checkConfig, 300);
+  }
 });
 
 /**
@@ -342,7 +419,6 @@ document.head.appendChild(messageStyle);
 
 /**
  * Zusätzliche CSS-Styles für die Icons der neuen Stems
- * Füge diese zur style.css hinzu
  */
 const stemIconStyle = document.createElement('style');
 stemIconStyle.textContent = `
@@ -386,6 +462,14 @@ stemIconStyle.textContent = `
   /* RELEASE spezifische Farben */
   [data-stem="1"].word.found .stem-icon .stem-icon-base {
     fill: rgba(214, 41, 65, 0.5) !important;
+  }
+  
+  /* Stärkere Badge-Hervorhebung */
+  .mode-badge {
+    padding: 7px 12px;
+    font-weight: bold;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   }
 `;
 document.head.appendChild(stemIconStyle);
