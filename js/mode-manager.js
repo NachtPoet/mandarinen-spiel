@@ -99,9 +99,6 @@ function showModeBadge(mode) {
 /**
  * Erstellt oder aktualisiert den Countdown zum Release
  */
-/**
- * Erstellt oder aktualisiert den Countdown zum Release
- */
 function updateReleaseCountdown() {
   if (!window.APP_CONFIG || !window.APP_CONFIG.RELEASE_DATE) return;
   
@@ -129,6 +126,7 @@ function updateReleaseCountdown() {
     countdownBadge.style.display = 'flex';
   }
 }
+
 
 /**
  * Zeigt das Admin-Panel zum Umschalten zwischen Modi an
