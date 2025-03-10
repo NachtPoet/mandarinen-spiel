@@ -2921,33 +2921,200 @@ body.fullscreen .fullscreen-btn {
   }
 }
 
-/**
- * Erstellt oder aktualisiert den Countdown zum Release
- */
-function updateReleaseCountdown() {
-  if (!window.APP_CONFIG || !window.APP_CONFIG.RELEASE_DATE) return;
-  
-  const releaseDate = new Date(window.APP_CONFIG.RELEASE_DATE);
-  const now = new Date();
-  
-  // Wenn das Release-Datum bereits vorbei ist, nichts anzeigen
-  if (now >= releaseDate) return;
-  
-  // Tage bis zum Release berechnen
-  const diffTime = releaseDate - now;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
-  // Vorhandenen Countdown entfernen, falls er existiert
-  const existingCountdown = document.querySelector('.release-countdown');
-  if (existingCountdown) {
-    existingCountdown.remove();
+/* Timer-Anzeige */
+#timer {
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  color: #fff;
+  background: linear-gradient(to right, 
+    rgba(160, 216, 239, 0.2), 
+    rgba(105, 179, 203, 0.3));
+  padding: 8px 15px;
+  border-radius: 20px;
+  box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
+  transition: all 0.3s ease;
+  position: absolute;
+  left: 15px;
+  top: 15px;
+  z-index: 10;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 25%;
+}
+
+#timer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: shine 3s infinite linear;
+}
+
+/* Countdown-Badge */
+.countdown-badge {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(to right, 
+    rgba(255, 140, 0, 0.4), 
+    rgba(230, 115, 0, 0.5));
+  color: white;
+  font-size: 0.7rem;
+  padding: 5px 10px;
+  border-radius: 20px;
+  z-index: 11;
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
+  border: 1px solid rgba(255, 140, 0, 0.5);
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  min-width: 90px;
+  max-width: 110px;
+}
+
+/* Level-Anzeige */
+#levelIndicator {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 0.7rem;
+  background: linear-gradient(to right, 
+    rgba(160, 216, 239, 0.2), 
+    rgba(105, 179, 203, 0.3));
+  padding: 8px 15px;
+  border-radius: 20px;
+  box-shadow: 0 0 15px rgba(160, 216, 239, 0.3);
+  border: 1px solid rgba(247, 193, 187, 0.3);
+  z-index: 10;
+  white-space: nowrap;
+  max-width: 25%;
+}
+
+/* Spielfeld-Raster nach unten verschieben */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 5px;
+  margin-top: 80px !important; /* Mehr Platz für die UI-Elemente */
+  margin-bottom: 20px;
+  user-select: none;
+  touch-action: none;
+  box-shadow: 0 6px 22px rgba(0,0,0,0.7);
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.4);
+  transition: transform var(--transition-speed);
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile Optimierungen */
+@media (max-width: 800px) {
+  #timer {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    top: 15px;
+    left: 10px;
+    max-width: 25%;
   }
   
-  // Countdown-Badge im Spielbereich aktualisieren
-  const countdownBadge = document.getElementById('countdown-badge');
-  if (countdownBadge) {
-    // Nur die Tage-Anzahl anzeigen, "RELEASE" wird per CSS hinzugefügt
-    countdownBadge.textContent = `in ${diffDays} Tagen`;
-    countdownBadge.style.display = 'flex';
+  .countdown-badge {
+    padding: 5px 10px;
+    font-size: 0.7rem;
+    top: 15px;
+    min-width: 80px;
+    max-width: 100px;
+  }
+  
+  #levelIndicator {
+    padding: 6px 12px;
+    font-size: 0.7rem;
+    top: 15px;
+    right: 10px;
+    max-width: 25%;
+  }
+  
+  .grid {
+    margin-top: 70px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  #timer {
+    padding: 5px 10px;
+    font-size: 0.7rem;
+    top: 15px;
+    left: 8px;
+    max-width: 22%;
+  }
+  
+  .countdown-badge {
+    padding: 4px 8px;
+    font-size: 0.65rem;
+    top: 15px;
+    min-width: 70px;
+    max-width: 90px;
+  }
+  
+  #levelIndicator {
+    padding: 5px 10px;
+    font-size: 0.65rem;
+    top: 15px;
+    right: 8px;
+    max-width: 22%;
+  }
+  
+  .grid {
+    margin-top: 60px !important;
+  }
+}
+
+/* Für sehr kleine Geräte */
+@media (max-width: 450px) {
+  #timer {
+    padding: 4px 8px;
+    font-size: 0.65rem;
+    top: 15px;
+    left: 5px;
+    max-width: 20%;
+  }
+  
+  .countdown-badge {
+    padding: 3px 8px;
+    font-size: 0.6rem;
+    top: 15px;
+    min-width: 60px;
+    max-width: 80px;
+  }
+  
+  #levelIndicator {
+    padding: 4px 8px;
+    font-size: 0.6rem;
+    top: 15px;
+    right: 5px;
+    max-width: 20%;
+  }
+  
+  .grid {
+    margin-top: 55px !important;
+  }
+}
+
+/* Für extrem schmale Geräte */
+@media (max-width: 360px) {
+  #timer, #levelIndicator {
+    padding: 3px 6px;
+    font-size: 0.6rem;
+    max-width: 18%;
+  }
+  
+  .countdown-badge {
+    padding: 3px 6px;
+    font-size: 0.55rem;
+    min-width: 50px;
+    max-width: 70px;
   }
 }
