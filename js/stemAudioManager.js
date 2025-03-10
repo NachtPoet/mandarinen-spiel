@@ -246,26 +246,25 @@ StemAudioManager.prototype.allStemsLoaded = function() {
 };
 
 /**
+ * Verbesserte play()-Methode für StemAudioManager
+ * 
+ * Diese Methode wartet, bis ALLE Stems geladen sind, bevor sie die Wiedergabe startet.
+ * Finde diese Methode in stemAudioManager.js und ersetze sie vollständig.
+ */
+
+/**
  * Startet die Wiedergabe aller Stems synchronisiert
- * Verbesserte Version mit robuster Fehlererkennung und Wiederholungslogik
+ * Verbesserte Version, die auf das Laden aller Stems wartet
  */
 StemAudioManager.prototype.play = function() {
   if (this.isPlaying) return;
   
-  console.log("StemAudioManager.play aufgerufen, Context-Status: " + this.context.state);
+  console.log("StemAudioManager.play aufgerufen, Context-Status: " + this.context.state + ", Stems geladen: " + this.stemsLoadedCount + "/" + this.stemsTotalCount);
   
-  // Prüfen, ob mindestens der erste Buffer geladen ist
-  if (!this.buffers[0] || !this.stemsLoaded[0]) {
-    console.log("Warte auf Laden des ersten Stems...");
-    // Warten und erneut versuchen
-    var self = this;
-    var checkInterval = setInterval(function() {
-      if (self.buffers[0] && self.stemsLoaded[0]) {
-        clearInterval(checkInterval);
-        console.log("Erster Stem geladen, versuche zu spielen");
-        self.play(); // Rekursiver Aufruf nach dem Laden
-      }
-    }, 200);
+  // Prüfen, ob alle Stems geladen sind
+  if (this.stemsLoadedCount < this.stemsTotalCount) {
+    console.log("Warte auf Laden aller Stems...");
+    // Wir kehren zurück und lassen den Ladebildschirm weiterlaufen
     return;
   }
   
@@ -302,7 +301,6 @@ StemAudioManager.prototype.play = function() {
     }, 500);
   }
 };
-
 /**
  * Interne Methode zum Starten aller Stem-Quellen
  */
