@@ -125,6 +125,11 @@ function addReleaseCountdown() {
   const countdown = document.createElement('div');
   countdown.id = 'release-countdown';
   countdown.className = 'release-countdown';
+  
+  // Aktuellen Modus als data-Attribut für CSS speichern
+  countdown.setAttribute('data-mode', window.APP_CONFIG.MODE);
+  
+  // Nur "Release in X Tagen" - ohne PRE-RELEASE (kommt per CSS)
   countdown.innerHTML = `<span>Release in ${diffDays} Tagen</span>`;
   
   // Zum Dokument hinzufügen
