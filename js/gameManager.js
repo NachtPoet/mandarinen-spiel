@@ -392,8 +392,14 @@ class GameManager {
  * Verbesserte Version mit robuster Audio-Behandlung
  */
 /**
+ * Verbesserte startGame-Methode mit verbessertem Timing
+ * 
+ * Diese Methode muss die startGame-Methode in der GameManager-Klasse ersetzen.
+ */
+
+/**
  * Startet das Spiel und initialisiert Audio
- * Verbesserte Version mit Ladebildschirm
+ * Verbesserte Version mit Ladebildschirm und garantiertem Laden aller Stems
  */
 startGame() {
   this.audioManager.playSound('click');
@@ -426,9 +432,12 @@ startGame() {
       
       console.log(`Audio-Ladefortschritt: ${Math.round(progress * 100)}% (${loaded}/${total})`);
       
-      // Wenn alle Stems geladen sind, Spiel starten
+      // Nur wenn alle Stems geladen sind, Spiel starten
       if (loaded >= total) {
+        // Kurze Verzögerung für visuelles Feedback
         setTimeout(() => {
+          console.log("Alle Stems geladen, starte Spiel...");
+          
           // Startbildschirm ausblenden und Spielcontainer anzeigen
           this.domElements.startScreen.classList.add("hidden");
           this.domElements.gameContainer.style.display = "flex";
@@ -440,20 +449,18 @@ startGame() {
           this.timerInterval = setInterval(() => this.updateTimerDisplay(), 1000);
           this.initLevel();
           
-          // Audio starten
+          // Audio starten - WICHTIG: Alle Stems sind jetzt definitiv geladen
           if (this.stemAudioManager.context) {
             this.stemAudioManager.context.resume().then(() => {
               console.log("AudioContext erfolgreich aktiviert durch Benutzerinteraktion");
               
-              // Verzögerter Start für alle Geräte
-              setTimeout(() => {
-                this.stemAudioManager.play();
-                
-                // Nach dem Start eine zusätzliche Synchronisation erzwingen
-                if (typeof this.stemAudioManager.syncAllStems === 'function') {
-                  setTimeout(() => this.stemAudioManager.syncAllStems(true), 500);
-                }
-              }, 300);
+              // Starte die Musik mit allen Stems
+              this.stemAudioManager.play();
+              
+              // Nach dem Start eine zusätzliche Synchronisation erzwingen
+              if (typeof this.stemAudioManager.syncAllStems === 'function') {
+                setTimeout(() => this.stemAudioManager.syncAllStems(true), 500);
+              }
             }).catch(e => console.warn("Fehler beim Aktivieren des AudioContext:", e));
           }
           
