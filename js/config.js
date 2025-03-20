@@ -6,7 +6,7 @@
 // WICHTIG: Explizit window.APP_CONFIG verwenden, um es global zu machen
 window.APP_CONFIG = {
   // Modus: "BETA", "PRE_RELEASE" oder "RELEASE"
-  MODE: "PRE_RELEASE",  // Setze den Default direkt auf PRE_RELEASE
+  MODE: "RELEASE",
   
   // Release-Datum
   RELEASE_DATE: new Date("2025-03-21T00:00:00"),
@@ -66,8 +66,8 @@ console.log("config.js: APP_CONFIG global initialisiert", window.APP_CONFIG);
  * Initialisiert die Konfiguration aus URL-Parametern oder localStorage
  */
 function initConfig() {
-  // FORCE PRE-RELEASE bei jedem Laden (BETA-KOMMENTAR entfernen, wenn alle auf PRE_RELEASE sein sollen)
-  //localStorage.setItem('app_mode', 'PRE_RELEASE');
+  // FORCE RELEASE bei jedem Laden (BETA-KOMMENTAR entfernen, wenn alle auf PRE_RELEASE sein sollen)
+  //localStorage.setItem('app_mode', 'RELEASE');
   
   // Modus aus URL-Parametern prüfen (für einfaches Testen)
   const urlParams = new URLSearchParams(window.location.search);
