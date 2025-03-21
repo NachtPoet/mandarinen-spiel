@@ -780,12 +780,12 @@
             
             switch (trackName) {
                 case 'drums':
-                    energyThreshold = 0.05;
+                    energyThreshold = 0.03;
                     minDistance = 0.5; // seconds
                     noteLength = 4;
                     break;
                 case 'piano':
-                    energyThreshold = 0.02;
+                    energyThreshold = 0.015;
                     minDistance = 1.5;
                     noteLength = 8;
                     break;
@@ -805,7 +805,7 @@
                     noteLength = 5;
                     break;
                 default:
-                    energyThreshold = 0.02;
+                    energyThreshold = 0.015;
                     minDistance = 1.0;
                     noteLength = 4;
             }
@@ -846,13 +846,13 @@
             let maxPatterns;
             switch (difficulty) {
                 case 'easy':
-                    maxPatterns = 8;
+                    maxPatterns = 10;
                     break;
                 case 'hard':
-                    maxPatterns = 20;
+                    maxPatterns = 25;
                     break;
                 default: // medium
-                    maxPatterns = 12;
+                    maxPatterns = 15;
             }
             
             // Keep only the top patterns
@@ -860,6 +860,10 @@
             
             // Sort by time
             topPatterns.sort((a, b) => a.time - b.time);
+            
+            // Add some debug information
+            console.log(`Track ${trackName} analysis complete. Found ${patterns.length} patterns, using ${topPatterns.length}`);
+            console.log(`First few patterns:`, topPatterns.slice(0, 3));
             
             return topPatterns;
         }
@@ -1300,6 +1304,11 @@
             
             // Start generating notes
             generateNotes();
+            
+            // Debug info
+            console.log("Audio playback started");
+            console.log("Analyzed patterns available:", analyzedPatterns !== null);
+            console.log("Using analyzed patterns:", useAnalyzedPatterns);
         }
 
         // Stop all audio
@@ -1342,8 +1351,16 @@
 
         // Generate falling notes based on patterns
         function generateNotes() {
-            for (const track in notePatterns) {
-                notePatterns[track].forEach(noteInfo => {
+            // Choose which patterns to use
+            const patternsToUse = useAnalyzedPatterns && analyzedPatterns ? analyzedPatterns : notePatterns;
+            
+            console.log("Generating notes using patterns:", useAnalyzedPatterns ? "analyzed" : "predefined");
+            console.log("Patterns:", patternsToUse);
+            
+            for (const track in patternsToUse) {
+                if (!patternsToUse[track] || patternsToUse[track].length === 0) continue;
+                
+                patternsToUse[track].forEach(noteInfo => {
                     setTimeout(() => {
                         if (!isPlaying) return;
                         createNote(track, noteInfo.duration);
