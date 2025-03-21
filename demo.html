@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandarinen Rhythmus-Spiel</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .game-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            max-width: 95vw;
+            max-height: 95vh;
+            background-color: #111;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 850px) {
+            .game-container {
+                width: 95vw;
+                height: 95vh;
+            }
+        }
+
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://mandarinenspiel.alexandrajanzen.de/assets/audio/stems/cover.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.3;
+            filter: blur(3px);
+        }
+
+        .header {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        
+        /* Mobile adjustments for header */
+        @media (max-width: 767px) {
+            .title {
+                font-size: 20px;
+            }
+            
+            .subtitle {
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .title {
+                font-size: 18px;
+            }
+            
+            .subtitle {
+                font-size: 12px;
+            }
+        }
+
+        .tracks-container {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 700px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 1;
+        }
+
+        .track {
+            width: 100px;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        
+        /* Mobile layout for tracks */
+        @media (max-width: 767px) {
+            .tracks-container {
+                width: 90%;
+                bottom: 150px;
+            }
+            
+            .track {
+                width: 18%;
+                height: 250px;
+            }
+            
+            .track-name {
+                font-size: 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .tracks-container {
+                bottom: 120px;
+            }
+            
+            .track {
+                height: 200px;
+            }
+        }
+
+        .track-lane {
+            width: 60px;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .track-name {
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        
+        /* Mobile adjustments for track lanes */
+        @media (max-width: 767px) {
+            .track-lane {
+                width: 90%;
+            }
+        }
+
+        .hit-zone {
+            position: absolute;
+            bottom: 0;
+            width: 60px;
+            height: 60px;
+            background-color: rgba(255, 215, 0, 0.3);
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            z-index: 1;
+        }
+        
+        /* Mobile adjustments for hit zones */
+        @media (max-width: 767px) {
+            .hit-zone {
+                width: 90%;
+                height: 50px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+
+        .note {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: #FFD700;
+            border-radius: 50%;
+            left: 5px;
+            transform: translateY(0);
+            animation: fallDown linear;
+        }
+
+        @keyframes fallDown {
+            0% {
+                transform: translateY(-100%);
+            }
+            100% {
+                transform: translateY(300px);
+            }
+        }
+        
+        /* Mobile adjustments for notes */
+        @media (max-width: 767px) {
+            .note {
+                width: 40px;
+                height: 40px;
+                left: 50%;
+                transform: translateX(-50%) translateY(0);
+            }
+            
+            @keyframes fallDown {
+                0% {
+                    transform: translateX(-50%) translateY(-100%);
+                }
+                100% {
+                    transform: translateX(-50%) translateY(250px);
+                }
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .note {
+                width: 35px;
+                height: 35px;
+            }
+            
+            @keyframes fallDown {
+                0% {
+                    transform: translateX(-50%) translateY(-100%);
+                }
+                100% {
+                    transform: translateX(-50%) translateY(200px);
+                }
+            }
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #FFD700;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #FFC000;
+            transform: scale(1.05);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .score-container {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            text-align: right;
+            z-index: 1;
+        }
+
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        .multiplier {
+            font-size: 18px;
+            color: #fff;
+        }
+        
+        /* Mobile adjustments for score */
+        @media (max-width: 767px) {
+            .score-container {
+                top: 60px;
+                right: 10px;
+            }
+            
+            .score {
+                font-size: 18px;
+            }
+            
+            .multiplier {
+                font-size: 14px;
+            }
+        }
+
+        .key-hint {
+            position: absolute;
+            bottom: 65px;
+            width: 60px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 5px;
+            padding: 5px 0;
+        }
+        
+        /* Mobile adjustments for key hints */
+        @media (max-width: 767px) {
+            .key-hint {
+                display: none; /* Hide keyboard hints on mobile */
+            }
+        }
+        
+        /* Touch areas for mobile */
+        .touch-area {
+            display: none; /* Hidden by default, shown on mobile */
+            position: absolute;
+            bottom: 10px;
+            width: 90%;
+            height: 40px;
+            background-color: rgba(255, 215, 0, 0.2);
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            z-index: 2;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+        
+        @media (max-width: 767px) {
+            .touch-area {
+                display: block;
+            }
+        }
+
+        .hit-feedback {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .perfect {
+            color: #00FFFF;
+        }
+
+        .good {
+            color: #00FF00;
+        }
+
+        .ok {
+            color: #FFFF00;
+        }
+
+        .missed {
+            color: #FF0000;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .modal-content {
+            background-color: #111;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            border: 2px solid #FFD700;
+        }
+        
+        /* Mobile adjustments for modals */
+        @media (max-width: 767px) {
+            .modal-content {
+                padding: 20px;
+            }
+            
+            .modal-title {
+                font-size: 20px;
+            }
+            
+            .modal-text {
+                font-size: 14px;
+            }
+        }
+
+        .modal-title {
+            font-size: 24px;
+            color: #FFD700;
+            margin-bottom: 20px;
+        }
+
+        .modal-text {
+            font-size: 16px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .difficulty-btn {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .difficulty-btn.selected {
+            background-color: #FFD700;
+            color: #000;
+        }
+
+        .active-instrument {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: #00FF00;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .instrument-controls {
+            position: absolute;
+            top: 150px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            z-index: 1;
+        }
+        
+        /* Mobile adjustments for instrument controls */
+        @media (max-width: 767px) {
+            .instrument-controls {
+                top: 100px;
+                right: 10px;
+            }
+            
+            .toggle-label {
+                font-size: 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .instrument-controls {
+                top: 90px;
+            }
+        }
+
+        .instrument-toggle {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .toggle-label {
+            margin-right: 10px;
+            color: #fff;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #FFD700;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="background"></div>
+        <div class="header">
+            <div class="title">MANDARINEN - RHYTHMUS-SPIEL</div>
+            <div class="subtitle">ALEXANDRA JANZEN</div>
+        </div>
+
+        <div class="score-container">
+            <div class="score">Score: <span id="score-value">0</span></div>
+            <div class="multiplier">Multiplikator: <span id="multiplier-value">x1</span></div>
+        </div>
+
+        <div class="instrument-controls">
+            <div class="instrument-toggle">
+                <span class="toggle-label">Vocals aktivieren</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="vocals-toggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="tracks-container">
+            <div class="track">
+                <div class="track-name">Piano</div>
+                <div class="track-lane" id="track-piano">
+                    <div class="hit-zone"></div>
+                    <div class="key-hint">S</div>
+                    <div class="touch-area">Tap</div>
+                    <div class="active-instrument" id="active-piano"></div>
+                </div>
+                <div class="hit-feedback" id="feedback-piano"></div>
+            </div>
+            <div class="track">
+                <div class="track-name">Bass/Drums</div>
+                <div class="track-lane" id="track-drums">
+                    <div class="hit-zone"></div>
+                    <div class="key-hint">D</div>
+                    <div class="touch-area">Tap</div>
+                    <div class="active-instrument" id="active-drums"></div>
+                </div>
+                <div class="hit-feedback" id="feedback-drums"></div>
+            </div>
+            <div class="track">
+                <div class="track-name">Gitarren</div>
+                <div class="track-lane" id="track-guitars">
+                    <div class="hit-zone"></div>
+                    <div class="key-hint">F</div>
+                    <div class="touch-area">Tap</div>
+                    <div class="active-instrument" id="active-guitars"></div>
+                </div>
+                <div class="hit-feedback" id="feedback-guitars"></div>
+            </div>
+            <div class="track">
+                <div class="track-name">Streicher</div>
+                <div class="track-lane" id="track-strings">
+                    <div class="hit-zone"></div>
+                    <div class="key-hint">J</div>
+                    <div class="touch-area">Tap</div>
+                    <div class="active-instrument" id="active-strings"></div>
+                </div>
+                <div class="hit-feedback" id="feedback-strings"></div>
+            </div>
+            <div class="track">
+                <div class="track-name">Synths/FX</div>
+                <div class="track-lane" id="track-synths">
+                    <div class="hit-zone"></div>
+                    <div class="key-hint">K</div>
+                    <div class="touch-area">Tap</div>
+                    <div class="active-instrument" id="active-synths"></div>
+                </div>
+                <div class="hit-feedback" id="feedback-synths"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" id="start-btn">Spiel starten</button>
+            <button class="btn" id="restart-btn" style="display: none;">Neu starten</button>
+        </div>
+    </div>
+
+    <div class="modal" id="start-modal">
+        <div class="modal-content">
+            <div class="modal-title">Mandarinen Rhythmus-Spiel</div>
+            <div class="modal-text">
+                Begleite Alexandra Janzen beim Song "Mandarinen"! Die Stimme läuft automatisch, und du musst die Instrumente im richtigen Moment aktivieren.
+                <br><br>
+                Drücke die Tasten, wenn die Noten die Hit-Zone erreichen:
+                <br>
+                S = Piano, D = Bass/Drums, F = Gitarren, J = Streicher, K = Synths/FX
+                <br><br>
+                Wähle den Schwierigkeitsgrad:
+            </div>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn" id="easy-btn">Leicht</button>
+                <button class="difficulty-btn selected" id="medium-btn">Mittel</button>
+                <button class="difficulty-btn" id="hard-btn">Schwer</button>
+            </div>
+            <button class="btn" id="modal-start-btn">Starten</button>
+        </div>
+    </div>
+
+    <div class="modal" id="end-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-title">Spiel beendet!</div>
+            <div class="modal-text">
+                Dein Score: <span id="final-score">0</span>
+                <br><br>
+                <span id="performance-text"></span>
+            </div>
+            <button class="btn" id="modal-restart-btn">Erneut spielen</button>
+        </div>
+    </div>
+
+    <script>
+        // Audio Context
+        let audioContext;
+        let gainNodes = {};
+        let audioBuffers = {};
+        let audioSources = {};
+        let isPlaying = false;
+        let startTime = 0;
+
+        // Game variables
+        let score = 0;
+        let multiplier = 1;
+        let combo = 0;
+        let difficulty = 'medium';
+        let notePatterns = {};
+        let activeNotes = [];
+        let instrumentStates = {
+            piano: false,
+            drums: false,
+            guitars: false,
+            strings: false,
+            synths: false,
+            vocals: true
+        };
+
+        // DOM Elements
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const startModal = document.getElementById('start-modal');
+        const endModal = document.getElementById('end-modal');
+        const modalStartBtn = document.getElementById('modal-start-btn');
+        const modalRestartBtn = document.getElementById('modal-restart-btn');
+        const easyBtn = document.getElementById('easy-btn');
+        const mediumBtn = document.getElementById('medium-btn');
+        const hardBtn = document.getElementById('hard-btn');
+        const vocalsToggle = document.getElementById('vocals-toggle');
+        const scoreValue = document.getElementById('score-value');
+        const multiplierValue = document.getElementById('multiplier-value');
+        const finalScore = document.getElementById('final-score');
+        const performanceText = document.getElementById('performance-text');
+
+        // Track elements
+        const tracks = ['piano', 'drums', 'guitars', 'strings', 'synths'];
+        const trackElements = {};
+        const activeInstrumentElements = {};
+        const feedbackElements = {};
+
+        tracks.forEach(track => {
+            trackElements[track] = document.getElementById(`track-${track}`);
+            activeInstrumentElements[track] = document.getElementById(`active-${track}`);
+            feedbackElements[track] = document.getElementById(`feedback-${track}`);
+        });
+
+        // Key mappings
+        const keyMap = {
+            's': 'piano',
+            'd': 'drums',
+            'f': 'guitars',
+            'j': 'strings',
+            'k': 'synths'
+        };
+
+        // Note patterns based on song structure
+        function generateNotePatterns() {
+            const basePatterns = {
+                piano: [
+                    { time: 1.5, duration: 8 },
+                    { time: 11.5, duration: 8 },
+                    { time: 21.5, duration: 8 },
+                    { time: 31.5, duration: 8 },
+                    { time: 41.5, duration: 8 },
+                    { time: 51.5, duration: 8 },
+                    { time: 61.5, duration: 8 },
+                    { time: 71.5, duration: 8 },
+                    { time: 91.5, duration: 8 },
+                    { time: 101.5, duration: 8 },
+                    { time: 111.5, duration: 8 },
+                    { time: 121.5, duration: 8 },
+                    { time: 141.5, duration: 8 },
+                    { time: 151.5, duration: 8 }
+                ],
+                drums: [
+                    { time: 21.5, duration: 4 },
+                    { time: 27.5, duration: 4 },
+                    { time: 33.5, duration: 4 },
+                    { time: 41.5, duration: 4 },
+                    { time: 49.5, duration: 4 },
+                    { time: 57.5, duration: 4 },
+                    { time: 65.5, duration: 4 },
+                    { time: 73.5, duration: 4 },
+                    { time: 91.5, duration: 4 },
+                    { time: 99.5, duration: 4 },
+                    { time: 107.5, duration: 4 },
+                    { time: 115.5, duration: 4 },
+                    { time: 141.5, duration: 4 },
+                    { time: 149.5, duration: 4 }
+                ],
+                guitars: [
+                    { time: 31.5, duration: 6 },
+                    { time: 41.5, duration: 6 },
+                    { time: 51.5, duration: 6 },
+                    { time: 61.5, duration: 6 },
+                    { time: 71.5, duration: 6 },
+                    { time: 91.5, duration: 6 },
+                    { time: 101.5, duration: 6 },
+                    { time: 111.5, duration: 6 },
+                    { time: 141.5, duration: 6 },
+                    { time: 151.5, duration: 6 }
+                ],
+                strings: [
+                    { time: 11.5, duration: 10 },
+                    { time: 31.5, duration: 10 },
+                    { time: 51.5, duration: 10 },
+                    { time: 71.5, duration: 10 },
+                    { time: 91.5, duration: 10 },
+                    { time: 111.5, duration: 10 },
+                    { time: 131.5, duration: 10 },
+                    { time: 151.5, duration: 10 }
+                ],
+                synths: [
+                    { time: 1.5, duration: 5 },
+                    { time: 21.5, duration: 5 },
+                    { time: 41.5, duration: 5 },
+                    { time: 61.5, duration: 5 },
+                    { time: 81.5, duration: 5 },
+                    { time: 101.5, duration: 5 },
+                    { time: 121.5, duration: 5 },
+                    { time: 141.5, duration: 5 }
+                ]
+            };
+
+            // Adjust patterns based on difficulty
+            notePatterns = JSON.parse(JSON.stringify(basePatterns));
+
+            if (difficulty === 'easy') {
+                // Fewer notes for easy mode
+                for (const track in notePatterns) {
+                    notePatterns[track] = notePatterns[track].filter((_, index) => index % 2 === 0);
+                }
+            } else if (difficulty === 'hard') {
+                // More notes for hard mode
+                for (const track in notePatterns) {
+                    const originalPattern = [...notePatterns[track]];
+                    originalPattern.forEach(note => {
+                        // Add additional notes 2 seconds after each original note
+                        if (note.time + 2 < 165) { // Don't add notes beyond song length
+                            notePatterns[track].push({ time: note.time + 2, duration: note.duration });
+                        }
+                    });
+                    // Sort by time
+                    notePatterns[track].sort((a, b) => a.time - b.time);
+                }
+            }
+        }
+
+        // Initialize audio context and load audio files
+        async function initAudio() {
+            // Create audio context
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Create gain nodes for each track
+            tracks.forEach(track => {
+                gainNodes[track] = audioContext.createGain();
+                gainNodes[track].gain.value = 0; // Start with volume at 0
+                gainNodes[track].connect(audioContext.destination);
+            });
+            
+            // Create gain node for vocals
+            gainNodes.vocals = audioContext.createGain();
+            gainNodes.vocals.gain.value = 1; // Vocals start playing
+            gainNodes.vocals.connect(audioContext.destination);
+
+            // Load audio files
+            const files = {
+                piano: '01_piano.mp3',
+                drums: '02R_bass_drums.mp3',
+                guitars: '04_guitars.mp3',
+                strings: '05_strings.mp3',
+                synths: '06_synths_fx.mp3',
+                vocals: '07_vocals.mp3'
+            };
+
+            const baseUrl = 'https://mandarinenspiel.alexandrajanzen.de/assets/audio/stems/';
+            
+            // Load all audio files
+            for (const [key, file] of Object.entries(files)) {
+                try {
+                    const response = await fetch(baseUrl + file);
+                    const arrayBuffer = await response.arrayBuffer();
+                    audioBuffers[key] = await audioContext.decodeAudioData(arrayBuffer);
+                } catch (error) {
+                    console.error(`Error loading audio file ${file}:`, error);
+                }
+            }
+        }
+
+        // Start playing audio
+        function playAudio() {
+            if (!audioContext || isPlaying) return;
+            
+            // Resume audio context if suspended
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            startTime = audioContext.currentTime;
+            isPlaying = true;
+            
+            // Create source nodes for each track
+            for (const [key, buffer] of Object.entries(audioBuffers)) {
+                const source = audioContext.createBufferSource();
+                source.buffer = buffer;
+                source.connect(gainNodes[key]);
+                source.start(0);
+                audioSources[key] = source;
+            }
+            
+            // Start generating notes
+            generateNotes();
+        }
+
+        // Stop all audio
+        function stopAudio() {
+            if (!isPlaying) return;
+            
+            for (const key in audioSources) {
+                if (audioSources[key]) {
+                    audioSources[key].stop();
+                    audioSources[key].disconnect();
+                    audioSources[key] = null;
+                }
+            }
+            
+            isPlaying = false;
+        }
+
+        // Toggle instrument sound
+        function toggleInstrument(instrument, active) {
+            if (!gainNodes[instrument] || !isPlaying) return;
+            
+            const gain = gainNodes[instrument].gain;
+            const targetValue = active ? 1 : 0;
+            
+            // Smooth transition
+            gain.cancelScheduledValues(audioContext.currentTime);
+            gain.setValueAtTime(gain.value, audioContext.currentTime);
+            gain.linearRampToValueAtTime(targetValue, audioContext.currentTime + 0.1);
+            
+            // Update visual state
+            instrumentStates[instrument] = active;
+            
+            if (instrument !== 'vocals') {
+                activeInstrumentElements[instrument].style.opacity = active ? 1 : 0;
+            }
+        }
+
+        // Generate falling notes based on patterns
+        function generateNotes() {
+            for (const track in notePatterns) {
+                notePatterns[track].forEach(noteInfo => {
+                    setTimeout(() => {
+                        if (!isPlaying) return;
+                        createNote(track, noteInfo.duration);
+                    }, noteInfo.time * 1000);
+                });
+            }
+        }
+
+        // Create a falling note
+        function createNote(track, noteDuration) {
+            if (!trackElements[track] || !isPlaying) return;
+            
+            const note = document.createElement('div');
+            note.className = 'note';
+            
+            // Calculate animation duration based on difficulty
+            let animationDuration;
+            switch (difficulty) {
+                case 'easy':
+                    animationDuration = 3;
+                    break;
+                case 'hard':
+                    animationDuration = 1.5;
+                    break;
+                default: // medium
+                    animationDuration = 2;
+            }
+            
+            note.style.animationDuration = `${animationDuration}s`;
+            trackElements[track].appendChild(note);
+            
+            // Track the note for hit detection
+            const noteObj = {
+                element: note,
+                track: track,
+                duration: noteDuration,
+                hit: false
+            };
+            
+            activeNotes.push(noteObj);
+            
+            // Remove the note after animation completes
+            setTimeout(() => {
+                if (note.parentNode) {
+                    note.parentNode.removeChild(note);
+                }
+                
+                // If note wasn't hit, it was missed
+                if (!noteObj.hit && isPlaying) {
+                    showFeedback(track, 'missed');
+                    resetCombo();
+                }
+                
+                // Remove from active notes
+                const index = activeNotes.indexOf(noteObj);
+                if (index !== -1) {
+                    activeNotes.splice(index, 1);
+                }
+            }, animationDuration * 1000);
+        }
+
+        // Handle key press
+        function handleKeyPress(event) {
+            if (!isPlaying) return;
+            
+            const key = event.key.toLowerCase();
+            if (keyMap[key]) {
+                const track = keyMap[key];
+                checkNoteHit(track);
+            }
+        }
+
+        // Check if a note was hit
+        function checkNoteHit(track) {
+            // Find notes for this track
+            const trackNotes = activeNotes.filter(note => note.track === track && !note.hit);
+            if (trackNotes.length === 0) return;
+            
+            // Get the note closest to the hit zone
+            trackNotes.sort((a, b) => {
+                const aRect = a.element.getBoundingClientRect();
+                const bRect = b.element.getBoundingClientRect();
+                const hitRect = trackElements[track].querySelector('.hit-zone').getBoundingClientRect();
+                
+                return Math.abs(aRect.bottom - hitRect.top) - Math.abs(bRect.bottom - hitRect.top);
+            });
+            
+            const closestNote = trackNotes[0];
+            const noteRect = closestNote.element.getBoundingClientRect();
+            const hitRect = trackElements[track].querySelector('.hit-zone').getBoundingClientRect();
+            
+            const distance = Math.abs(noteRect.bottom - hitRect.top);
+            const hitZoneHeight = hitRect.height;
+            
+            let hitQuality;
+            if (distance < hitZoneHeight * 0.2) {
+                hitQuality = 'perfect';
+            } else if (distance < hitZoneHeight * 0.4) {
+                hitQuality = 'good';
+            } else if (distance < hitZoneHeight * 0.7) {
+                hitQuality = 'ok';
+            } else {
+                // Too far from hit zone
+                return;
+            }
+            
+            // Mark as hit
+            closestNote.hit = true;
+            closestNote.element.style.backgroundColor = '#00FF00';
+            
+            // Toggle instrument on
+            toggleInstrument(track, true);
+            
+            // Auto-disable after duration
+            setTimeout(() => {
+                toggleInstrument(track, false);
+            }, closestNote.duration * 1000);
+            
+            // Show feedback and update score
+            showFeedback(track, hitQuality);
+            updateScore(hitQuality);
+            
+            // Remove note element
+            setTimeout(() => {
+                if (closestNote.element.parentNode) {
+                    closestNote.element.parentNode.removeChild(closestNote.element);
+                }
+            }, 100);
+        }
+
+        // Update score based on hit quality
+        function updateScore(hitQuality) {
+            let points;
+            switch (hitQuality) {
+                case 'perfect':
+                    points = 100;
+                    combo += 1;
+                    break;
+                case 'good':
+                    points = 50;
+                    combo += 1;
+                    break;
+                case 'ok':
+                    points = 25;
+                    combo += 1;
+                    break;
+                default:
+                    points = 0;
+                    combo = 0;
+            }
+            
+            // Update multiplier based on combo
+            if (combo >= 30) {
+                multiplier = 4;
+            } else if (combo >= 20) {
+                multiplier = 3;
+            } else if (combo >= 10) {
+                multiplier = 2;
+            } else {
+                multiplier = 1;
+            }
+            
+            score += points * multiplier;
+            
+            // Update UI
+            scoreValue.textContent = score;
+            multiplierValue.textContent = `x${multiplier}`;
+        }
+
+        // Reset combo
+        function resetCombo() {
+            combo = 0;
+            multiplier = 1;
+            multiplierValue.textContent = `x${multiplier}`;
+        }
+
+        // Show feedback based on hit quality
+        function showFeedback(track, quality) {
+            const feedbackElement = feedbackElements[track];
+            
+            let text;
+            switch (quality) {
+                case 'perfect':
+                    text = 'Perfect!';
+                    break;
+                case 'good':
+                    text = 'Gut!';
+                    break;
+                case 'ok':
+                    text = 'OK';
+                    break;
+                case 'missed':
+                    text = 'Verpasst!';
+                    break;
+                default:
+                    text = '';
+            }
+            
+            feedbackElement.textContent = text;
+            feedbackElement.className = `hit-feedback ${quality}`;
+            feedbackElement.style.opacity = 1;
+            
+            setTimeout(() => {
+                feedbackElement.style.opacity = 0;
+            }, 500);
+        }
+
+        // Start the game
+        function startGame() {
+            // Generate note patterns based on difficulty
+            generateNotePatterns();
+            
+            // Reset game state
+            score = 0;
+            multiplier = 1;
+            combo = 0;
+            scoreValue.textContent = score;
+            multiplierValue.textContent = `x${multiplier}`;
+            
+            // Hide start button, show restart button
+            startBtn.style.display = 'none';
+            restartBtn.style.display = 'inline-block';
+            
+            // Start audio
+            playAudio();
+            
+            // End game after song duration (adjust as needed)
+            setTimeout(() => {
+                endGame();
+            }, 170000); // ~2:50 minutes
+        }
+
+        // End the game
+        function endGame() {
+            stopAudio();
+            
+            // Update final score
+            finalScore.textContent = score;
+            
+            // Set performance text
+            let performanceMessage;
+            if (score >= 10000) {
+                performanceMessage = 'Fantastisch! Du bist ein Rhythmus-Profi!';
+            } else if (score >= 5000) {
+                performanceMessage = 'Sehr gut! Du hast ein gutes Rhythmusgefühl!';
+            } else if (score >= 2000) {
+                performanceMessage = 'Nicht schlecht! Mit etwas Übung wirst du noch besser!';
+            } else {
+                performanceMessage = 'Guter Versuch! Übe weiter und verbessere deinen Score!';
+            }
+            
+            performanceText.textContent = performanceMessage;
+            
+            // Show end modal
+            endModal.style.display = 'flex';
+        }
+
+        // Restart the game
+        function restartGame() {
+            stopAudio();
+            
+            // Clear all notes
+            activeNotes.forEach(note => {
+                if (note.element.parentNode) {
+                    note.element.parentNode.removeChild(note.element);
+                }
+            });
+            activeNotes = [];
+            
+            // Reset instrument states
+            for (const track of tracks) {
+                instrumentStates[track] = false;
+                activeInstrumentElements[track].style.opacity = 0;
+            }
+            
+            // Hide end modal
+            endModal.style.display = 'none';
+            
+            // Start game again
+            startGame();
+        }
+
+        // Detect mobile device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // Function to add touch events
+        function setupTouchEvents() {
+            tracks.forEach(track => {
+                const touchArea = trackElements[track].querySelector('.touch-area');
+                if (touchArea) {
+                    touchArea.addEventListener('touchstart', (e) => {
+                        e.preventDefault(); // Prevent default touch behavior
+                        checkNoteHit(track);
+                    });
+                    
+                    // Also add click event for testing on desktop
+                    touchArea.addEventListener('click', () => {
+                        checkNoteHit(track);
+                    });
+                }
+            });
+        }
+        
+        // Update the modal text for mobile devices
+        function updateModalForMobile() {
+            const modalText = document.querySelector('.modal-text');
+            if (isMobile) {
+                modalText.innerHTML = 
+                    'Begleite Alexandra Janzen beim Song "Mandarinen"! Die Stimme läuft automatisch, und du musst die Instrumente im richtigen Moment aktivieren.' +
+                    '<br><br>' +
+                    'Tippe auf die Flächen unter den Spuren, wenn die Noten die Hit-Zone erreichen.' +
+                    '<br><br>' +
+                    'Wähle den Schwierigkeitsgrad:';
+            }
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', () => {
+            startModal.style.display = 'flex';
+            updateModalForMobile();
+        });
+
+        modalStartBtn.addEventListener('click', () => {
+            startModal.style.display = 'none';
+            startGame();
+            
+            // Setup touch events if on mobile
+            if (isMobile) {
+                setupTouchEvents();
+            }
+        });
+
+        restartBtn.addEventListener('click', restartGame);
+        modalRestartBtn.addEventListener('click', restartGame);
+
+        easyBtn.addEventListener('click', () => {
+            difficulty = 'easy';
+            easyBtn.classList.add('selected');
+            mediumBtn.classList.remove('selected');
+            hardBtn.classList.remove('selected');
+        });
+
+        mediumBtn.addEventListener('click', () => {
+            difficulty = 'medium';
+            easyBtn.classList.remove('selected');
+            mediumBtn.classList.add('selected');
+            hardBtn.classList.remove('selected');
+        });
+
+        hardBtn.addEventListener('click', () => {
+            difficulty = 'hard';
+            easyBtn.classList.remove('selected');
+            mediumBtn.classList.remove('selected');
+            hardBtn.classList.add('selected');
+        });
+
+        vocalsToggle.addEventListener('change', (e) => {
+            toggleInstrument('vocals', e.target.checked);
+        });
+
+        document.addEventListener('keydown', handleKeyPress);
+        
+        // Setup touch events on load if on mobile
+        if (isMobile) {
+            window.addEventListener('load', () => {
+                updateModalForMobile();
+                setupTouchEvents();
+            });
+        }
+
+        // Initialize audio on page load
+        window.addEventListener('load', initAudio);
+
+        // Handle window focus/blur
+        window.addEventListener('blur', () => {
+            // Pause game when window loses focus
+            if (isPlaying) {
+                stopAudio();
+                
+                // Show restart button
+                startBtn.style.display = 'none';
+                restartBtn.style.display = 'inline-block';
+            }
+        });
+    </script>
+</body>
+</html>
