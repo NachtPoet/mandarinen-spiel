@@ -665,13 +665,215 @@
     </div>
 
     <script>
+        // Audio analysis functions
+        async function analyzeAudio() {
+            const analyzeBtn = document.getElementById('analyze-btn');
+            analyzeBtn.textContent = 'Analysiere...';
+            analyzeBtn.disabled = true;
+            
+            // Create a temporary audio context for analysis
+            const tempContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Load audio files again if needed
+            const files = {
+                piano: '01_piano.mp3',
+                drums: '02R_bass_drums.mp3',
+                guitars: '04_guitars.mp3',
+                strings: '05_strings.mp3',
+                synths: '06_synths_fx.mp3'
+            };
+            
+            const baseUrl = 'https://mandarinenspiel.alexandrajanzen.de/assets/audio/stems/';
+            
+            // Create a status div to show progress
+            const statusDiv = document.createElement('div');
+            statusDiv.style.marginTop = '10px';
+            statusDiv.style.color = '#FFD700';
+            statusDiv.textContent = 'Analysiere Stems...';
+            analyzeBtn.parentNode.insertBefore(statusDiv, analyzeBtn.nextSibling);
+            
+            try {
+                // Initialize analyzed patterns
+                analyzedPatterns = {
+                    piano: [],
+                    drums: [],
+                    guitars: [],
+                    strings: [],
+                    synths: []
+                };
+                
+                // Analyze each track
+                for (const [track, file] of Object.entries(files)) {
+                    statusDiv.textContent = `Analysiere ${track}...`;
+                    
+                    // Load the audio file
+                    const response = await fetch(baseUrl + file);
+                    const arrayBuffer = await response.arrayBuffer();
+                    const audioBuffer = await tempContext.decodeAudioData(arrayBuffer);
+                    
+                    // Analyze the track
+                    const patterns = await analyzeTrack(tempContext, audioBuffer, track);
+                    analyzedPatterns[track] = patterns;
+                }
+                
+                statusDiv.textContent = 'Analyse abgeschlossen!';
+                statusDiv.style.color = '#00FF00';
+                
+                // Enable the analyzed patterns toggle
+                document.getElementById('analyze-toggle').disabled = false;
+                
+                // Enable analyze button again
+                analyzeBtn.textContent = 'Erneut analysieren';
+                analyzeBtn.disabled = false;
+                
+                // Auto-select the toggle
+                document.getElementById('analyze-toggle').checked = true;
+                useAnalyzedPatterns = true;
+                
+            } catch (error) {
+                console.error('Error analyzing audio:', error);
+                statusDiv.textContent = 'Fehler bei der Analyse!';
+                statusDiv.style.color = '#FF0000';
+                
+                // Enable analyze button again
+                analyzeBtn.textContent = 'Audio analysieren';
+                analyzeBtn.disabled = false;
+            } finally {
+                // Close the temporary audio context
+                if (tempContext.state !== 'closed') {
+                    tempContext.close();
+                }
+            }
+        }
+        
+        // Analyze a single track
+        async function analyzeTrack(context, buffer, trackName) {
+            // Create an offline audio context for analysis
+            const offlineContext = new OfflineAudioContext(1, buffer.length, buffer.sampleRate);
+            
+            // Create source
+            const source = offlineContext.createBufferSource();
+            source.buffer = buffer;
+            
+            // Create analyzer
+            const analyzer = offlineContext.createAnalyser();
+            analyzer.fftSize = 2048;
+            
+            // Connect nodes
+            source.connect(analyzer);
+            analyzer.connect(offlineContext.destination);
+            
+            // Start the source
+            source.start(0);
+            
+            // Process the audio
+            const renderedBuffer = await offlineContext.startRendering();
+            
+            // Get the audio data
+            const channelData = renderedBuffer.getChannelData(0);
+            
+            // Detect onsets (peaks in energy)
+            const patterns = [];
+            
+            // Process parameters based on track type
+            let energyThreshold, minDistance, noteLength;
+            
+            switch (trackName) {
+                case 'drums':
+                    energyThreshold = 0.05;
+                    minDistance = 0.5; // seconds
+                    noteLength = 4;
+                    break;
+                case 'piano':
+                    energyThreshold = 0.02;
+                    minDistance = 1.5;
+                    noteLength = 8;
+                    break;
+                case 'guitars':
+                    energyThreshold = 0.01;
+                    minDistance = 2.0;
+                    noteLength = 6;
+                    break;
+                case 'strings':
+                    energyThreshold = 0.008;
+                    minDistance = 3.0;
+                    noteLength = 10;
+                    break;
+                case 'synths':
+                    energyThreshold = 0.01;
+                    minDistance = 2.5;
+                    noteLength = 5;
+                    break;
+                default:
+                    energyThreshold = 0.02;
+                    minDistance = 1.0;
+                    noteLength = 4;
+            }
+            
+            // Calculate frame size for analysis (100ms windows)
+            const frameSize = Math.floor(buffer.sampleRate * 0.1);
+            let lastPeakTime = -minDistance;
+            
+            // Process frames
+            for (let i = 0; i < channelData.length; i += frameSize) {
+                // Calculate energy in this frame
+                let energy = 0;
+                for (let j = 0; j < frameSize && i + j < channelData.length; j++) {
+                    energy += Math.abs(channelData[i + j]);
+                }
+                energy /= frameSize;
+                
+                // Calculate time in seconds
+                const time = i / buffer.sampleRate;
+                
+                // Check if this is a peak
+                if (energy > energyThreshold && time - lastPeakTime >= minDistance) {
+                    // Add to patterns
+                    patterns.push({
+                        time: time,
+                        duration: noteLength,
+                        energy: energy
+                    });
+                    
+                    lastPeakTime = time;
+                }
+            }
+            
+            // Limit to the top patterns based on energy
+            patterns.sort((a, b) => b.energy - a.energy);
+            
+            // Max number of patterns based on track and difficulty
+            let maxPatterns;
+            switch (difficulty) {
+                case 'easy':
+                    maxPatterns = 8;
+                    break;
+                case 'hard':
+                    maxPatterns = 20;
+                    break;
+                default: // medium
+                    maxPatterns = 12;
+            }
+            
+            // Keep only the top patterns
+            const topPatterns = patterns.slice(0, maxPatterns);
+            
+            // Sort by time
+            topPatterns.sort((a, b) => a.time - b.time);
+            
+            return topPatterns;
+        }
         // Audio Context
         let audioContext;
         let gainNodes = {};
         let audioBuffers = {};
         let audioSources = {};
+        let audioAnalysers = {};
+        let audioDataArrays = {};
         let isPlaying = false;
         let startTime = 0;
+        let analyzedPatterns = null;
+        let useAnalyzedPatterns = false;
 
         // Game variables
         let score = 0;
@@ -972,13 +1174,36 @@
             tracks.forEach(track => {
                 gainNodes[track] = audioContext.createGain();
                 gainNodes[track].gain.value = 0; // Start with volume at 0
-                gainNodes[track].connect(audioContext.destination);
+                
+                // Create analyzer nodes for each track
+                audioAnalysers[track] = audioContext.createAnalyser();
+                audioAnalysers[track].fftSize = 2048;
+                const bufferLength = audioAnalysers[track].frequencyBinCount;
+                audioDataArrays[track] = {
+                    time: new Uint8Array(bufferLength),
+                    freq: new Uint8Array(bufferLength)
+                };
+                
+                // Connect gain node to analyzer and then to destination
+                gainNodes[track].connect(audioAnalysers[track]);
+                audioAnalysers[track].connect(audioContext.destination);
             });
             
             // Create gain node for vocals
             gainNodes.vocals = audioContext.createGain();
             gainNodes.vocals.gain.value = 1; // Vocals start playing
-            gainNodes.vocals.connect(audioContext.destination);
+            
+            // Create analyzer for vocals
+            audioAnalysers.vocals = audioContext.createAnalyser();
+            audioAnalysers.vocals.fftSize = 2048;
+            const vocalBufferLength = audioAnalysers.vocals.frequencyBinCount;
+            audioDataArrays.vocals = {
+                time: new Uint8Array(vocalBufferLength),
+                freq: new Uint8Array(vocalBufferLength)
+            };
+            
+            gainNodes.vocals.connect(audioAnalysers.vocals);
+            audioAnalysers.vocals.connect(audioContext.destination);
 
             // Load audio files
             const files = {
@@ -1002,6 +1227,54 @@
                     console.error(`Error loading audio file ${file}:`, error);
                 }
             }
+            
+            // Add a button to analyze audio in the start modal
+            const difficultyButtons = document.querySelector('.difficulty-buttons');
+            const analyzeButton = document.createElement('button');
+            analyzeButton.textContent = 'Audio analysieren';
+            analyzeButton.className = 'btn';
+            analyzeButton.id = 'analyze-btn';
+            analyzeButton.style.marginTop = '15px';
+            analyzeButton.addEventListener('click', analyzeAudio);
+            difficultyButtons.parentNode.insertBefore(analyzeButton, difficultyButtons.nextSibling);
+            
+            // Add a toggle for using analyzed patterns
+            const analyzeToggleContainer = document.createElement('div');
+            analyzeToggleContainer.style.marginTop = '15px';
+            analyzeToggleContainer.style.display = 'flex';
+            analyzeToggleContainer.style.alignItems = 'center';
+            analyzeToggleContainer.style.justifyContent = 'center';
+            
+            const analyzeToggleLabel = document.createElement('span');
+            analyzeToggleLabel.textContent = 'Analysierte Muster verwenden: ';
+            analyzeToggleLabel.style.color = '#fff';
+            analyzeToggleLabel.style.marginRight = '10px';
+            
+            const analyzeToggle = document.createElement('label');
+            analyzeToggle.className = 'toggle-switch';
+            
+            const analyzeToggleInput = document.createElement('input');
+            analyzeToggleInput.type = 'checkbox';
+            analyzeToggleInput.id = 'analyze-toggle';
+            analyzeToggleInput.addEventListener('change', (e) => {
+                useAnalyzedPatterns = e.target.checked;
+                if (useAnalyzedPatterns && !analyzedPatterns) {
+                    alert('Bitte zuerst die Audio-Analyse durchführen!');
+                    e.target.checked = false;
+                    useAnalyzedPatterns = false;
+                }
+            });
+            
+            const analyzeToggleSlider = document.createElement('span');
+            analyzeToggleSlider.className = 'toggle-slider';
+            
+            analyzeToggle.appendChild(analyzeToggleInput);
+            analyzeToggle.appendChild(analyzeToggleSlider);
+            
+            analyzeToggleContainer.appendChild(analyzeToggleLabel);
+            analyzeToggleContainer.appendChild(analyzeToggle);
+            
+            difficultyButtons.parentNode.insertBefore(analyzeToggleContainer, analyzeButton.nextSibling);
         }
 
         // Start playing audio
@@ -1042,6 +1315,9 @@
             }
             
             isPlaying = false;
+            
+            // Stop visualization if active
+            stopVisualization();
         }
 
         // Toggle instrument sound
@@ -1270,6 +1546,21 @@
             feedbackElement.className = `hit-feedback ${quality}`;
             feedbackElement.style.opacity = 1;
             
+            // Vibrate on mobile devices for tactile feedback (if supported)
+            if (navigator.vibrate && quality !== 'missed') {
+                switch (quality) {
+                    case 'perfect':
+                        navigator.vibrate(100);
+                        break;
+                    case 'good':
+                        navigator.vibrate(70);
+                        break;
+                    case 'ok':
+                        navigator.vibrate(40);
+                        break;
+                }
+            }
+            
             setTimeout(() => {
                 feedbackElement.style.opacity = 0;
             }, 500);
@@ -1278,7 +1569,9 @@
         // Start the game
         function startGame() {
             // Generate note patterns based on difficulty
-            generateNotePatterns();
+            if (!useAnalyzedPatterns || !analyzedPatterns) {
+                generateNotePatterns();
+            }
             
             // Reset game state
             score = 0;
@@ -1294,10 +1587,119 @@
             // Start audio
             playAudio();
             
+            // Start visualization if needed
+            if (useAnalyzedPatterns) {
+                startVisualization();
+            }
+            
             // End game after song duration (adjust as needed)
             setTimeout(() => {
                 endGame();
             }, 170000); // ~2:50 minutes
+        }
+        
+        // Audio visualization
+        let visualizationActive = false;
+        let visualizationCanvas;
+        let visualizationContext;
+        
+        // Start visualization
+        function startVisualization() {
+            if (visualizationActive) return;
+            
+            // Create canvas for visualization
+            visualizationCanvas = document.createElement('canvas');
+            visualizationCanvas.width = 300;
+            visualizationCanvas.height = 100;
+            visualizationCanvas.style.position = 'absolute';
+            visualizationCanvas.style.bottom = '20px';
+            visualizationCanvas.style.left = '50%';
+            visualizationCanvas.style.transform = 'translateX(-50%)';
+            visualizationCanvas.style.zIndex = '5';
+            visualizationCanvas.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+            visualizationCanvas.style.borderRadius = '5px';
+            
+            // Add canvas to game container
+            document.querySelector('.game-container').appendChild(visualizationCanvas);
+            
+            visualizationContext = visualizationCanvas.getContext('2d');
+            visualizationActive = true;
+            
+            // Start animation
+            updateVisualization();
+        }
+        
+        // Update visualization
+        function updateVisualization() {
+            if (!visualizationActive || !isPlaying) return;
+            
+            visualizationContext.clearRect(0, 0, visualizationCanvas.width, visualizationCanvas.height);
+            
+            // Draw time-domain data for each track
+            const trackColors = {
+                piano: '#FF6347',
+                drums: '#4169E1',
+                guitars: '#32CD32',
+                strings: '#9370DB',
+                synths: '#FFD700',
+                vocals: '#FF69B4'
+            };
+            
+            const trackY = {
+                piano: 10,
+                drums: 25,
+                guitars: 40,
+                strings: 55,
+                synths: 70,
+                vocals: 85
+            };
+            
+            for (const track in audioAnalysers) {
+                if (!audioAnalysers[track]) continue;
+                
+                // Get time domain data
+                audioAnalysers[track].getByteTimeDomainData(audioDataArrays[track].time);
+                
+                // Draw waveform
+                visualizationContext.lineWidth = 2;
+                visualizationContext.strokeStyle = trackColors[track] || '#FFF';
+                visualizationContext.beginPath();
+                
+                const sliceWidth = visualizationCanvas.width / audioDataArrays[track].time.length;
+                let x = 0;
+                
+                for (let i = 0; i < audioDataArrays[track].time.length; i++) {
+                    const v = audioDataArrays[track].time[i] / 128.0;
+                    const y = trackY[track] + (v * 15 - 15);
+                    
+                    if (i === 0) {
+                        visualizationContext.moveTo(x, y);
+                    } else {
+                        visualizationContext.lineTo(x, y);
+                    }
+                    
+                    x += sliceWidth;
+                }
+                
+                visualizationContext.lineTo(visualizationCanvas.width, trackY[track]);
+                visualizationContext.stroke();
+                
+                // Draw track label
+                visualizationContext.font = '10px Arial';
+                visualizationContext.fillStyle = trackColors[track] || '#FFF';
+                visualizationContext.fillText(track, 5, trackY[track] + 3);
+            }
+            
+            // Keep updating
+            requestAnimationFrame(updateVisualization);
+        }
+        
+        // Stop visualization
+        function stopVisualization() {
+            visualizationActive = false;
+            if (visualizationCanvas && visualizationCanvas.parentNode) {
+                visualizationCanvas.parentNode.removeChild(visualizationCanvas);
+            }
         }
 
         // End the game
