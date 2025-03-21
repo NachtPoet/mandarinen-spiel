@@ -728,83 +728,189 @@
 
         // Note patterns based on song structure
         function generateNotePatterns() {
+            const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            // Base patterns - now with more rhythmic structure and less overlap
             const basePatterns = {
                 piano: [
-                    { time: 1.5, duration: 8 },
-                    { time: 11.5, duration: 8 },
-                    { time: 21.5, duration: 8 },
-                    { time: 31.5, duration: 8 },
-                    { time: 41.5, duration: 8 },
-                    { time: 51.5, duration: 8 },
-                    { time: 61.5, duration: 8 },
-                    { time: 71.5, duration: 8 },
-                    { time: 91.5, duration: 8 },
-                    { time: 101.5, duration: 8 },
-                    { time: 111.5, duration: 8 },
-                    { time: 121.5, duration: 8 },
-                    { time: 141.5, duration: 8 },
-                    { time: 151.5, duration: 8 }
+                    { time: 2.0, duration: 8 },
+                    { time: 10.0, duration: 8 },
+                    { time: 22.0, duration: 8 },
+                    { time: 34.0, duration: 8 },
+                    { time: 46.0, duration: 8 },
+                    { time: 58.0, duration: 8 },
+                    { time: 70.0, duration: 8 },
+                    { time: 82.0, duration: 8 },
+                    { time: 94.0, duration: 8 },
+                    { time: 106.0, duration: 8 },
+                    { time: 118.0, duration: 8 },
+                    { time: 130.0, duration: 8 },
+                    { time: 142.0, duration: 8 },
+                    { time: 154.0, duration: 8 }
                 ],
                 drums: [
-                    { time: 21.5, duration: 4 },
-                    { time: 27.5, duration: 4 },
-                    { time: 33.5, duration: 4 },
-                    { time: 41.5, duration: 4 },
-                    { time: 49.5, duration: 4 },
-                    { time: 57.5, duration: 4 },
-                    { time: 65.5, duration: 4 },
-                    { time: 73.5, duration: 4 },
-                    { time: 91.5, duration: 4 },
-                    { time: 99.5, duration: 4 },
-                    { time: 107.5, duration: 4 },
-                    { time: 115.5, duration: 4 },
-                    { time: 141.5, duration: 4 },
-                    { time: 149.5, duration: 4 }
+                    { time: 6.0, duration: 4 },
+                    { time: 14.0, duration: 4 },
+                    { time: 26.0, duration: 4 },
+                    { time: 38.0, duration: 4 },
+                    { time: 50.0, duration: 4 },
+                    { time: 62.0, duration: 4 },
+                    { time: 74.0, duration: 4 },
+                    { time: 86.0, duration: 4 },
+                    { time: 98.0, duration: 4 },
+                    { time: 110.0, duration: 4 },
+                    { time: 122.0, duration: 4 },
+                    { time: 134.0, duration: 4 },
+                    { time: 146.0, duration: 4 },
+                    { time: 158.0, duration: 4 }
                 ],
                 guitars: [
-                    { time: 31.5, duration: 6 },
-                    { time: 41.5, duration: 6 },
-                    { time: 51.5, duration: 6 },
-                    { time: 61.5, duration: 6 },
-                    { time: 71.5, duration: 6 },
-                    { time: 91.5, duration: 6 },
-                    { time: 101.5, duration: 6 },
-                    { time: 111.5, duration: 6 },
-                    { time: 141.5, duration: 6 },
-                    { time: 151.5, duration: 6 }
+                    { time: 4.0, duration: 6 },
+                    { time: 16.0, duration: 6 },
+                    { time: 28.0, duration: 6 },
+                    { time: 40.0, duration: 6 },
+                    { time: 52.0, duration: 6 },
+                    { time: 64.0, duration: 6 },
+                    { time: 76.0, duration: 6 },
+                    { time: 88.0, duration: 6 },
+                    { time: 100.0, duration: 6 },
+                    { time: 112.0, duration: 6 },
+                    { time: 124.0, duration: 6 },
+                    { time: 136.0, duration: 6 },
+                    { time: 148.0, duration: 6 },
+                    { time: 160.0, duration: 6 }
                 ],
                 strings: [
-                    { time: 11.5, duration: 10 },
-                    { time: 31.5, duration: 10 },
-                    { time: 51.5, duration: 10 },
-                    { time: 71.5, duration: 10 },
-                    { time: 91.5, duration: 10 },
-                    { time: 111.5, duration: 10 },
-                    { time: 131.5, duration: 10 },
-                    { time: 151.5, duration: 10 }
+                    { time: 8.0, duration: 10 },
+                    { time: 20.0, duration: 10 },
+                    { time: 32.0, duration: 10 },
+                    { time: 44.0, duration: 10 },
+                    { time: 56.0, duration: 10 },
+                    { time: 68.0, duration: 10 },
+                    { time: 80.0, duration: 10 },
+                    { time: 92.0, duration: 10 },
+                    { time: 104.0, duration: 10 },
+                    { time: 116.0, duration: 10 },
+                    { time: 128.0, duration: 10 },
+                    { time: 140.0, duration: 10 },
+                    { time: 152.0, duration: 10 }
                 ],
                 synths: [
-                    { time: 1.5, duration: 5 },
-                    { time: 21.5, duration: 5 },
-                    { time: 41.5, duration: 5 },
-                    { time: 61.5, duration: 5 },
-                    { time: 81.5, duration: 5 },
-                    { time: 101.5, duration: 5 },
-                    { time: 121.5, duration: 5 },
-                    { time: 141.5, duration: 5 }
+                    { time: 12.0, duration: 5 },
+                    { time: 24.0, duration: 5 },
+                    { time: 36.0, duration: 5 },
+                    { time: 48.0, duration: 5 },
+                    { time: 60.0, duration: 5 },
+                    { time: 72.0, duration: 5 },
+                    { time: 84.0, duration: 5 },
+                    { time: 96.0, duration: 5 },
+                    { time: 108.0, duration: 5 },
+                    { time: 120.0, duration: 5 },
+                    { time: 132.0, duration: 5 },
+                    { time: 144.0, duration: 5 },
+                    { time: 156.0, duration: 5 }
                 ]
             };
-
+            
+            // Create mobile-friendly patterns (no overlapping notes)
+            const mobileBasePatterns = {
+                piano: [
+                    { time: 2.0, duration: 8 },
+                    { time: 18.0, duration: 8 },
+                    { time: 34.0, duration: 8 },
+                    { time: 50.0, duration: 8 },
+                    { time: 66.0, duration: 8 },
+                    { time: 82.0, duration: 8 },
+                    { time: 98.0, duration: 8 },
+                    { time: 114.0, duration: 8 },
+                    { time: 130.0, duration: 8 },
+                    { time: 146.0, duration: 8 }
+                ],
+                drums: [
+                    { time: 6.0, duration: 4 },
+                    { time: 22.0, duration: 4 },
+                    { time: 38.0, duration: 4 },
+                    { time: 54.0, duration: 4 },
+                    { time: 70.0, duration: 4 },
+                    { time: 86.0, duration: 4 },
+                    { time: 102.0, duration: 4 },
+                    { time: 118.0, duration: 4 },
+                    { time: 134.0, duration: 4 },
+                    { time: 150.0, duration: 4 }
+                ],
+                guitars: [
+                    { time: 10.0, duration: 6 },
+                    { time: 26.0, duration: 6 },
+                    { time: 42.0, duration: 6 },
+                    { time: 58.0, duration: 6 },
+                    { time: 74.0, duration: 6 },
+                    { time: 90.0, duration: 6 },
+                    { time: 106.0, duration: 6 },
+                    { time: 122.0, duration: 6 },
+                    { time: 138.0, duration: 6 },
+                    { time: 154.0, duration: 6 }
+                ],
+                strings: [
+                    { time: 14.0, duration: 10 },
+                    { time: 30.0, duration: 10 },
+                    { time: 46.0, duration: 10 },
+                    { time: 62.0, duration: 10 },
+                    { time: 78.0, duration: 10 },
+                    { time: 94.0, duration: 10 },
+                    { time: 110.0, duration: 10 },
+                    { time: 126.0, duration: 10 },
+                    { time: 142.0, duration: 10 },
+                    { time: 158.0, duration: 10 }
+                ],
+                synths: [
+                    { time: 0.0, duration: 5 },
+                    { time: 16.0, duration: 5 },
+                    { time: 32.0, duration: 5 },
+                    { time: 48.0, duration: 5 },
+                    { time: 64.0, duration: 5 },
+                    { time: 80.0, duration: 5 },
+                    { time: 96.0, duration: 5 },
+                    { time: 112.0, duration: 5 },
+                    { time: 128.0, duration: 5 },
+                    { time: 144.0, duration: 5 }
+                ]
+            };
+            
+            // Use mobile patterns if on mobile device
+            let selectedPatterns = isMobileDevice ? mobileBasePatterns : basePatterns;
+            
             // Adjust patterns based on difficulty
-            notePatterns = JSON.parse(JSON.stringify(basePatterns));
-
+            notePatterns = JSON.parse(JSON.stringify(selectedPatterns));
+            
             if (difficulty === 'easy') {
-                // Fewer notes for easy mode
+                // Fewer notes for easy mode and ensure they don't overlap
                 for (const track in notePatterns) {
                     notePatterns[track] = notePatterns[track].filter((_, index) => index % 2 === 0);
                 }
-            } else if (difficulty === 'hard') {
-                // More notes for hard mode
+                
+                // If on mobile, add extra spacing between notes regardless of difficulty
+                if (isMobileDevice) {
+                    const allTimes = [];
+                    // Collect all times from all tracks
+                    for (const track in notePatterns) {
+                        notePatterns[track].forEach(note => allTimes.push(note.time));
+                    }
+                    
+                    // Sort times
+                    allTimes.sort((a, b) => a - b);
+                    
+                    // Check for notes that are too close together (less than 3 seconds apart)
+                    for (let i = 1; i < allTimes.length; i++) {
+                        if (allTimes[i] - allTimes[i-1] < 3) {
+                            // Find this note in patterns and remove it
+                            for (const track in notePatterns) {
+                                notePatterns[track] = notePatterns[track].filter(note => note.time !== allTimes[i]);
+                            }
+                        }
+                    }
+                }
+            } else if (difficulty === 'hard' && !isMobileDevice) {
+                // More notes for hard mode, but only on desktop
                 for (const track in notePatterns) {
                     const originalPattern = [...notePatterns[track]];
                     originalPattern.forEach(note => {
@@ -816,6 +922,44 @@
                     // Sort by time
                     notePatterns[track].sort((a, b) => a.time - b.time);
                 }
+            }
+            
+            // For mobile medium and hard, ensure no notes appear at the same time
+            if (isMobileDevice && difficulty !== 'easy') {
+                // Collect all notes from all tracks
+                const allNotes = [];
+                for (const track in notePatterns) {
+                    notePatterns[track].forEach(note => {
+                        allNotes.push({
+                            track: track,
+                            time: note.time,
+                            duration: note.duration
+                        });
+                    });
+                }
+                
+                // Sort by time
+                allNotes.sort((a, b) => a.time - b.time);
+                
+                // Ensure minimum spacing between notes (1.5s for medium, 1s for hard)
+                const minSpacing = difficulty === 'medium' ? 1.5 : 1;
+                for (let i = 1; i < allNotes.length; i++) {
+                    if (allNotes[i].time - allNotes[i-1].time < minSpacing) {
+                        allNotes[i].time = allNotes[i-1].time + minSpacing;
+                    }
+                }
+                
+                // Update note patterns with adjusted times
+                for (const track in notePatterns) {
+                    notePatterns[track] = [];
+                }
+                
+                allNotes.forEach(note => {
+                    notePatterns[note.track].push({
+                        time: note.time,
+                        duration: note.duration
+                    });
+                });
             }
         }
 
@@ -1232,9 +1376,9 @@
             const modalText = document.querySelector('.modal-text');
             if (isMobile) {
                 modalText.innerHTML = 
-                    'Begleite Alexandra Janzen beim Song "Mandarinen"! Die Stimme läuft automatisch, und du musst die Instrumente im richtigen Moment aktivieren.' +
+                    'Begleite Alexandra Janzen beim Song "Mandarinen"! Die Stimme läuft automatisch, und du musst die Instrumente im Takt aktivieren.' +
                     '<br><br>' +
-                    'Tippe auf die Flächen unter den Spuren, wenn die Noten die Hit-Zone erreichen.' +
+                    'Tippe auf die Flächen, wenn die Noten die Hit-Zone erreichen. Die Noten folgen einem echten Rhythmus-Muster.' +
                     '<br><br>' +
                     'Wähle den Schwierigkeitsgrad:';
             }
