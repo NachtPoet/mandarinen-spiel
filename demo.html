@@ -780,13 +780,13 @@
             
             switch (trackName) {
                 case 'drums':
-                    energyThreshold = 0.02;
-                    minDistance = 0.4; // seconds
+                    energyThreshold = 0.008;  // Much lower threshold to detect more beats
+                    minDistance = 0.2; // Allow notes very close together
                     noteLength = 4;
                     break;
                 case 'piano':
-                    energyThreshold = 0.01;
-                    minDistance = 0.8;
+                    energyThreshold = 0.005;  // Very low threshold for piano
+                    minDistance = 0.3;        // Allow notes close together
                     noteLength = 8;
                     break;
                 case 'guitars':
@@ -846,13 +846,13 @@
             let maxPatterns;
             switch (difficulty) {
                 case 'easy':
-                    maxPatterns = trackName === 'piano' || trackName === 'drums' ? 20 : 10;
+                    maxPatterns = trackName === 'piano' || trackName === 'drums' ? 50 : 10;
                     break;
                 case 'hard':
-                    maxPatterns = trackName === 'piano' || trackName === 'drums' ? 40 : 25;
+                    maxPatterns = trackName === 'piano' || trackName === 'drums' ? 100 : 25;
                     break;
                 default: // medium
-                    maxPatterns = trackName === 'piano' || trackName === 'drums' ? 30 : 15;
+                    maxPatterns = trackName === 'piano' || trackName === 'drums' ? 75 : 15;
             }
             
             // Keep only the top patterns
@@ -1314,6 +1314,12 @@
                 audioSources[key] = source;
             }
             
+            // Start Piano and Drums with vocals
+            if (!useAnalyzedPatterns) {
+                toggleInstrument('piano', true);
+                toggleInstrument('drums', true);
+            }
+            
             // Start generating notes
             generateNotes();
             
@@ -1374,8 +1380,52 @@
             console.log("Generating notes using patterns:", useAnalyzedPatterns ? "analyzed" : "predefined");
             console.log("Patterns:", patternsToUse);
             
+            // Set up piano and drums to be more frequent
+            const regularIntervalNotes = {
+                piano: [],
+                drums: []
+            };
+            
+            // Add regular piano notes every 2 seconds if using predefined patterns
+            if (!useAnalyzedPatterns) {
+                for (let i = 0; i <= 200; i += 2) {
+                    regularIntervalNotes.piano.push({
+                        time: i,
+                        duration: 8
+                    });
+                }
+                
+                // Add regular drum notes every 2.5 seconds
+                for (let i = 1; i <= 200; i += 2.5) {
+                    regularIntervalNotes.drums.push({
+                        time: i,
+                        duration: 4
+                    });
+                }
+                
+                // Use these for piano and drums instead
+                for (let track of ['piano', 'drums']) {
+                    console.log(`Scheduling ${regularIntervalNotes[track].length} ${track} notes`);
+                    
+                    regularIntervalNotes[track].forEach(noteInfo => {
+                        setTimeout(() => {
+                            if (!isPlaying) return;
+                            createNote(track, noteInfo.duration);
+                        }, noteInfo.time * 1000);
+                    });
+                }
+            }
+            
+            // Schedule notes for all tracks
             for (const track in patternsToUse) {
+                // Skip piano and drums if using regular intervals and not analyzed
+                if (!useAnalyzedPatterns && (track === 'piano' || track === 'drums')) {
+                    continue;
+                }
+                
                 if (!patternsToUse[track] || patternsToUse[track].length === 0) continue;
+                
+                console.log(`Scheduling ${patternsToUse[track].length} ${track} notes`);
                 
                 patternsToUse[track].forEach(noteInfo => {
                     setTimeout(() => {
