@@ -780,32 +780,32 @@
             
             switch (trackName) {
                 case 'drums':
-                    energyThreshold = 0.03;
-                    minDistance = 0.5; // seconds
+                    energyThreshold = 0.02;
+                    minDistance = 0.4; // seconds
                     noteLength = 4;
                     break;
                 case 'piano':
-                    energyThreshold = 0.015;
-                    minDistance = 1.5;
+                    energyThreshold = 0.01;
+                    minDistance = 0.8;
                     noteLength = 8;
                     break;
                 case 'guitars':
-                    energyThreshold = 0.01;
+                    energyThreshold = 0.008;
                     minDistance = 2.0;
                     noteLength = 6;
                     break;
                 case 'strings':
-                    energyThreshold = 0.008;
+                    energyThreshold = 0.006;
                     minDistance = 3.0;
                     noteLength = 10;
                     break;
                 case 'synths':
-                    energyThreshold = 0.01;
+                    energyThreshold = 0.008;
                     minDistance = 2.5;
                     noteLength = 5;
                     break;
                 default:
-                    energyThreshold = 0.015;
+                    energyThreshold = 0.01;
                     minDistance = 1.0;
                     noteLength = 4;
             }
@@ -846,13 +846,13 @@
             let maxPatterns;
             switch (difficulty) {
                 case 'easy':
-                    maxPatterns = 10;
+                    maxPatterns = trackName === 'piano' || trackName === 'drums' ? 20 : 10;
                     break;
                 case 'hard':
-                    maxPatterns = 25;
+                    maxPatterns = trackName === 'piano' || trackName === 'drums' ? 40 : 25;
                     break;
                 default: // medium
-                    maxPatterns = 15;
+                    maxPatterns = trackName === 'piano' || trackName === 'drums' ? 30 : 15;
             }
             
             // Keep only the top patterns
@@ -860,6 +860,18 @@
             
             // Sort by time
             topPatterns.sort((a, b) => a.time - b.time);
+            
+            // Ensure piano starts right at the beginning
+            if (trackName === 'piano') {
+                // Add a note at the very beginning if there isn't one already
+                if (topPatterns.length > 0 && topPatterns[0].time > 1) {
+                    topPatterns.unshift({
+                        time: 0.5,
+                        duration: noteLength,
+                        energy: 0.05
+                    });
+                }
+            }
             
             // Add some debug information
             console.log(`Track ${trackName} analysis complete. Found ${patterns.length} patterns, using ${topPatterns.length}`);
@@ -1330,10 +1342,10 @@
         }
 
         // Toggle instrument sound
-        function toggleInstrument(instrument, active) {
-            if (!gainNodes[instrument] || !isPlaying) return;
+        function toggleInstrument(track, active, duration = null) {
+            if (!gainNodes[track] || !isPlaying) return;
             
-            const gain = gainNodes[instrument].gain;
+            const gain = gainNodes[track].gain;
             const targetValue = active ? 1 : 0;
             
             // Smooth transition
@@ -1342,10 +1354,15 @@
             gain.linearRampToValueAtTime(targetValue, audioContext.currentTime + 0.1);
             
             // Update visual state
-            instrumentStates[instrument] = active;
+            instrumentStates[track] = active;
             
-            if (instrument !== 'vocals') {
-                activeInstrumentElements[instrument].style.opacity = active ? 1 : 0;
+            if (track !== 'vocals') {
+                activeInstrumentElements[track].style.opacity = active ? 1 : 0;
+            }
+            
+            // Don't auto-disable if no duration specified
+            if (duration === null) {
+                return;
             }
         }
 
@@ -1412,6 +1429,9 @@
                 if (!noteObj.hit && isPlaying) {
                     showFeedback(track, 'missed');
                     resetCombo();
+                    
+                    // Turn off the instrument when a note is missed
+                    toggleInstrument(track, false);
                 }
                 
                 // Remove from active notes
@@ -1612,7 +1632,7 @@
             // End game after song duration (adjust as needed)
             setTimeout(() => {
                 endGame();
-            }, 170000); // ~2:50 minutes
+            }, 210000); // ~3:30 minutes to ensure full song playback
         }
         
         // Audio visualization
