@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-current-lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mandarinen im Gepäck</title>
   <!-- Retro Pixel-Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&subset=cyrillic,cyrillic-ext&display=swap" rel="stylesheet">
   <!-- Ergänzende Schriftart für Lyrics -->
-  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600&subset=cyrillic,cyrillic-ext&display=swap" rel="stylesheet">
   <!-- Stylesheet einbinden -->
   <link rel="stylesheet" href="css/style.css">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 </head>
@@ -18,15 +18,15 @@
   <div id="star-field"></div>
   <div class="memory-flash"></div>
 
-  <h1>Mandarinen im Gepäck</h1>
+  <h1 data-translate="pageTitle">Mandarinen im Gepäck</h1>
 
   <!-- Startbildschirm mit Cover-Ästhetik -->
   <div id="startScreen" class="overlay">
     <div class="cover-frame">
       <!-- Goldene Überschrift wie auf dem Cover -->
       <div class="cover-title">
-        <span class="artist-name">ALEXANDRA JANZEN</span>
-        <span class="song-title">MANDARINEN</span>
+        <span class="artist-name" data-translate="coverArtistName">ALEXANDRA JANZEN</span>
+        <span class="song-title" data-translate="coverSongTitle">MANDARINEN</span>
       </div>
       
       <!-- Mandarinen-Animation -->
@@ -35,44 +35,52 @@
         <div class="mandarin-right"></div>
       </div>
       
-      <h2>Erinnerungen im Gepäck</h2>
+      <h2 data-translate="startScreenTitle">Erinnerungen im Gepäck</h2>
       
-      <p>
+      <p data-translate="startScreenDescription">
         Tauche ein in die Welt der Mandarinen und entdecke verschüttete Erinnerungen. Jedes gefundene Wort
         enthüllt einen Teil eines besonderen Liedes.<br>
         Folge der Geschichte durch die Zeit - von der Kindheit bis zum Wiedersehen.
       </p>
+
+      <!-- Sprachauswahl -->
+      <div class="select-wrapper language-select-wrapper">
+        <label for="languageSelect">Sprache:</label>
+        <select id="languageSelect">
+          <!-- Optionen werden dynamisch von localization.js hinzugefügt -->
+        </select>
+      </div>
       
       <div class="select-wrapper">
-        <label for="difficultySelect">Schwierigkeitsgrad:</label>
+        <label for="difficultySelect" data-translate="difficultyLabel">Schwierigkeitsgrad:</label>
         <select id="difficultySelect">
-          <option value="easy" selected>Leichtes Gepäck</option>
-          <option value="hard">Schweres Gepäck</option>
-          <option value="loose">Loch in der Tasche</option>
+          <option value="easy" selected data-translate="difficultyEasy">Leichtes Gepäck</option>
+          <option value="hard" data-translate="difficultyHard">Schweres Gepäck</option>
+          <option value="loose" data-translate="difficultyLoose">Loch in der Tasche</option>
         </select>
       </div>
       
       <div class="button-container">
-  <button id="startButton" class="btn primary">
-    <span class="gold-triangle"></span>Spiel fortsetzen
-  </button>
-  <button id="startNewButton" class="btn secondary">Neue Reise beginnen</button>
-  <button id="helpButton" class="btn">Spielanleitung</button>
-  <!-- Fullscreen-Button für Mobilgeräte -->
-  <button id="fullscreenButton" class="btn fullscreen-btn">
-    <span class="fullscreen-icon"></span>Vollbild
-  </button>
-</div>
+        <button id="startButton" class="btn primary disabled" disabled>
+          <span class="gold-triangle"></span><span data-translate="continueButton">Spiel fortsetzen</span>
+        </button>
+        <button id="startNewButton" class="btn secondary" data-translate="startNewButton">Neue Reise beginnen</button>
+        <button id="helpButton" class="btn" data-translate="helpButton">Spielanleitung</button>
+        <!-- Fullscreen-Button für Mobilgeräte -->
+        <button id="fullscreenButton" class="btn fullscreen-btn">
+          <span class="fullscreen-icon"></span><span data-translate="fullscreenButton">Vollbild</span>
+        </button>
+      </div>
 
       <div id="loadingIndicator" class="loading-indicator" style="display: none;">
-  <div class="loading-spinner"></div>
-  <p class="loading-text">Musik wird geladen...</p>
-  <div class="loading-progress-container">
-    <div class="loading-progress-bar" id="loadingProgressBar"></div>
-  </div>
-</div>
+        <div class="loading-spinner"></div>
+        <p class="loading-text" data-translate="loadingText">Musik wird geladen...</p>
+        <div class="loading-progress-container">
+          <div class="loading-progress-bar" id="loadingProgressBar"></div>
+        </div>
+      </div>
       
-      <p class="save-notice">Dein Fortschritt und deine Erinnerungen werden automatisch gespeichert.</p>
+      <p class="save-notice" data-translate="saveNotice">Dein Fortschritt und deine Erinnerungen werden automatisch gespeichert.</p>
       
       <!-- Copyright-Info im Cover-Stil -->
       <div class="cover-footer">
@@ -87,18 +95,27 @@
 
   <!-- Spielbereich -->
   <div id="gameContainer" class="container" style="display:none;">
-    <div id="epicBadge" class="epic-badge">Perfekte Runde!</div>
-    <div id="levelIndicator">Level: 1/10</div>
-    <div id="timer">Zeit: 0:00</div>
+    <div id="epicBadge" class="epic-badge" data-translate="epicBadge">Perfekte Runde!</div>
+    <div id="levelIndicator">Level: 1/10</div> <!-- Wird dynamisch aktualisiert -->
+    <div id="timer">Zeit: 0:00</div> <!-- Wird dynamisch aktualisiert -->
     <div id="grid" class="grid"></div>
-    <div id="progress"><div id="progressBar"></div></div>
+    
+    <!-- Untertitel-Bereich direkt nach dem Grid, ersetzt #progress -->
+    <div id="subtitlesContainer" class="subtitles-container">
+      <div id="subtitlesText" class="subtitles-text"></div>
+      <button id="subtitlesToggle" class="subtitles-toggle" aria-label="Untertitel ein/aus" title="Untertitel anzeigen/ausblenden"></button>
+    </div>
+    
+    <!-- Fortschrittsanzeige ausgeblendet -->
+    <div id="progress" style="display: none;"><div id="progressBar"></div></div>
+    
     <div id="wordList" class="word-list"></div>
     <!-- Musik-Toggle-Button innerhalb des Containers -->
     <button id="musicToggle"></button>
     <button id="soundToggle"></button>
-    <button id="hintButton">TIPP</button>
+    <button id="hintButton" data-translate="hintButton">TIPP</button>
     <!-- Cover-Reveal Button hinzufügen -->
-    <button class="cover-reveal-button" id="coverRevealButton" aria-label="Cover anzeigen"></button>
+    <button class="cover-reveal-button" id="coverRevealButton" data-translate-aria="coverRevealButtonLabel" aria-label="Cover anzeigen"></button>
   </div>
 
   <!-- Verbessertes Level-Overlay mit Cover-Ästhetik -->
@@ -106,8 +123,8 @@
     <div class="cover-frame level-frame">
       <!-- Cover-Titel für konsistentes Design -->
       <div class="cover-title">
-        <span class="artist-name">ALEXANDRA JANZEN</span>
-        <span class="song-title">MANDARINEN</span>
+        <span class="artist-name" data-translate="coverArtistName">ALEXANDRA JANZEN</span>
+        <span class="song-title" data-translate="coverSongTitle">MANDARINEN</span>
       </div>
       
       <!-- Level-Badge mit Cover-Stil -->
@@ -116,7 +133,7 @@
           <div class="mandarin-left"></div>
           <div class="mandarin-right"></div>
         </div>
-        <div class="level-number">LEVEL <span id="currentLevelNum">1</span></div>
+        <div class="level-number" id="levelOverlayNumber">LEVEL 1</div> <!-- Wird dynamisch aktualisiert -->
       </div>
       
       <!-- Verbesserte Lyrics-Anzeige -->
@@ -128,7 +145,7 @@
       <!-- Button mit Cover-Stil -->
       <button id="nextLevelButton" class="btn primary">
         <span class="gold-triangle"></span>
-        Weiter in der Geschichte
+        <span data-translate="nextLevelButton">Weiter in der Geschichte</span>
       </button>
       
       <!-- Cover-Footer mit goldenem Dreieck -->
@@ -147,8 +164,8 @@
     <div class="cover-frame">
       <!-- Cover-Titel für konsistentes Design -->
       <div class="cover-title">
-        <span class="artist-name">ALEXANDRA JANZEN</span>
-        <span class="song-title">MANDARINEN</span>
+        <span class="artist-name" data-translate="coverArtistName">ALEXANDRA JANZEN</span>
+        <span class="song-title" data-translate="coverSongTitle">MANDARINEN</span>
       </div>
       
       <!-- Doppelte Mandarinen -->
@@ -157,46 +174,46 @@
         <div class="mandarin-right"></div>
       </div>
       
-      <h2>Reise vollendet</h2>
-      <p id="endMessage">
+      <h2 data-translate="endScreenTitle">Reise vollendet</h2>
+      <p id="endMessage" data-translate="endScreenMessage">
         In den Mandarinen liegen Erinnerungen und Verbundenheit –
         du hast die Geschichte des Songs Stück für Stück entdeckt.
       </p>
       <div class="reward-box" id="rewardBox"></div>
-      <p id="couponCode">Dein Gutscheincode: MANDARINEN (10% Rabatt)</p>
-      <p><a href="https://shop.alexandrajanzen.de/" target="_blank" class="shop-link">Zum Shop</a></p>
+      <p id="couponCode" data-translate="couponCodeText">Dein Gutscheincode: MANDARINEN (10% Rabatt)</p>
+      <p><a href="https://shop.alexandrajanzen.de/" target="_blank" class="shop-link" data-translate="shopLinkText">Zum Shop</a></p>
       <div class="button-container">
         <button id="restartButton" class="btn primary">
-          <span class="gold-triangle"></span>Erneut spielen
+          <span class="gold-triangle"></span><span data-translate="restartButton">Erneut spielen</span>
         </button>
-        <button id="restartNewButton" class="btn secondary">Neue Reise beginnen</button>
+        <button id="restartNewButton" class="btn secondary" data-translate="restartNewButtonEnd">Neue Reise beginnen</button>
       </div>
-      <p class="save-notice">Die Erinnerungen bleiben - du kannst jederzeit mit einem anderen Schwierigkeitsgrad spielen.</p>
+      <p class="save-notice" data-translate="saveNoticeEnd">Die Erinnerungen bleiben - du kannst jederzeit mit einem anderen Schwierigkeitsgrad spielen.</p>
       
       <!-- NEUER CODE: Credits im Endscreen -->
       <div class="mandarin-credits">
-        <h3>Erinnerungen & Danksagungen</h3>
+        <h3 data-translate="creditsTitle">Erinnerungen & Danksagungen</h3>
         <div class="credit-line">
-          <span class="credit-label">Musik & Text:</span>
-          <span class="credit-names">"Mandarinen" von Alexandra Janzen & Lukas Dröse</span>
+          <span class="credit-label" data-translate="creditLabelMusic">Musik & Text:</span>
+          <span class="credit-names" data-translate="creditNamesMusic">"Mandarinen" von Alexandra Janzen & Lukas Dröse</span>
         </div>
         <div class="credit-line">
-          <span class="credit-label">Produktion:</span>
-          <span class="credit-names">Gidon Carmel & Roland Meyer de Voltaire</span>
+          <span class="credit-label" data-translate="creditLabelProduction">Produktion:</span>
+          <span class="credit-names" data-translate="creditNamesProduction">Gidon Carmel & Roland Meyer de Voltaire</span>
         </div>
         <div class="credit-line">
-          <span class="credit-label">Mix:</span>
-          <span class="credit-names">Roland Meyer de Voltaire</span>
+          <span class="credit-label" data-translate="creditLabelMix">Mix:</span>
+          <span class="credit-names" data-translate="creditNamesMix">Roland Meyer de Voltaire</span>
         </div>
         <div class="credit-line">
-          <span class="credit-label">Idee & Code:</span>
-          <span class="credit-names">Claude 3.7 und "Der NachtPoet" Stefan Brinkmann</span>
+          <span class="credit-label" data-translate="creditLabelIdeaCode">Idee & Code:</span>
+          <span class="credit-names" data-translate="creditNamesIdeaCode">Claude 3.7 und "Der NachtPoet" Stefan Brinkmann</span>
         </div>
         <div class="credit-line">
-          <span class="credit-label">Cover:</span>
-          <span class="credit-names">Yvonne Hartmann</span>
+          <span class="credit-label" data-translate="creditLabelCover">Cover:</span>
+          <span class="credit-names" data-translate="creditNamesCover">Yvonne Hartmann</span>
         </div>
-        <p class="special-thanks">Extra Mandarinen-Dankeschön für die gemeinsame Reise durch Klang, Code und Kreativität!</p>
+        <p class="special-thanks" data-translate="specialThanks">Extra Mandarinen-Dankeschön für die gemeinsame Reise durch Klang, Code und Kreativität!</p>
       </div>
       
       <!-- Cover-Footer mit goldenem Dreieck -->
@@ -213,33 +230,33 @@
   <!-- Hilfe-Overlay -->
   <div id="helpOverlay" class="overlay hidden">
     <div class="help-container">
-      <div class="help-title">Spielanleitung</div>
+      <div class="help-title" data-translate="helpOverlayTitle">Spielanleitung</div>
 
       <div class="help-section">
-        <h3>Spielziel</h3>
-        <p>Finde Wörter im Rätsel und entdecke die Geschichte hinter dem Lied über Erinnerungen, Trennung und Wiedersehen.</p>
+        <h3 data-translate="helpSectionGoalTitle">Spielziel</h3>
+        <p data-translate="helpSectionGoalText">Finde Wörter im Rätsel und entdecke die Geschichte hinter dem Lied über Erinnerungen, Trennung und Wiedersehen.</p>
       </div>
 
       <div class="help-section">
-        <h3>Steuerung</h3>
-        <p>Ziehe über Buchstaben, um Wörter zu markieren (horizontal, vertikal, diagonal).</p>
+        <h3 data-translate="helpSectionControlsTitle">Steuerung</h3>
+        <p data-translate="helpSectionControlsText">Ziehe über Buchstaben, um Wörter zu markieren (horizontal, vertikal, diagonal).</p>
       </div>
 
       <div class="help-section">
-        <h3>Schwierigkeitsgrade</h3>
-        <p>• <strong>Leichtes Gepäck</strong>: Nur horizontal/vertikal<br>
-        • <strong>Schweres Gepäck</strong>: Alle Richtungen<br>
-        • <strong>Loch in der Tasche</strong>: Nur Anfangsbuchstaben</p>
+        <h3 data-translate="helpSectionDifficultyTitle">Schwierigkeitsgrade</h3>
+        <p>• <strong data-translate="difficultyEasy">Leichtes Gepäck</strong>: <span data-translate="helpDifficultyEasyDesc">Nur horizontal/vertikal</span><br>
+        • <strong data-translate="difficultyHard">Schweres Gepäck</strong>: <span data-translate="helpDifficultyHardDesc">Alle Richtungen</span><br>
+        • <strong data-translate="difficultyLoose">Loch in der Tasche</strong>: <span data-translate="helpDifficultyLooseDesc">Nur Anfangsbuchstaben</span></p>
       </div>
 
       <div class="help-section">
-        <h3>Tipps</h3>
-        <p>• Tipp-Button bei Bedarf nutzen<br>
+        <h3 data-translate="helpSectionTipsTitle">Tipps</h3>
+        <p data-translate="helpSectionTipsText">• Tipp-Button bei Bedarf nutzen<br>
         • Farbwechsel zeigen Stimmung des Levels<br>
         • Die Musik passt sich jedem Level an</p>
       </div>
     </div>
-    <button id="closeHelpButton" class="btn">Zurück zur Reise</button>
+    <button id="closeHelpButton" class="btn" data-translate="closeHelpButton">Zurück zur Reise</button>
   </div>
 
   <!-- Cover-Modal außerhalb aller Container am Ende des body -->
@@ -247,8 +264,8 @@
     <div class="cover-container">
       <img src="assets/images/mandarinen_cover.jpg" alt="Alexandra Janzen - Mandarinen Cover" id="fullCoverImage">
       <div class="cover-info">
-        <h3>Alexandra Janzen - Mandarinen</h3>
-        <p>Das neue Album jetzt überall verfügbar</p>
+        <h3 data-translate="coverModalTitle">Alexandra Janzen - Mandarinen</h3>
+        <p data-translate="coverModalInfo">Das neue Album jetzt überall verfügbar</p>
       </div>
       <div class="cover-close" id="coverModalClose">&times;</div>
     </div>
@@ -257,28 +274,28 @@
   <!-- NEUER CODE: Credits Modal -->
   <div class="credits-modal" id="creditsModal">
     <div class="credits-content">
-      <div class="credits-title">Mandarinen im Gepäck</div>
+      <div class="credits-title" data-translate="creditsModalTitle">Mandarinen im Gepäck</div>
       <div class="credits-section">
-        <h3>Musik & Text</h3>
-        <p>"Mandarinen" von Alexandra Janzen & Lukas Dröse</p>
+        <h3 data-translate="creditsModalMusicTitle">Musik & Text</h3>
+        <p data-translate="creditsModalMusicText">"Mandarinen" von Alexandra Janzen & Lukas Dröse</p>
       </div>
       <div class="credits-section">
-        <h3>Produktion</h3>
-        <p>Gidon Carmel & Roland Meyer de Voltaire</p>
+        <h3 data-translate="creditsModalProductionTitle">Produktion</h3>
+        <p data-translate="creditsModalProductionText">Gidon Carmel & Roland Meyer de Voltaire</p>
       </div>
       <div class="credits-section">
-        <h3>Mix</h3>
-        <p>Roland Meyer de Voltaire</p>
+        <h3 data-translate="creditsModalMixTitle">Mix</h3>
+        <p data-translate="creditsModalMixText">Roland Meyer de Voltaire</p>
       </div>
       <div class="credits-section">
-        <h3>Idee und Programmierung</h3>
-        <p>Claude 3.7 und "Der NachtPoet" Stefan Brinkmann</p>
+        <h3 data-translate="creditsModalIdeaCodeTitle">Idee und Programmierung</h3>
+        <p data-translate="creditsModalIdeaCodeText">Claude 3.7 und "Der NachtPoet" Stefan Brinkmann</p>
       </div>
       <div class="credits-section">
-        <h3>Cover</h3>
-        <p>Yvonne Hartmann</p>
+        <h3 data-translate="creditsModalCoverTitle">Cover</h3>
+        <p data-translate="creditsModalCoverText">Yvonne Hartmann</p>
       </div>
-      <div class="credits-footer">
+      <div class="credits-footer" data-translate="creditsModalThanks">
         Extra Mandarinen-Dankeschön für die gemeinsame Reise<br>
         durch Klang, Code und Kreativität!
       </div>
@@ -297,11 +314,14 @@
   <!-- JavaScript Dateien einbinden -->
 <!-- Konfiguration -->
 <script src="js/config.js"></script>
-  <script src="js/utils.js"></script>
+<script src="js/utils.js"></script>
 <script src="js/levels.js"></script>
+<!-- Lokalisierung muss vor UI und Main geladen werden -->
+<script src="js/localization.js"></script>
+<script src="js/subtitles.js"></script>
+<script src="js/audioManager.js"></script>
 <!-- Erst ui.js laden, dann Audio-Manager und GameManager -->
 <script src="js/ui.js"></script>
-<script src="js/audioManager.js"></script>
 <script src="js/stemAudioManager.js"></script>
 <script src="js/gameManager.js"></script>
 <script src="js/main.js"></script>
