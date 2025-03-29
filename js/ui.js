@@ -38,12 +38,13 @@ function setColorScheme(scheme) {
  * Aktualisiert die Timer-Anzeige
  * @param {number} startTime - Die Startzeit des Spiels in Millisekunden
  * @param {HTMLElement} timerElement - Das HTML-Element, das den Timer anzeigt
+ * @param {string} timePrefix - The translated prefix (e.g., "Time: ")
  */
-function updateTimer(startTime, timerElement) {
+function updateTimer(startTime, timerElement, timePrefix = "Zeit: ") { // Add prefix parameter with default
   let elapsed = Math.floor((Date.now() - startTime) / 1000);
   let minutes = Math.floor(elapsed / 60);
   let seconds = elapsed % 60;
-  timerElement.textContent = `Zeit: ${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  timerElement.textContent = `${timePrefix}${minutes}:${seconds < 10 ? "0" : ""}${seconds}`; // Use prefix
 }
 
 /**
@@ -73,8 +74,10 @@ function renderGrid(grid, gridSize, gridContainer) {
  * @param {Set} foundWords - Set der bereits gefundenen Wörter
  * @param {string} difficulty - Aktueller Schwierigkeitsgrad
  * @param {HTMLElement} wordListDiv - Container für die Wortliste
+ * @param {function} translateFunc - The localization translate function
+ * @param {function} getStemNameKeyFunc - Function to get the translation key for a stem name
  */
-function renderWordList(targetWords, foundWords, difficulty, wordListDiv) {
+function renderWordList(targetWords, foundWords, difficulty, wordListDiv, translateFunc, getStemNameKeyFunc) {
   wordListDiv.innerHTML = "";
 
   // Icons für jeden Stem - dynamisch basierend auf dem Modus
@@ -85,12 +88,30 @@ function renderWordList(targetWords, foundWords, difficulty, wordListDiv) {
     span.classList.add("word");
     span.id = "word-" + word;
     
-    // Stem-Index für dieses Wort (maximal 5 Stems zu aktivieren)
-    const stemIndex = index < 5 ? index + 1 : 0;
+    // Verbesserte Stem-Index-Zuordnung für verschiedene Modi
+    let stemIndex;
+    const mode = window.APP_CONFIG ? window.APP_CONFIG.MODE.toUpperCase() : 'BETA';
     
+    if (mode === 'RELEASE') {
+        // Release-Stem-Mapping für die 5 Stems
+        switch(index) {
+            case 0: stemIndex = 1; break; // 02R_bass_drums.mp3 (Index 1)
+            case 1: stemIndex = 2; break; // 04_guitars.mp3 (Index 2)
+            case 2: stemIndex = 3; break; // 05_strings.mp3 (Index 3)
+            case 3: stemIndex = 4; break; // 06_synths_fx.mp3 (Index 4)
+            case 4: stemIndex = 5; break; // 07_vocals.mp3 (Index 5)
+            default: stemIndex = 0;
+        }
+    } else {
+        // Ursprüngliche Berechnung für BETA und PRE_RELEASE
+        stemIndex = index < 5 ? index + 1 : 0;
+    }
+    
+    // Get translated stem name for title attribute
     if (stemIndex > 0) {
       span.setAttribute('data-stem', stemIndex);
-      span.setAttribute('title', getStemName(stemIndex));
+      const stemNameKey = getStemNameKeyFunc(stemIndex); // Use passed function
+      span.setAttribute('title', translateFunc(stemNameKey)); // Use passed translate function
     }
 
     // Text-Inhalt basierend auf Schwierigkeitsgrad
@@ -175,29 +196,26 @@ function getStemIcons() {
 /**
  * Gibt den Namen eines Stems basierend auf seinem Index zurück
  * @param {number} stemIndex - Index des Stems (1-5)
- * @returns {string} - Name des Stems
+ * @returns {string} - Name des Stems (DEPRECATED - use getStemNameKey in GameManager and translate)
  */
-function getStemName(stemIndex) {
-  if (window.APP_CONFIG && APP_CONFIG.STEMS && APP_CONFIG.STEMS[APP_CONFIG.MODE]) {
-    // Stem-Namen aus der Konfiguration laden
-    const stems = APP_CONFIG.STEMS[APP_CONFIG.MODE];
-    if (stemIndex >= 0 && stemIndex < stems.length) {
-      return stems[stemIndex].name;
-    }
-  }
-  
-  // Fallback zu den Standard-Namen
-  const stemNames = [
-    "Piano (Basis)",
-    "Bass",
-    "Schlagzeug",
-    "Gitarren",
-    "Weitere Instrumente",
-    "Gesang"
-  ];
-  
-  return stemNames[stemIndex] || "";
-}
+// function getStemName(stemIndex) {
+//   // This function is now less useful as names are handled by translation keys.
+//   // Kept for reference or potential fallback, but should ideally be removed.
+//   if (window.APP_CONFIG && APP_CONFIG.STEMS && APP_CONFIG.STEMS[APP_CONFIG.MODE]) {
+//     const stems = APP_CONFIG.STEMS[APP_CONFIG.MODE];
+//     if (stemIndex >= 0 && stemIndex < stems.length) {
+//       // Try to get translated name via key derived in GameManager
+//       const key = gameInstance ? gameInstance.getStemNameKey(stemIndex) : `stemName${stemIndex}`; // Needs access to gameInstance or pass function
+//       return localization.translate(key, { default: stems[stemIndex].name }); // Use translate with fallback
+//     }
+//   }
+//   // Fallback keys
+//   const fallbackKeys = [
+//     '', 'config_stems_beta_piano', 'config_stems_beta_bass', 'config_stems_beta_drums',
+//     'config_stems_beta_guitars', 'config_stems_beta_others', 'config_stems_beta_vocals'
+//   ];
+//   return localization.translate(fallbackKeys[stemIndex] || `stemName${stemIndex}`, { default: `Stem ${stemIndex}` });
+// }
 
 /**
  * Aktualisiert die Fortschrittsanzeige
@@ -321,12 +339,15 @@ function showStemActivation(stemName, stemIndex) {
   const noteSymbols = ['♪', '♫', '🎵', '🎶'];
   const randomNote = noteSymbols[Math.floor(Math.random() * noteSymbols.length)];
   const endNote = noteSymbols[Math.floor(Math.random() * noteSymbols.length)];
-  
+
+  // Use translation key for the notification text
+  const notificationText = localization.translate('stemActivationNotification', { stemName: currentStemName });
+
   notification.innerHTML = `
     <div class="stem-notification-icon"></div>
-    ${randomNote} ${currentStemName} aktiviert ${endNote}
+    ${randomNote} ${notificationText} ${endNote}
   `;
-  
+
   // Füge es zum Spielbereich hinzu
   gameContainer.appendChild(notification);
   
@@ -340,3 +361,108 @@ function showStemActivation(stemName, stemIndex) {
     }, 2000);
   }, 10);
 }
+
+// Füge Debug-Information hinzu, um zu sehen, ob die Event-Listener korrekt initialisiert werden
+console.log('UI-Script wird geladen');
+
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('UI: DOM vollständig geladen, initialisiere UI-Module...');
+  
+  // Deklariere UI-Elemente
+  const startButton = document.getElementById('startButton');
+  const startNewButton = document.getElementById('startNewButton');
+  const helpButton = document.getElementById('helpButton');
+  
+  console.log('UI: Hauptelemente gefunden:', {
+    startButton: !!startButton,
+    startNewButton: !!startNewButton,
+    helpButton: !!helpButton
+  });
+  
+  // Event-Listener für den Start-Button
+  if (startButton) {
+    console.log('UI: Füge Startbutton-Listener hinzu');
+    startButton.addEventListener('click', function() {
+      console.log('UI: Start-Button geklickt');
+      
+      // Überprüfe, ob die Audio-Manager ordnungsgemäß initialisiert wurden
+      const stemAudioReady = window.stemAudioManager && typeof window.stemAudioManager.play === 'function';
+      console.log('UI: StemAudioManager bereit:', stemAudioReady);
+      
+      // Spiel starten, wenn vorhanden
+      if (window.gameManager && typeof window.gameManager.startGame === 'function') {
+        console.log('UI: Rufe gameManager.startGame() auf');
+        window.gameManager.startGame();
+      } else {
+        console.error('UI: GameManager nicht verfügbar oder startGame-Methode fehlt');
+      }
+    });
+  }
+});
+
+// Exportiere UI-Funktionen für die globale Nutzung
+window.ui = {
+  // Zeigt eine Benachrichtigung an (z.B. für aktivierte Stems)
+  showNotification: function(message, stemIndex) {
+    const notification = document.querySelector('.stem-notification');
+    if (!notification) return;
+    
+    // Setze Stem-Attribut für spezielles Styling
+    notification.setAttribute('data-stem', stemIndex || '1');
+    
+    // Ändere den Text
+    const textElement = notification.querySelector('.stem-notification-text');
+    if (textElement) {
+      textElement.textContent = message;
+    }
+    
+    // Animation starten
+    notification.classList.remove('hide');
+    notification.classList.add('show');
+    
+    // Nach 3 Sekunden ausblenden
+    setTimeout(() => {
+      notification.classList.remove('show');
+      notification.classList.add('hide');
+    }, 3000);
+  },
+  
+  // Aktiviert einen epischen Badge für perfekte Levels
+  showEpicBadge: function(show) {
+    const badge = document.querySelector('.epic-badge');
+    if (badge) {
+      if (show) {
+        badge.classList.add('visible');
+      } else {
+        badge.classList.remove('visible');
+      }
+    }
+  },
+  
+  // Setzt die aktuelle Levelanzeige
+  updateLevelIndicator: function(current, total) {
+    const indicator = document.getElementById('levelIndicator');
+    if (indicator) {
+      // Prüfen, ob Lokalisierung verfügbar ist
+      if (window.localization) {
+        indicator.textContent = window.localization.translate('levelIndicator', { 
+          current: current, 
+          total: total 
+        });
+      } else {
+        indicator.textContent = `Level: ${current}/${total}`;
+      }
+    }
+  },
+  
+  debug: {
+    logUIElements: function() {
+      console.log('UI Debug - Wichtige Elemente:');
+      console.log('Start Button:', document.getElementById('startButton'));
+      console.log('Start New Button:', document.getElementById('startNewButton'));
+      console.log('Grid:', document.getElementById('grid'));
+      console.log('Word List:', document.getElementById('wordList'));
+      console.log('Subtitles Container:', document.getElementById('subtitlesContainer'));
+    }
+  }
+};

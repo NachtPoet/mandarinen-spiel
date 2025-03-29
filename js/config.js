@@ -6,55 +6,55 @@
 // WICHTIG: Explizit window.APP_CONFIG verwenden, um es global zu machen
 window.APP_CONFIG = {
   // Modus: "BETA", "PRE_RELEASE" oder "RELEASE"
-  MODE: "RELEASE",
+  MODE: "RELEASE",  // Geändert von PRE_RELEASE auf RELEASE
   
   // Release-Datum
   RELEASE_DATE: new Date("2025-03-21T00:00:00"),
   
-  // Texte für jeden Modus
+  // Texte für jeden Modus (Keys für die Übersetzung)
   TEXTS: {
     BETA: {
-      ALBUM_STATUS: "Demo-Version",
-      ALBUM_INFO: "Das neue Album kommt bald",
-      END_MESSAGE: "Die Single 'Mandarinen' erscheint am 21. März 2025!"
+      ALBUM_STATUS_KEY: "config_texts_beta_status",
+      ALBUM_INFO_KEY: "config_texts_beta_info",
+      END_MESSAGE_KEY: "config_texts_beta_end"
     },
     PRE_RELEASE: {
-      ALBUM_STATUS: "Vorankündigung",
-      ALBUM_INFO: "Die neue Single erscheint am 21. März",
-      END_MESSAGE: "Die Single 'Mandarinen' erscheint am 21. März 2025!"
+      ALBUM_STATUS_KEY: "config_texts_prerelease_status",
+      ALBUM_INFO_KEY: "config_texts_prerelease_info",
+      END_MESSAGE_KEY: "config_texts_prerelease_end"
     },
     RELEASE: {
-      ALBUM_STATUS: "Jetzt erhältlich",
-      ALBUM_INFO: "Die neue Single jetzt überall verfügbar",
-      END_MESSAGE: "Die Single 'Mandarinen' ist jetzt überall erhältlich!"
+      ALBUM_STATUS_KEY: "config_texts_release_status",
+      ALBUM_INFO_KEY: "config_texts_release_info",
+      END_MESSAGE_KEY: "config_texts_release_end"
     }
   },
-  
-  // Stem-Konfiguration für jeden Modus
+
+  // Stem-Konfiguration für jeden Modus (nur Dateinamen, Namen werden über Keys geladen)
   STEMS: {
     BETA: [
-      { file: "01B_piano.mp3", name: "Piano (Basis)" },
-      { file: "02B_bass.mp3", name: "Bass" },
-      { file: "03B_drums.mp3", name: "Schlagzeug" },
-      { file: "04B_guitars.mp3", name: "Gitarren" },
-      { file: "05B_others.mp3", name: "Weitere Instrumente" },
-      { file: "06B_vocals.mp3", name: "Gesang (Demo)" }
+      { file: "01B_piano.mp3" }, // name removed
+      { file: "02B_bass.mp3" },
+      { file: "03B_drums.mp3" },
+      { file: "04B_guitars.mp3" },
+      { file: "05B_others.mp3" },
+      { file: "06B_vocals.mp3" }
     ],
     PRE_RELEASE: [
-      { file: "01_piano.mp3", name: "Piano (Basis)" },
-      { file: "02_bass.mp3", name: "Bass" },
-      { file: "03_drums.mp3", name: "Schlagzeug" },
-      { file: "04_guitars.mp3", name: "Gitarren" },
-      { file: "05_strings.mp3", name: "Streicher" },
-      { file: "06_synths_fx.mp3", name: "Synths & FX" }
+      { file: "01_piano.mp3" },
+      { file: "02_bass.mp3" },
+      { file: "03_drums.mp3" },
+      { file: "04_guitars.mp3" },
+      { file: "05_strings.mp3" },
+      { file: "06_synths_fx.mp3" }
     ],
     RELEASE: [
-      { file: "01_piano.mp3", name: "Piano (Basis)" },
-      { file: "02R_bass_drums.mp3", name: "Bass & Drums" },
-      { file: "04_guitars.mp3", name: "Gitarren" },
-      { file: "05_strings.mp3", name: "Streicher" },
-      { file: "06_synths_fx.mp3", name: "Synths & FX" },
-      { file: "07_vocals.mp3", name: "Gesang" }
+      { file: "01_piano.mp3" },
+      { file: "02R_bass_drums.mp3" },
+      { file: "04_guitars.mp3" },
+      { file: "05_strings.mp3" },
+      { file: "06_synths_fx.mp3" },
+      { file: "07_vocals.mp3" }
     ]
   }
 };
@@ -66,8 +66,8 @@ console.log("config.js: APP_CONFIG global initialisiert", window.APP_CONFIG);
  * Initialisiert die Konfiguration aus URL-Parametern oder localStorage
  */
 function initConfig() {
-  // FORCE RELEASE bei jedem Laden (BETA-KOMMENTAR entfernen, wenn alle auf PRE_RELEASE sein sollen)
-  //localStorage.setItem('app_mode', 'RELEASE');
+  // FORCE RELEASE bei jedem Laden
+  localStorage.setItem('app_mode', 'RELEASE');
   
   // Modus aus URL-Parametern prüfen (für einfaches Testen)
   const urlParams = new URLSearchParams(window.location.search);
