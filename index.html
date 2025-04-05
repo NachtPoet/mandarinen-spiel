@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="de" data-current-lang="de">
+<!-- 1. Das HTML-Element muss den lang-Attribut unterstützen und initial auf "de" gesetzt sein -->
+<!-- 2. Füge dir="ltr" initial hinzu (wird durch JS bei RTL-Sprachen geändert) -->
+<html lang="de" data-current-lang="de" dir="ltr" data-direction="ltr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,35 +17,56 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&subset=cyrillic,cyrillic-ext&display=swap" rel="stylesheet">
   <!-- Ergänzende Schriftart für Lyrics -->
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600&subset=cyrillic,cyrillic-ext&display=swap" rel="stylesheet">
+  <!-- 3. Füge arabische Schriftart hinzu für bessere Darstellung -->
+  <!-- Nach dem bestehenden Schrift-Link: -->
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Hinzufügen von Noto Sans Devanagari für Hindi-Unterstützung -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
   <!-- Stylesheet einbinden -->
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/script-toggle.css">
+  <!-- 4. CSS für RTL-Unterstützung hinzufügen (nach den bestehenden CSS) -->
+  <!-- Neue RTL-CSS hinzufügen: -->
+  <link rel="stylesheet" href="css/rtl.css">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
+  <!-- 5. Neues Meta-Tag für bessere RTL-Unterstützung hinzufügen -->
+  <!-- RTL-Unterstützung für Mobilgeräte -->
+  <meta name="format-detection" content="telephone=no">
 </head>
 <body>
+  <!-- Ladebildschirm -->
+  <div id="loadingScreen" class="loading-overlay" style="display: flex; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); z-index: 9999; color: white; flex-direction: column;">
+    <h2 data-translate="loadingTitle">Lade Erinnerungen...</h2>
+    <div class="loading-progress-container" style="width: 80%; max-width: 400px; background-color: #555; border-radius: 5px; margin-top: 15px;">
+      <div id="loadingProgressBar" class="loading-progress-bar" style="width: 0%; height: 30px; background-color: #ffcc00; border-radius: 5px; text-align: center; line-height: 30px; color: black; font-weight: bold; font-size: 0.9rem;">0%</div>
+    </div>
+    <p id="loadingProgressText" style="margin-top: 10px;">0 / 6 Stems geladen</p>
+  </div>
+
   <div id="star-field"></div>
   <div class="memory-flash"></div>
 
   <h1 data-translate="pageTitle">Mandarinen im Gepäck</h1>
 
   <!-- Startbildschirm mit Cover-Ästhetik -->
-  <div id="startScreen" class="overlay">
+  <div id="startScreen" class="overlay" style="display: none;">
     <div class="cover-frame">
       <!-- Goldene Überschrift wie auf dem Cover -->
       <div class="cover-title">
         <span class="artist-name" data-translate="coverArtistName">ALEXANDRA JANZEN</span>
         <span class="song-title" data-translate="coverSongTitle">MANDARINEN</span>
       </div>
-      
+
       <!-- Mandarinen-Animation -->
       <div class="double-mandarins">
         <div class="mandarin-left"></div>
         <div class="mandarin-right"></div>
       </div>
-      
+
       <h2 data-translate="startScreenTitle">Erinnerungen im Gepäck</h2>
-      
+
       <p data-translate="startScreenDescription">
         Tauche ein in die Welt der Mandarinen und entdecke verschüttete Erinnerungen. Jedes gefundene Wort
         enthüllt einen Teil eines besonderen Liedes.<br>
@@ -57,16 +80,17 @@
           <!-- Optionen werden dynamisch von localization.js hinzugefügt -->
         </select>
       </div>
-      
+
       <div class="select-wrapper">
         <label for="difficultySelect" data-translate="difficultyLabel">Schwierigkeitsgrad:</label>
         <select id="difficultySelect">
           <option value="easy" selected data-translate="difficultyEasy">Leichtes Gepäck</option>
           <option value="hard" data-translate="difficultyHard">Schweres Gepäck</option>
           <option value="loose" data-translate="difficultyLoose">Loch in der Tasche</option>
+          <option value="babel" data-translate="difficultyBabel">Babel</option>
         </select>
       </div>
-      
+
       <div class="button-container">
         <button id="startButton" class="btn primary disabled" disabled>
           <span class="gold-triangle"></span><span data-translate="continueButton">Spiel fortsetzen</span>
@@ -86,36 +110,36 @@
           <div class="loading-progress-bar" id="loadingProgressBar"></div>
         </div>
       </div>
-      
+
       <p class="save-notice" data-translate="saveNotice">Dein Fortschritt und deine Erinnerungen werden automatisch gespeichert.</p>
-      
+
       <!-- Copyright-Info im Cover-Stil -->
       <div class="cover-footer">
         <span class="gold-triangle"></span>
         <span>1</span>
       </div>
     </div>
-    
+
     <!-- Filmkorn-Overlay -->
     <div class="vintage-overlay"></div>
   </div>
 
   <!-- Spielbereich -->
-  <div id="gameContainer" class="container" style="display:none;">
+  <div id="gameContainer" class="container" style="display: none;">
     <div id="epicBadge" class="epic-badge" data-translate="epicBadge">Perfekte Runde!</div>
     <div id="levelIndicator">Level: 1/10</div> <!-- Wird dynamisch aktualisiert -->
     <div id="timer">Zeit: 0:00</div> <!-- Wird dynamisch aktualisiert -->
     <div id="grid" class="grid"></div>
-    
+
     <!-- Untertitel-Bereich direkt nach dem Grid, ersetzt #progress -->
     <div id="subtitlesContainer" class="subtitles-container">
       <div id="subtitlesText" class="subtitles-text"></div>
       <button id="subtitlesToggle" class="subtitles-toggle" aria-label="Untertitel ein/aus" title="Untertitel anzeigen/ausblenden"></button>
     </div>
-    
+
     <!-- Fortschrittsanzeige ausgeblendet -->
     <div id="progress" style="display: none;"><div id="progressBar"></div></div>
-    
+
     <div id="wordList" class="word-list"></div>
     <!-- Musik-Toggle-Button innerhalb des Containers -->
     <button id="musicToggle"></button>
@@ -123,6 +147,8 @@
     <button id="hintButton" data-translate="hintButton">TIPP</button>
     <!-- Cover-Reveal Button hinzufügen -->
     <button class="cover-reveal-button" id="coverRevealButton" data-translate-aria="coverRevealButtonLabel" aria-label="Cover anzeigen"></button>
+    <!-- Home-Button hinzufügen -->
+    <button id="homeButton" class="home-button" data-translate-aria="homeButtonLabel" aria-label="Zurück zum Startbildschirm"></button>
   </div>
 
   <!-- Verbessertes Level-Overlay mit Cover-Ästhetik -->
@@ -133,7 +159,7 @@
         <span class="artist-name" data-translate="coverArtistName">ALEXANDRA JANZEN</span>
         <span class="song-title" data-translate="coverSongTitle">MANDARINEN</span>
       </div>
-      
+
       <!-- Level-Badge mit Cover-Stil -->
       <div class="level-badge">
         <div class="double-mandarins small">
@@ -142,26 +168,26 @@
         </div>
         <div class="level-number" id="levelOverlayNumber">LEVEL 1</div> <!-- Wird dynamisch aktualisiert -->
       </div>
-      
+
       <!-- Verbesserte Lyrics-Anzeige -->
       <div class="lyrics-container">
         <div id="lyricDisplay" style="white-space: pre-wrap;"></div>
         <div class="level-quote" id="levelQuote"></div>
       </div>
-      
+
       <!-- Button mit Cover-Stil -->
       <button id="nextLevelButton" class="btn primary">
         <span class="gold-triangle"></span>
         <span data-translate="nextLevelButton">Weiter in der Geschichte</span>
       </button>
-      
+
       <!-- Cover-Footer mit goldenem Dreieck -->
       <div class="cover-footer">
         <span class="gold-triangle"></span>
         <span id="levelFooterNum">1</span>
       </div>
     </div>
-    
+
     <!-- Vintage-Overlay für Filmkorn-Effekt -->
     <div class="vintage-overlay"></div>
   </div>
@@ -174,13 +200,13 @@
         <span class="artist-name" data-translate="coverArtistName">ALEXANDRA JANZEN</span>
         <span class="song-title" data-translate="coverSongTitle">MANDARINEN</span>
       </div>
-      
+
       <!-- Doppelte Mandarinen -->
       <div class="double-mandarins">
         <div class="mandarin-left"></div>
         <div class="mandarin-right"></div>
       </div>
-      
+
       <h2 data-translate="endScreenTitle">Reise vollendet</h2>
       <p id="endMessage" data-translate="endScreenMessage">
         In den Mandarinen liegen Erinnerungen und Verbundenheit –
@@ -196,7 +222,7 @@
         <button id="restartNewButton" class="btn secondary" data-translate="restartNewButtonEnd">Neue Reise beginnen</button>
       </div>
       <p class="save-notice" data-translate="saveNoticeEnd">Die Erinnerungen bleiben - du kannst jederzeit mit einem anderen Schwierigkeitsgrad spielen.</p>
-      
+
       <!-- NEUER CODE: Credits im Endscreen -->
       <div class="mandarin-credits">
         <h3 data-translate="creditsTitle">Erinnerungen & Danksagungen</h3>
@@ -222,14 +248,14 @@
         </div>
         <p class="special-thanks" data-translate="specialThanks">Extra Mandarinen-Dankeschön für die gemeinsame Reise durch Klang, Code und Kreativität!</p>
       </div>
-      
+
       <!-- Cover-Footer mit goldenem Dreieck -->
       <div class="cover-footer">
         <span class="gold-triangle"></span>
         <span>1</span>
       </div>
     </div>
-    
+
     <!-- Filmkorn-Overlay -->
     <div class="vintage-overlay"></div>
   </div>
@@ -253,7 +279,8 @@
         <h3 data-translate="helpSectionDifficultyTitle">Schwierigkeitsgrade</h3>
         <p>• <strong data-translate="difficultyEasy">Leichtes Gepäck</strong>: <span data-translate="helpDifficultyEasyDesc">Nur horizontal/vertikal</span><br>
         • <strong data-translate="difficultyHard">Schweres Gepäck</strong>: <span data-translate="helpDifficultyHardDesc">Alle Richtungen</span><br>
-        • <strong data-translate="difficultyLoose">Loch in der Tasche</strong>: <span data-translate="helpDifficultyLooseDesc">Nur Anfangsbuchstaben</span></p>
+        • <strong data-translate="difficultyLoose">Loch in der Tasche</strong>: <span data-translate="helpDifficultyLooseDesc">Nur Anfangsbuchstaben</span><br>
+        • <strong data-translate="difficultyBabel">Babel</strong>: <span data-translate="helpDifficultyBabelDesc">Zufällige Sprache pro Level</span></p>
       </div>
 
       <div class="help-section">
@@ -325,6 +352,8 @@
 <script src="js/levels.js"></script>
 <!-- Lokalisierung muss vor UI und Main geladen werden -->
 <script src="js/localization.js"></script>
+<script src="js/script-toggle.js"></script>
+<script src="js/fallback-implementation.js"></script>
 <script src="js/subtitles.js"></script>
 <script src="js/audioManager.js"></script>
 <!-- Erst ui.js laden, dann Audio-Manager und GameManager -->
@@ -340,5 +369,11 @@
 <script src="js/fullscreen.js"></script>
 <!-- NEUER CODE: Credits JavaScript -->
 <script src="js/credits.js"></script>
+<!-- Home-Button Funktionalität -->
+<script src="js/homeButton.js"></script>
+<!-- Babel-Modus -->
+<script src="js/babel.js"></script>
+<!-- Babel-UI-Verbesserungen -->
+<script src="js/babel-ui.js"></script>
 </body>
 </html>
