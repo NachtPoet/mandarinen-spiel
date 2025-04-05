@@ -43,11 +43,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // Spielinstanz erstellen
-  gameInstance = new GameManager();
+  // Spielinstanz erstellen und global verfügbar machen
+  window.gameInstance = new GameManager(); // Attach to window
   
-  // Spielinstanz initialisieren
-  gameInstance.init();
+  // Spielinstanz initialisieren (über die globale Variable)
+  window.gameInstance.init();
 
   // Touch-Events für das Spielraster optimieren
   document.addEventListener('touchmove', function(e) {

@@ -116,7 +116,7 @@ class Settings {
 
     // Schwierigkeitsgrad ändern
     changeDifficulty(difficulty) {
-        const validDifficulties = ['easy', 'hard', 'loose'];
+        const validDifficulties = ['easy', 'hard', 'loose', 'babel'];
         if (validDifficulties.includes(difficulty)) {
             return this.setSetting('difficulty', difficulty);
         }
@@ -151,4 +151,4 @@ class Settings {
 
 // Exportiere einen Singleton für die Einstellungen
 const gameSettings = new Settings();
-export default gameSettings; 
+export default gameSettings;

@@ -35,14 +35,14 @@ function AudioManager() {
   this.musicLoaded = false;
   this.musicLoading = false;
   
-  // Subtitles Integration
-  this.setupSubtitlesIntegration();
+  // Subtitles Integration (bleibt für Stems relevant?) - Vorerst drin lassen
+  // this.setupSubtitlesIntegration(); // Auskommentiert, da bgMusic nicht mehr verwendet wird
   
-  // Musik-Ladefortschritt überwachen
-  this.setupMusicLoadMonitoring();
+  // Musik-Ladefortschritt überwachen (nicht mehr für bgMusic nötig)
+  // this.setupMusicLoadMonitoring(); // Auskommentiert
 
   // Rufen wir die Lademethode für die Musik auf, um sie sofort zu laden
-  this.loadMusic();
+  // this.loadMusic(); // Nicht mehr aufrufen, da keine bgMusic geladen wird
 }
 
 // Integration der Untertitel-Funktionalität
@@ -172,13 +172,13 @@ AudioManager.prototype.loadMusic = function(musicUrl) {
   
   // Setze Ladezustand zurück
   this.musicLoaded = false;
-  this.musicLoading = true;
+  this.musicLoading = true; // Flag wird gesetzt, aber kein Laden ausgelöst
   
   // Setze neue Quelle mit Standardwert falls nicht angegeben
-  this.bgMusic.src = musicUrl || "assets/audio/background.mp3";
+  // this.bgMusic.src = musicUrl || "assets/audio/background.mp3"; // Entfernt - keine bgMusic Quelle setzen
   
   // Starte Laden
-  this.bgMusic.load();
+  // this.bgMusic.load(); // Entfernt - kein Laden auslösen
   
   // Gib ein Promise zurück, das erfüllt wird, wenn die Musik geladen ist
   return new Promise(function(resolve, reject) {

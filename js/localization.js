@@ -1,4 +1,4 @@
-// Localization module
+// Aktualisierte Version der localization.js mit RTL-Unterstützung
 
 let currentTranslations = {};
 let currentLanguage = 'de';
@@ -7,16 +7,31 @@ let localizationReady = false; // Flag to track readiness
 const availableLanguages = {
   'de': 'Deutsch',
   'en': 'English',
+  'es': 'Español',
+  'fr': 'Français',
+  'el': 'Ελληνικά',
+  'it': 'Italiano',
+  'pt': 'Português',
+  'da': 'Dansk',
+  'fi': 'Suomi',
+  'nl': 'Nederlands',
+  'sv': 'Svenska',
+  'pl': 'Polski',
+  'tr': 'Türkçe',
   'ru': 'Русский',
   'uk': 'Українська',
-  'fr': 'Français',
-  'es': 'Español',
-  'it': 'Italiano',
-  'nl': 'Nederlands',
-  'tr': 'Türkçe',
-  'pl': 'Polski',
-  'da': 'Dansk'
+  'zh': '中文',
+  'ja': '日本語',
+  'ko': '한국어',
+  'hi': 'हिन्दी',
+  'ar': 'العربية'
 };
+
+// Liste der RTL-Sprachen
+const rtlLanguages = ['ar', 'he', 'fa', 'ur'];
+
+// Liste der Sprachen mit komplexen Zeichen, die eine größere Schriftart benötigen
+const complexCharLanguages = ['zh', 'ja', 'ko', 'ar', 'hi']; // Added missing comma
 
 async function loadTranslations(lang) {
   if (!availableLanguages[lang]) {
@@ -32,9 +47,13 @@ async function loadTranslations(lang) {
     currentLanguage = lang;
     console.log(`Translations loaded for ${lang}`);
     localStorage.setItem('preferredLanguage', lang);
+
+    // Update document direction based on language
+    updateDocumentDirection(lang);
+
     // Update UI only if DOM is ready, otherwise wait for DOMContentLoaded listener
     if (document.readyState !== 'loading') {
-        updateUI();
+      updateUI();
     }
     // Dispatch event for modules listening for language *changes*
     document.dispatchEvent(new CustomEvent('translations-loaded', { detail: { lang } }));
@@ -49,20 +68,73 @@ async function loadTranslations(lang) {
   }
 }
 
+// Neue Funktion: Aktualisiert die Dokumentenrichtung basierend auf der Sprache
+function updateDocumentDirection(lang) {
+  const isRtl = rtlLanguages.includes(lang);
+  document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
+  document.documentElement.setAttribute('data-direction', isRtl ? 'rtl' : 'ltr');
+
+  // RTL-Klasse zum Body hinzufügen/entfernen für CSS-Selektoren
+  if (isRtl) {
+    document.body.classList.add('rtl');
+  } else {
+    document.body.classList.remove('rtl');
+  }
+
+  console.log(`Document direction set to ${isRtl ? 'RTL' : 'LTR'} for language ${lang}`);
+
+  // Klasse für komplexe Zeichensätze hinzufügen/entfernen
+  const isComplex = complexCharLanguages.includes(lang);
+  console.log(`[Font Debug] Language: ${lang}, Is complex? ${isComplex}`); // Log check result
+
+  // Immer zuerst alle Klassen entfernen, um einen sauberen Zustand zu haben
+  document.body.classList.remove('lang-complex-chars');
+
+  // Dann die entsprechenden Klassen hinzufügen
+  if (isComplex) {
+    document.body.classList.add('lang-complex-chars');
+    console.log("[Font Debug] Added 'lang-complex-chars' class to body.");
+
+    // Spezielle Debug-Ausgabe für Arabisch und Hindi
+    if (lang === 'ar') {
+      console.log("[Font Debug] Arabic language detected - applying special styles.");
+    } else if (lang === 'hi') {
+      console.log("[Font Debug] Hindi language detected - applying special styles.");
+    }
+  } else {
+    console.log("[Font Debug] No complex character language detected.");
+  }
+
+  // Aktualisiere alle Zellen und Wörter im Spiel, falls das Spiel bereits läuft
+  setTimeout(function() {
+    // Zellen aktualisieren
+    const cells = document.querySelectorAll('.cell');
+    if (cells.length > 0) {
+      console.log(`[Font Debug] Updating ${cells.length} cells for language ${lang}`);
+    }
+
+    // Wörter aktualisieren
+    const words = document.querySelectorAll('.word');
+    if (words.length > 0) {
+      console.log(`[Font Debug] Updating ${words.length} words for language ${lang}`);
+    }
+  }, 100);
+}
+
 function translate(key, params = {}) {
   if (!currentTranslations || !key) {
     return (typeof params === 'string') ? params : `[${key}]`;
   }
-  
+
   // Versuche den Schlüssel in den geladenen Übersetzungen zu finden
   let translation = currentTranslations[key];
-  
+
   if (translation === undefined) {
     console.log(`Translation key not found: ${key}`);
     // Wenn keine Übersetzung gefunden, gib den Fallback oder den Schlüssel zurück
     return (typeof params === 'string') ? params : `[${key}]`;
   }
-  
+
   // Parameter ersetzen, wenn es sich um ein Objekt handelt
   try {
     if (typeof params === 'object' && params !== null) {
@@ -75,7 +147,7 @@ function translate(key, params = {}) {
     console.error(`Error replacing placeholder in key "${key}" with params:`, params, e);
     return `[ERR:${key}]`;
   }
-  
+
   return translation;
 }
 
@@ -85,11 +157,14 @@ function updateUI() {
     return;
   }
   console.log("Updating UI elements based on translations...");
-  
+
   // HTML-Sprache aktualisieren
   document.documentElement.lang = currentLanguage;
   document.documentElement.setAttribute('data-current-lang', currentLanguage);
-  
+
+  // Achte auf RTL/LTR-Richtung
+  updateDocumentDirection(currentLanguage);
+
   document.querySelectorAll('[data-translate]').forEach(element => {
     const key = element.getAttribute('data-translate');
     const translation = translate(key);
@@ -118,6 +193,10 @@ function getCurrentLanguage() {
 
 function getAvailableLanguages() {
   return availableLanguages;
+}
+
+function isRtlLanguage(lang) {
+  return rtlLanguages.includes(lang);
 }
 
 function populateLanguageSelector() {
@@ -179,6 +258,7 @@ window.localization = {
   updateUI,
   getCurrentLanguage,
   getAvailableLanguages,
+  isRtlLanguage, // Neue Funktion zum Abfragen, ob eine Sprache RTL ist
   isReady: () => localizationReady, // Expose readiness flag
   getTranslationEntry: (key) => {
     return currentTranslations[key];

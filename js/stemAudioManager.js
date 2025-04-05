@@ -75,6 +75,9 @@ function StemAudioManager() {
   this.onLoadProgressCallback = null;
   this.stemsTotalCount = this.numStems;
   this.stemsLoadedCount = 0;
+  this._loadAllPromise = null; // Für die neue Ladefunktion
+  this._resolveLoadAll = null;
+  this._rejectLoadAll = null;
   
   // Initialisieren
   this.init();
@@ -165,30 +168,13 @@ StemAudioManager.prototype.loadStemBuffer = function(index) {
     'https://mandarinenspiel.alexandrajanzen.de/assets/audio/stems/' + filename
   ];
   
-  console.log("Versuche, Stem " + (index + 1) + " zu laden");
-  
-  // Ersten Pfad versuchen
-  this.tryLoadPath(possiblePaths, 0, index);
-};
-
-/**
- * Rekursiv verschiedene Pfade für den Stem-Load versuchen
- */
-StemAudioManager.prototype.tryLoadPath = function(paths, pathIndex, stemIndex) {
   var self = this;
+  var filename = this.stemFiles[index];
   
-  if (pathIndex >= paths.length) {
-    console.error("Alle Pfade für Stem " + (stemIndex + 1) + " gescheitert.");
-    
-    // Stems-Ladefortschritt aktualisieren (auch bei Fehler)
-    this.stemsLoadedCount++;
-    this.updateLoadProgress();
-    
-    return;
-  }
+  // Konstruiere den einzigen korrekten Pfad
+  var path = 'assets/audio/stems/' + filename;
   
-  var path = paths[pathIndex];
-  console.log("Versuche Pfad: " + path + " für Stem " + (stemIndex + 1));
+  console.log("Lade Stem " + (index + 1) + " von Pfad: " + path);
   
   fetch(path)
     .then(function(response) {
@@ -198,53 +184,73 @@ StemAudioManager.prototype.tryLoadPath = function(paths, pathIndex, stemIndex) {
       return response.arrayBuffer();
     })
     .then(function(arrayBuffer) {
+      // Dekodiere die Audiodaten
       return self.context.decodeAudioData(arrayBuffer);
     })
     .then(function(audioBuffer) {
-      console.log("Stem " + (stemIndex + 1) + " erfolgreich geladen");
-      self.buffers[stemIndex] = audioBuffer;
-      self.stemsLoaded[stemIndex] = true;
+      // Erfolgreich geladen und dekodiert
+      console.log("Stem " + (index + 1) + " erfolgreich geladen und dekodiert.");
+      self.buffers[index] = audioBuffer;
+      self.stemsLoaded[index] = true;
       
       // Wenn es der erste Stem ist, die Dauer für alle speichern
-      if (stemIndex === 0) {
+      if (index === 0 && audioBuffer) {
         self.bufferDuration = audioBuffer.duration;
-        console.log("Audio-Dauer: " + self.bufferDuration + " Sekunden");
+        console.log("Audio-Dauer gesetzt: " + self.bufferDuration + " Sekunden");
       }
       
-      // GainNode erstellen
-      if (!self.gainNodes[stemIndex]) {
-        self.gainNodes[stemIndex] = self.context.createGain();
-        self.gainNodes[stemIndex].connect(self.context.destination);
+      // GainNode erstellen, falls noch nicht vorhanden
+      if (!self.gainNodes[index]) {
+        self.gainNodes[index] = self.context.createGain();
+        self.gainNodes[index].connect(self.context.destination);
       }
       
       // Lautstärke setzen (nur Piano hat anfangs Lautstärke > 0)
-      self.gainNodes[stemIndex].gain.value = self.stemVolumes[stemIndex];
+      self.gainNodes[index].gain.value = self.stemVolumes[index];
       
       // Stems-Ladefortschritt aktualisieren
       self.stemsLoadedCount++;
-      self.updateLoadProgress();
+      // self.stemsLoadedCount++; // Entferne doppelte Inkrementierung
+      self.updateLoadProgress(); // Fortschritt aktualisieren
     })
     .catch(function(error) {
-      console.warn("Fehler beim Laden von " + path + ": " + error.message);
-      // Nächsten Pfad versuchen
-      self.tryLoadPath(paths, pathIndex + 1, stemIndex);
+      // Fehler beim Laden oder Dekodieren
+      console.error("Fehler beim Laden/Dekodieren von Stem " + (index + 1) + " (" + path + "):", error);
+      self.stemsLoaded[index] = false; // Markieren als nicht geladen
       
-      // Wenn alle Pfade erschöpft sind (in der äußeren Methode)
-      if (pathIndex >= paths.length - 1) {
-        // Stems-Ladefortschritt auch bei Fehler aktualisieren
-        self.stemsLoadedCount++;
-        self.updateLoadProgress();
-      }
+      // Stems-Ladefortschritt trotzdem erhöhen, um den Ladevorgang abzuschließen (auch bei Fehler)
+      self.stemsLoadedCount++;
+      self.updateLoadProgress(); // Fortschritt aktualisieren (wird Fehler im Promise behandeln)
     });
 };
+
 
 /**
  * Aktualisiert den Ladefortschritt und ruft den Callback auf
  */
 StemAudioManager.prototype.updateLoadProgress = function() {
+  var progress = this.stemsLoadedCount / this.stemsTotalCount;
+  var allStemsProcessed = this.stemsLoadedCount >= this.stemsTotalCount;
+
+  // Callback aufrufen, falls vorhanden
   if (this.onLoadProgressCallback) {
-    var progress = this.stemsLoadedCount / this.stemsTotalCount;
     this.onLoadProgressCallback(progress, this.stemsLoadedCount, this.stemsTotalCount);
+  }
+
+  // Promise auflösen oder ablehnen, wenn alle Stems verarbeitet wurden
+  if (allStemsProcessed && this._loadAllPromise) {
+    var successfullyLoaded = this.stemsLoaded.every(loaded => loaded === true);
+    if (successfullyLoaded) {
+      console.log("Alle Stems erfolgreich geladen.");
+      if (this._resolveLoadAll) this._resolveLoadAll();
+    } else {
+      console.error("Einige Stems konnten nicht geladen werden.");
+      if (this._rejectLoadAll) this._rejectLoadAll("Fehler beim Laden einiger Stems.");
+    }
+    // Promise-Callbacks zurücksetzen
+    this._loadAllPromise = null;
+    this._resolveLoadAll = null;
+    this._rejectLoadAll = null;
   }
 };
 
@@ -260,7 +266,43 @@ StemAudioManager.prototype.resetLoadProgress = function() {
  * Prüft, ob alle Stems geladen sind
  */
 StemAudioManager.prototype.allStemsLoaded = function() {
-  return this.stemsLoadedCount >= this.stemsTotalCount;
+  // Prüft, ob *alle* Stems erfolgreich geladen wurden (nicht nur verarbeitet)
+  return this.stemsLoaded.every(loaded => loaded === true);
+};
+
+/**
+ * Lädt alle Stems und gibt ein Promise zurück, das aufgelöst wird, wenn alle geladen sind.
+ * @returns {Promise<void>} Ein Promise, das bei Erfolg aufgelöst oder bei Fehler abgelehnt wird.
+ */
+StemAudioManager.prototype.loadAllStems = function() {
+  var self = this;
+
+  // Wenn bereits ein Ladevorgang läuft, das bestehende Promise zurückgeben
+  if (this._loadAllPromise) {
+    return this._loadAllPromise;
+  }
+
+  // Wenn alle Stems bereits geladen sind, sofort auflösen
+  if (this.allStemsLoaded()) {
+    console.log("Alle Stems waren bereits geladen.");
+    return Promise.resolve();
+  }
+
+  // Neues Promise erstellen
+  this._loadAllPromise = new Promise(function(resolve, reject) {
+    self._resolveLoadAll = resolve;
+    self._rejectLoadAll = reject;
+
+    // Ladevorgang starten (falls nicht schon geschehen)
+    // Die init-Methode startet bereits das Laden, wir müssen hier nichts extra anstoßen.
+    // Der Fortschritt wird über updateLoadProgress verfolgt.
+    console.log("Starte/Überwache Ladevorgang für alle Stems...");
+    
+    // Initialen Fortschritt melden, falls schon Stems geladen wurden
+    self.updateLoadProgress(); 
+  });
+
+  return this._loadAllPromise;
 };
 
 /**
