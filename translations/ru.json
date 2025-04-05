@@ -8,11 +8,13 @@
   "difficultyEasy": "Лёгкий багаж",
   "difficultyHard": "Тяжёлый багаж",
   "difficultyLoose": "Дырка в кармане",
+  "difficultyBabel": "Вавилон",
   "continueButton": "Продолжить игру",
   "startButton": "Начать игру",
   "startNewButton": "Начать новое путешествие",
   "helpButton": "Как играть",
   "fullscreenButton": "На весь экран",
+  "loadingTitle": "Загрузка воспоминаний...",
   "loadingText": "Загрузка музыки...",
   "saveNotice": "Ваш прогресс и воспоминания сохраняются автоматически.",
   "epicBadge": "Идеальный раунд!",
@@ -20,6 +22,8 @@
   "timerPrefix": "Время: ",
   "hintButton": "ПОДСКАЗКА",
   "coverRevealButtonLabel": "Показать обложку",
+  "homeButtonLabel": "Вернуться на начальный экран",
+  "confirmReturnHome": "Вы хотите вернуться на начальный экран? Ваш прогресс будет сохранен.",
   "levelOverlayLevel": "УРОВЕНЬ {level}",
   "nextLevelButton": "Продолжить историю",
   "endScreenTitle": "Путешествие завершено",
@@ -50,6 +54,7 @@
   "helpDifficultyEasyDesc": "Только по горизонтали/вертикали",
   "helpDifficultyHardDesc": "Все направления",
   "helpDifficultyLooseDesc": "Только первые буквы",
+  "helpDifficultyBabelDesc": "Случайный язык на каждом уровне",
   "helpSectionTipsTitle": "Советы",
   "helpSectionTipsText": "• Используйте кнопку подсказки при необходимости<br>• Изменения цвета показывают настроение уровня<br>• Музыка адаптируется к каждому уровню",
   "closeHelpButton": "Вернуться к путешествию",
@@ -139,4 +144,4 @@
   "tutorial": "Как играть",
   "tutorialText": "Найдите скрытые слова в сетке букв. Слова могут идти горизонтально, вертикально или по диагонали. Проведите пальцем по буквам, чтобы отметить слово.",
   "loadingPleaseWait": "Пожалуйста, подождите, игра загружается..."
-} 
+}

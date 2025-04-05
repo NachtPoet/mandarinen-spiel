@@ -8,11 +8,13 @@
   "difficultyEasy": "Lichte bagage",
   "difficultyHard": "Zware bagage",
   "difficultyLoose": "Gat in de tas",
+  "difficultyBabel": "Babel",
   "continueButton": "Spel voortzetten",
   "startButton": "Spel starten",
   "startNewButton": "Nieuwe reis beginnen",
   "helpButton": "Speluitleg",
   "fullscreenButton": "Volledig scherm",
+  "loadingTitle": "Herinneringen laden...",
   "loadingText": "Muziek wordt geladen...",
   "saveNotice": "Je voortgang en herinneringen worden automatisch opgeslagen.",
   "epicBadge": "Perfecte ronde!",
@@ -20,6 +22,8 @@
   "timerPrefix": "Tijd: ",
   "hintButton": "TIP",
   "coverRevealButtonLabel": "Cover weergeven",
+  "homeButtonLabel": "Terug naar startscherm",
+  "confirmReturnHome": "Wil je terug naar het startscherm? Je voortgang wordt opgeslagen.",
   "levelOverlayLevel": "LEVEL {level}",
   "nextLevelButton": "Verder in het verhaal",
   "endScreenTitle": "Reis voltooid",
@@ -50,6 +54,7 @@
   "helpDifficultyEasyDesc": "Alleen horizontaal/verticaal",
   "helpDifficultyHardDesc": "Alle richtingen",
   "helpDifficultyLooseDesc": "Alleen beginletters",
+  "helpDifficultyBabelDesc": "Willekeurige taal per level",
   "helpSectionTipsTitle": "Tips",
   "helpSectionTipsText": "• Tip-knop gebruiken indien nodig<br>• Kleurveranderingen tonen de stemming van het level<br>• De muziek past zich aan elk level aan",
   "closeHelpButton": "Terug naar de reis",
@@ -140,4 +145,4 @@
   "tutorial": "Zo wordt gespeeld",
   "tutorialText": "Vind verborgen woorden in het letterspel. Woorden kunnen horizontaal, verticaal of diagonaal lopen. Swipe over de letters om een woord te markeren.",
   "loadingPleaseWait": "Even geduld, het spel wordt geladen..."
-} 
+}

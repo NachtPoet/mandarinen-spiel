@@ -9,16 +9,20 @@
   "difficultyEasy": "Bagaglio leggero",
   "difficultyHard": "Bagaglio pesante",
   "difficultyLoose": "Buco nella tasca",
+  "difficultyBabel": "Babele",
   "continueButton": "Continua il gioco",
   "startNewButton": "Inizia un nuovo viaggio",
   "helpButton": "Istruzioni",
   "fullscreenButton": "Schermo intero",
+  "loadingTitle": "Caricamento ricordi...",
   "loadingText": "Caricamento musica...",
   "saveNotice": "I tuoi progressi e i tuoi ricordi vengono salvati automaticamente.",
   "levelIndicator": "Livello: {current}/{total}",
   "timerPrefix": "Tempo: ",
   "hintButton": "INDIZIO",
   "coverRevealButtonLabel": "Mostra copertina",
+  "homeButtonLabel": "Torna alla schermata iniziale",
+  "confirmReturnHome": "Vuoi tornare alla schermata iniziale? I tuoi progressi verranno salvati.",
   "nextLevelButton": "Continua la storia",
   "endScreenTitle": "Viaggio completato",
   "endScreenMessage": "Nei mandarini ci sono ricordi e connessioni - hai scoperto la storia della canzone passo dopo passo.",
@@ -47,6 +51,10 @@
   "endMessageStats": "Hai giocato {quality}! Tempo: {minutes}:{seconds}, indizi utilizzati: {hints}",
   "helpTitle": "Come giocare",
   "helpText": "Trova le parole di ogni livello tracciando lettere orizzontalmente, verticalmente o diagonalmente. Ogni parola trovata aggiunge un nuovo elemento musicale.",
+  "helpDifficultyEasyDesc": "Solo orizzontale/verticale",
+  "helpDifficultyHardDesc": "Tutte le direzioni",
+  "helpDifficultyLooseDesc": "Solo prime lettere",
+  "helpDifficultyBabelDesc": "Lingua casuale per livello",
   "closeHelpButton": "Capito",
   "config_stems_release_piano": "Pianoforte",
   "config_stems_release_bassdrums": "Basso e batteria",
@@ -64,44 +72,44 @@
   "config_mode_prerelease": "Pre-release",
   "config_mode_release": "Versione finale",
   "subtitlesPlaceholder": "Sottotitoli",
-  
+
   "level1_lyric": "Mi nascondo\nE tu conti fino a dieci\nLa mia risata infantile\nVisibile attraverso le tende\nApro tutti gli armadi\nSolo amore in questa casa\nSembriamo così felici",
   "level1_quote": "L'infanzia è come la buccia di un mandarino - il suo profumo rimane nella memoria per tutta la vita.",
   "level1_words": ["NASCONDO", "INFANTILE", "TENDE", "ARMADI", "FELICI"],
-  
+
   "level2_lyric": "Suoni la chitarra\nE cantiamo \"Let It Be\"\nCostruiamo castelli\nFantasie di cuscini del divano\nE quando ci salutiamo\nMi dai i mandarini\nFinché non ci rivedremo",
   "level2_quote": "In ogni addio c'è il seme di un ricongiungimento, in ogni mandarino la dolcezza del ricordo.",
   "level2_words": ["CHITARRA", "CASTELLI", "FANTASIE", "ADDIO", "MANDARINI"],
-  
+
   "level3_lyric": "Ma i giorni sono diventati anni\nTra noi sono stati costruiti muri\nMi sei mancato, così tante volte\nE io sono mancata a te",
   "level3_quote": "Il tempo a volte costruisce muri, ma le vere connessioni trovano sempre un modo.",
   "level3_words": ["GIORNI", "ANNI", "MURI", "MANCATO", "VOLTE"],
-  
+
   "level4_lyric": "Siamo sempre connessi l'uno all'altro\nNon possiamo mai perderci\nAnche separati nelle ore più buie\nCiò che abbiamo non svanirà mai",
   "level4_quote": "Anche nelle ore più buie, i ricordi più luminosi brillano più intensamente.",
   "level4_words": ["CONNESSI", "PERDERCI", "BUIE", "SVANIRÀ", "ABBIAMO"],
-  
+
   "level5_lyric": "Attraverso tutte le curve, i tornanti\nNei giorni di pioggia, errori perdonati\nNon sei stato qui per così tanti anni\nMa non sei mai andato via\nHo sempre mandarini nel bagaglio",
   "level5_quote": "Nelle strade tortuose della vita, sono i piccoli simboli a darci un ancoraggio.",
   "level5_words": ["CURVE", "TORNANTI", "PIOGGIA", "ERRORI", "MANDARINI"],
-  
+
   "level6_lyric": "I pensieri tremano\nBusso alla tua porta\nPassi rilassati\nE poi sei davanti a me\nNelle tue braccia\nL'ultimo pezzo del puzzle\nTante ferite guariscono",
   "level6_quote": "A volte le vecchie ferite guariscono solo quando troviamo il coraggio di bussare a porte dimenticate.",
   "level6_words": ["TREMANO", "PORTA", "PASSI", "PUZZLE", "FERITE"],
-  
+
   "level7_lyric": "I capelli grigi ma\nUno sguardo familiare\nRidiamo entrambi\nIl tempo perduto ritorna\nFotografie ingiallite\nIn vecchie vetrine di legno\nE lì, due mandarini",
   "level7_quote": "In uno sguardo familiare c'è più storia che in mille fotografie.",
   "level7_words": ["CAPELLI", "SGUARDO", "RIDIAMO", "FOTOGRAFIE", "VETRINE"],
-  
+
   "level8_lyric": "E gli anni sono tornati giorni\nDalle pietre dei muri abbiamo costruito un sentiero\nTutti quei primi momenti mancati\nNon fanno più così male",
   "level8_quote": "Dalle pietre che una volta ci dividevano, ora costruiamo i ponti che ci collegano.",
   "level8_words": ["GIORNI", "PIETRE", "PRIMI", "MOMENTI", "MALE"],
-  
+
   "level9_lyric": "Siamo sempre connessi l'uno all'altro\nNon possiamo mai perderci\nAnche separati nelle ore più buie\nCiò che abbiamo non svanirà mai",
   "level9_quote": "Le vere connessioni non conoscono distanza, tempo o confini.",
   "level9_words": ["CONNESSI", "PERDERCI", "BUIE", "SVANIRÀ", "ABBIAMO"],
-  
+
   "level10_lyric": "Attraverso tutte le curve, i tornanti\nNei giorni di pioggia, errori perdonati\nNon sei stato qui per così tanti anni\nMa non sei mai andato via\nHo sempre mandarini nel bagaglio",
   "level10_quote": "Alla fine di ogni viaggio c'è la realizzazione: non sono i luoghi che visitiamo, ma le persone che portiamo con noi.",
   "level10_words": ["CURVE", "TORNANTI", "PIOGGIA", "ERRORI", "MANDARINI"]
-} 
+}
