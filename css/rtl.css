@@ -1,0 +1,500 @@
+/*
+ * RTL-Unterstützung für das Mandarinen-Spiel
+ * Diese Datei enthält spezifische Anpassungen für Rechts-nach-Links-Sprachen (Arabisch, Hebräisch, etc.)
+ */
+
+/* Grundlegende RTL-Richtung */
+html[dir="rtl"] {
+  /* Grundlegende Textrichtung bereits durch dir="rtl" festgelegt */
+  text-align: right;
+}
+
+/* Allgemeine UI-Elemente umkehren */
+html[dir="rtl"] #timer,
+html[dir="rtl"] .epic-badge {
+  left: auto;
+  right: 15px;
+}
+
+html[dir="rtl"] #levelIndicator {
+  right: auto;
+  left: 15px;
+}
+
+/* Buttons spiegeln - exakt spiegelverkehrt zur LTR-Anordnung */
+html[dir="rtl"] #musicToggle {
+  right: auto;
+  left: 20px;
+  z-index: 101; /* Sicherstellen, dass der Button über anderen Elementen liegt */
+}
+
+html[dir="rtl"] #soundToggle {
+  right: auto;
+  left: 70px;
+  z-index: 101; /* Sicherstellen, dass der Button über anderen Elementen liegt */
+}
+
+html[dir="rtl"] #hintButton {
+  left: auto;
+  right: 20px;
+  z-index: 101; /* Sicherstellen, dass der Button über anderen Elementen liegt */
+  width: auto; /* Verhindert, dass der Button zu breit wird */
+  max-width: 100px; /* Begrenzt die Breite */
+}
+
+/* Cover-Button und Home-Button neu positionieren - exakt spiegelverkehrt zur LTR-Anordnung */
+html[dir="rtl"] .cover-reveal-button {
+  left: auto;
+  right: 20px;
+  bottom: 70px; /* Gleiche Position wie in LTR, nur spiegelverkehrt */
+}
+
+html[dir="rtl"] .home-button {
+  right: auto;
+  left: 15px;
+}
+
+/* Dreiecke und Icons spiegeln */
+html[dir="rtl"] .gold-triangle {
+  transform: rotate(180deg);
+  margin-right: 0;
+  margin-left: 10px;
+}
+
+/* Select-Dropdown-Pfeil anpassen */
+html[dir="rtl"] .select-wrapper::after {
+  right: auto;
+  left: 12px;
+}
+
+/* Level-Overlay anpassen */
+html[dir="rtl"] #lyricDisplay {
+  margin-right: 0;
+  margin-left: 100px;
+  text-align: right;
+}
+
+html[dir="rtl"] .vinyl-player {
+  right: auto;
+  left: 3%;
+  transform: scaleX(-1) !important; /* Plattenspieler spiegeln */
+}
+
+/* Untertitel-Container anpassen */
+html[dir="rtl"] .subtitles-toggle {
+  right: auto;
+  left: 10px;
+}
+
+/* Wort-Liste und Stem-Icons */
+html[dir="rtl"] .word {
+  padding-right: 12px;
+  padding-left: 30px; /* Mehr Platz für das Icon */
+}
+
+html[dir="rtl"] .stem-icon-container {
+  right: auto;
+  left: 6px;
+}
+
+/* Credit-Linien anpassen */
+html[dir="rtl"] .mandarin-credits .credit-line {
+  flex-direction: row-reverse;
+}
+
+html[dir="rtl"] .mandarin-credits .credit-label {
+  text-align: left;
+}
+
+/* Benachrichtigungen anpassen */
+html[dir="rtl"] .stem-notification-icon {
+  margin-right: 0;
+  margin-left: 10px;
+}
+
+/* Spielraster - keine Änderung der Richtung notwendig,
+   da Buchstaben und Wörter vertikal oder horizontal gelesen werden */
+
+/* Mandarinen-Animation */
+html[dir="rtl"] .mandarin-left {
+  left: auto;
+  right: 10px;
+  animation-name: float-right-rtl;
+}
+
+html[dir="rtl"] .mandarin-right {
+  right: auto;
+  left: 10px;
+  animation-name: float-left-rtl;
+}
+
+/* Animationen für RTL anpassen */
+@keyframes float-left-rtl {
+  0% { transform: translateY(0) rotate(-5deg); }
+  100% { transform: translateY(-8px) rotate(5deg); }
+}
+
+@keyframes float-right-rtl {
+  0% { transform: translateY(-8px) rotate(5deg); }
+  100% { transform: translateY(0) rotate(-5deg); }
+}
+
+/* Cover-Frame Anpassungen */
+html[dir="rtl"] .cover-footer {
+  right: auto;
+  left: 25px;
+}
+
+/* Shop-Link und andere Links */
+html[dir="rtl"] .shop-link,
+html[dir="rtl"] button {
+  unicode-bidi: embed; /* Stellt sicher, dass der Text korrekt dargestellt wird */
+}
+
+/* Loading-Indikator und Progress-Bar */
+html[dir="rtl"] .loading-progress-bar {
+  direction: ltr; /* Progress-Bars sollen immer von links nach rechts gefüllt werden */
+}
+
+/* Hilfe-Dialog anpassen */
+html[dir="rtl"] .help-section {
+  text-align: right;
+  padding-left: 0;
+  padding-right: 15px;
+}
+
+html[dir="rtl"] .help-section::before {
+  left: auto;
+  right: 0;
+}
+
+/* Level-Quotes anpassen */
+html[dir="rtl"] .level-quote::before {
+  left: auto;
+  right: 0;
+}
+
+html[dir="rtl"] .level-quote::after {
+  right: auto;
+  left: 0;
+}
+
+/* Für kleine Bildschirme */
+@media (max-width: 600px) {
+  html[dir="rtl"] #timer {
+    right: 10px;
+  }
+
+  html[dir="rtl"] #levelIndicator {
+    left: 10px;
+  }
+
+  html[dir="rtl"] .subtitles-toggle {
+    left: 5px;
+  }
+
+  /* Verbesserte Positionierung der Buttons für RTL-Sprachen auf mobilen Geräten - exakt spiegelverkehrt zur LTR-Anordnung */
+  html[dir="rtl"] #hintButton {
+    right: 20px !important;
+    left: auto !important;
+    bottom: 15px !important;
+    width: auto !important; /* Verhindert, dass der Button zu breit wird */
+    max-width: 80px !important; /* Begrenzt die Breite */
+    padding: 5px 8px !important; /* Kleinere Polsterung */
+    font-size: 0.65rem !important; /* Kleinere Schriftgröße */
+  }
+
+  html[dir="rtl"] #musicToggle {
+    left: 20px !important;
+    right: auto !important;
+    bottom: 15px !important;
+  }
+
+  html[dir="rtl"] #soundToggle {
+    left: 70px !important;
+    right: auto !important;
+    bottom: 15px !important;
+  }
+
+  /* Anpassung für den Home-Button - exakt spiegelverkehrt zur LTR-Anordnung */
+  html[dir="rtl"] .home-button {
+    bottom: 70px !important;
+    left: 15px !important;
+    right: auto !important;
+  }
+
+  /* Anpassung für den Cover-Reveal-Button - exakt spiegelverkehrt zur LTR-Anordnung */
+  html[dir="rtl"] .cover-reveal-button {
+    bottom: 70px !important;
+    right: 20px !important;
+    left: auto !important;
+  }
+}
+
+/* Zusätzliche Anpassungen für arabischen Text */
+html[lang="ar"] .word,
+html[lang="ar"] #subtitlesText,
+html[lang="ar"] .level-quote,
+html[lang="ar"] #lyricDisplay,
+html[lang="ar"] p,
+html[lang="ar"] label,
+html[lang="ar"] button {
+  letter-spacing: normal; /* Arabisch benötigt keinen zusätzlichen Buchstabenabstand */
+  font-family: 'Amiri', 'Source Sans Pro', sans-serif; /* Ergänzende arabische Schriftart */
+}
+
+/* Arabische Schriftgrößen anpassen (etwas größer für bessere Lesbarkeit) */
+html[lang="ar"] #lyricDisplay {
+  font-size: 1.3rem;
+  line-height: 1.8;
+}
+
+html[lang="ar"] .level-quote {
+  font-size: 1.2rem;
+}
+
+html[lang="ar"] .word {
+  /* font-size: 0.75rem; */ /* Use the general complex char size */
+  font-size: 1.15em; /* Apply desired larger size */
+}
+
+/* Spezieller Workaround für Eingabesysteme bei arabischem Spiel */
+html[lang="ar"] .cell {
+  direction: rtl;
+  text-align: center; /* Trotzdem zentriert lassen */
+  /* font-size: 1rem; */ /* Use the general complex char size */
+  font-size: 1.2em; /* Apply desired larger size */
+  /* Add overflow properties from style.css complex rule */
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Spezielle Anpassung für arabische Buttons */
+html[lang="ar"] .btn {
+  font-size: 0.85rem; /* Leicht vergrößern für arabische Texte */
+}
+
+/* Für Zeilen, die bidirektionalen Text enthalten könnten */
+html[lang="ar"] .bidi-container {
+  unicode-bidi: bidi-override;
+}
+
+/* Toggle-Switch für verbundene Schriftarten (RTL-Anpassungen) */
+
+/* Fixierung für RTL-Sprachen, damit der Text korrekt angezeigt wird */
+html[dir="rtl"] .script-toggle-container {
+  /* Verbesserte Positionierung des Toggle-Containers */
+  display: flex;
+  justify-content: center;
+  margin: 15px auto 5px;
+  width: 90%;
+  max-width: 300px;
+  padding: 5px;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+html[dir="rtl"] .script-toggle-container label {
+  margin-right: 0;
+  margin-left: 10px;
+  font-size: 0.7rem; /* Kleinere Schriftgröße für mobile Geräte */
+}
+
+html[dir="rtl"] .toggle-slider:before {
+  left: auto;
+  right: 3px;
+}
+
+html[dir="rtl"] input:checked + .toggle-slider:before {
+  transform: translateX(-24px);
+}
+
+/* Bei kleinen Bildschirmen */
+@media (max-width: 600px) {
+  html[dir="rtl"] .script-toggle-container {
+    margin-top: 10px;
+    margin-bottom: 15px;
+    padding: 4px;
+  }
+
+  html[dir="rtl"] input:checked + .toggle-slider:before {
+    transform: translateX(-20px);
+  }
+
+  /* Kleinere Schriftgröße für sehr kleine Bildschirme */
+  html[dir="rtl"] .script-toggle-container label {
+    font-size: 0.65rem;
+  }
+}
+
+/* Verbesserte Darstellung für arabische Wörter */
+html[lang="ar"] .word.separated-view {
+  letter-spacing: 3px; /* Größerer Abstand für arabische Buchstaben */
+  font-size: 0.8rem; /* Etwas größer für bessere Lesbarkeit */
+}
+
+/* Spezielle Animation für RTL-Wörter beim Umschalten */
+html[dir="rtl"] .word {
+  transition: letter-spacing 0.4s ease-in-out;
+}
+
+/* Sonderfälle für arabische Texte mit getrennt/verbunden Switch */
+html[lang="ar"] .script-toggle-container {
+  margin-top: 10px; /* Weniger Abstand nach oben */
+  margin-bottom: 100px !important; /* Mehr Abstand nach unten, um Überlappungen zu vermeiden */
+  z-index: 50; /* Höherer z-index, um Überlappungen zu vermeiden */
+}
+
+/* Etwas besonderes Styling für das Toggle im RTL-Modus */
+html[dir="rtl"] .script-toggle-container {
+  border-color: rgba(255, 140, 0, 0.4);
+  box-shadow: 0 0 12px rgba(255, 140, 0, 0.3);
+  position: relative; /* Positionierung verbessern */
+}
+
+/* Verbesserte Darstellung der Wortliste für RTL-Sprachen */
+html[dir="rtl"] .word-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 100px !important; /* Platz für die Buttons unten */
+  padding: 0 10px;
+}
+
+/* Spezielle Anpassung für arabische Wortliste auf mobilen Geräten */
+@media (max-width: 600px) {
+  html[lang="ar"] .word-list {
+    margin-bottom: 10px !important; /* Weniger Abstand, damit der Toggle direkt unter den Suchbegriffen ist */
+  }
+
+  /* Mehr Abstand nach dem Toggle-Container, um Platz für die Buttons zu schaffen */
+  html[lang="ar"] .script-toggle-container {
+    margin-bottom: 100px !important;
+  }
+}
+
+/* Anpassung der Wörter in der Wortliste für RTL-Sprachen */
+html[dir="rtl"] .word {
+  margin: 3px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Zusätzliche CSS-Regeln für die rtl.css oder style.css */
+
+/* Spezielle Formatierung für RTL-Zellen */
+.cell.rtl-cell {
+  direction: rtl;
+  /* Richtung ändern, aber trotzdem zentriert halten */
+  text-align: center;
+}
+
+/* Zusätzlicher Stilelement für arabische Zellen */
+html[lang="ar"] .cell {
+  font-size: 1rem; /* Etwas größer für bessere Lesbarkeit */
+}
+
+/* Verbesserte Styling für "Loch in der Tasche" im RTL-Modus */
+html[dir="rtl"] .word.separated-view {
+  letter-spacing: 3px; /* Etwas mehr Abstand für bessere Lesbarkeit */
+}
+
+/* Verbessertes Hover-Styling für RTL-Wörter */
+html[dir="rtl"] .word:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+}
+
+/* Verbesserte Animationen beim Aufbau der Wortliste für RTL */
+@keyframes rtl-fadeInWord {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+html[dir="rtl"] .word {
+  animation: rtl-fadeInWord 0.3s forwards;
+  animation-delay: calc(var(--index, 0) * 0.05s);
+}
+
+/* Punktdarstellung in "Loch in der Tasche" für RTL-Sprachen optimieren */
+html[dir="rtl"] .word:not(.found) {
+  unicode-bidi: bidi-override; /* Steuert die bidirektionale Anzeige */
+}
+
+/* Mobile Anpassungen für RTL-Sprachen */
+/* Hinweis: Die Hauptanpassungen wurden bereits in den obigen Media Queries vorgenommen */
+
+/* Spezielle Klasse für den Toggle-Container in der mobilen RTL-Ansicht */
+.rtl-mobile-toggle {
+  margin: 10px auto 20px !important; /* Weniger Abstand nach unten, direkt unter den Suchbegriffen */
+  width: 90% !important;
+  max-width: 280px !important;
+  z-index: 40 !important;
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  border-radius: 8px !important;
+  padding: 5px !important;
+  box-shadow: 0 0 10px rgba(255, 140, 0, 0.2) !important;
+  position: relative !important; /* Positionierung verbessern */
+}
+
+/* Zusätzliche Anpassungen für sehr kleine Bildschirme */
+@media (max-width: 400px) {
+  /* Noch kleinere Schriftgröße für den Hint-Button */
+  html[dir="rtl"] #hintButton {
+    font-size: 0.6rem !important;
+    padding: 4px 6px !important;
+    max-width: 70px !important;
+    right: 20px !important; /* Konsistente Positionierung */
+  }
+
+  /* Kleinere Icons für die Sound-Buttons */
+  html[dir="rtl"] #musicToggle,
+  html[dir="rtl"] #soundToggle {
+    padding: 6px !important;
+  }
+
+  html[dir="rtl"] #musicToggle svg,
+  html[dir="rtl"] #soundToggle svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  /* Anpassung des Abstands zwischen den Buttons */
+  html[dir="rtl"] #soundToggle {
+    left: 60px !important;
+  }
+
+  /* Anpassung für den Cover-Reveal-Button */
+  html[dir="rtl"] .cover-reveal-button {
+    bottom: 70px !important;
+    right: 20px !important;
+  }
+
+  /* Anpassung für den Home-Button */
+  html[dir="rtl"] .home-button {
+    bottom: 70px !important;
+    left: 15px !important;
+  }
+
+  /* Mehr Abstand zwischen den Buttons und der Wortliste */
+  html[dir="rtl"] .word-list {
+    margin-bottom: 70px !important;
+  }
+
+  /* Optimierung des Toggle-Containers für sehr kleine Bildschirme */
+  html[dir="rtl"] .script-toggle-container {
+    width: 95%;
+    padding: 3px;
+    margin-top: 8px;
+    margin-bottom: 12px;
+  }
+
+  /* Kleinere Wortliste für mehr Platz */
+  html[dir="rtl"] .word-list {
+    margin-bottom: 60px; /* Mehr Platz für die Buttons unten */
+  }
+}

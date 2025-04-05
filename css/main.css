@@ -1,0 +1,59 @@
+/* Sprachauswahl (aktualisierte Stile) */
+.language-selector {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #fff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.language-selector label {
+  margin-right: 8px;
+  font-weight: 500;
+}
+
+.language-selector select {
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  color: white;
+  padding: 4px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.language-selector select:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.language-selector select:focus {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.language-selector select option {
+  background-color: rgba(50, 50, 50, 0.9);
+  color: white;
+}
+
+/* Für mobile Ansicht */
+@media (max-width: 768px) {
+  .language-selector {
+    top: 10px;
+    right: 10px;
+    font-size: 12px;
+  }
+  
+  .language-selector select {
+    padding: 3px 6px;
+    font-size: 12px;
+  }
+} 
