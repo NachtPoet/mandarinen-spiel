@@ -197,8 +197,9 @@ function renderWordList(targetWords, foundWords, difficulty, wordListElement, tr
       console.log(`Wort '${word}': isFound=${isFound}, showConnected=${showConnected}, difficulty=${difficulty}`);
     }
 
+    // --- Difficulty Logic ---
     if (difficulty === "loose" && !isFound) {
-        // Loose difficulty, word not found: Show first letter hint
+        // Loose difficulty ("Loch in der Tasche"), word not found: Show first letter hint
         const firstChar = word.charAt(0);
         if (isConnectedScript && !showConnected) {
             // Separated view for connected scripts (RTL handled)
@@ -214,34 +215,8 @@ function renderWordList(targetWords, foundWords, difficulty, wordListElement, tr
             wordEl.textContent = firstChar + '•'.repeat(word.length - 1);
             wordEl.classList.remove('separated-view');
         }
-    } else if (difficulty === "hard" && !isFound) {
-        // Hard difficulty, word not found: Show first letter hint (RIGHTMOST for RTL)
-        let hintChar;
-        let hintText;
-        if (isRtl) {
-            hintChar = word.slice(-1); // Get the last character (visually first in RTL)
-            hintText = '•'.repeat(word.length - 1) + hintChar;
-        } else {
-            hintChar = word.charAt(0); // Get the first character (visually first in LTR)
-            hintText = hintChar + '•'.repeat(word.length - 1);
-        }
-        wordEl.textContent = hintText;
-
-        // Apply separated view styling if needed for connected scripts
-        if (isConnectedScript && !showConnected) {
-             if (isRtl) {
-                 // Ensure spacing for separated view in RTL
-                 wordEl.textContent = '• '.repeat(word.length - 1) + hintChar;
-             } else {
-                 // Ensure spacing for separated view in LTR
-                 wordEl.textContent = hintChar + ' •'.repeat(word.length - 1);
-             }
-             wordEl.classList.add('separated-view');
-        } else {
-             wordEl.classList.remove('separated-view'); // Ensure class is removed if not separated
-        }
     } else {
-        // Word is found OR difficulty is easy/medium: Show full word
+        // Word is found OR difficulty is easy/hard/babel: Show full word
         if (isConnectedScript && !showConnected) {
             // Separated view for connected scripts
             if (window.connectedScript && window.connectedScript.getIndividualLetters) {
@@ -270,12 +245,6 @@ function renderWordList(targetWords, foundWords, difficulty, wordListElement, tr
 
     if (foundWords.has(word)) {
       wordEl.classList.add("found");
-      if (difficulty === "loose") {
-        wordEl.textContent = word; // Show full word when found
-        const iconSpan = wordEl.querySelector('.stem-icon-container');
-        if (iconSpan) iconSpan.style.opacity = 1; // Make icon fully visible
-      }
-
       // Bei gefundenen Wörtern volle Transparenz für das Icon
       if (stemIndex > 0) {
         wordEl.classList.add("stem-active");

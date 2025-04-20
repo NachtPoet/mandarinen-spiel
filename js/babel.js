@@ -83,47 +83,10 @@ class BabelManager {
         // Stelle die ursprüngliche Sprache wieder her
         this.restoreOriginalLanguage();
 
-        // Stelle den ursprünglichen Schwierigkeitsgrad wieder her, falls gespeichert
-        if (window.gameInstance && this._originalDifficulty) {
-            console.log(`Babel-Modus: Stelle ursprünglichen Schwierigkeitsgrad '${this._originalDifficulty}' wieder her`);
-            window.gameInstance.currentDifficulty = this._originalDifficulty;
-
-            // Aktualisiere auch das Dropdown-Menü, falls vorhanden und ein ursprünglicher Wert gespeichert wurde
-            const difficultySelect = document.getElementById('difficultySelect');
-            if (difficultySelect && this._originalSelectValue) {
-                console.log(`Babel-Modus: Stelle ursprünglichen Dropdown-Wert '${this._originalSelectValue}' wieder her`);
-                difficultySelect.value = this._originalSelectValue;
-
-                // Aktualisiere die visuelle Darstellung des Dropdowns
-                if (typeof updateDifficultyVisual === 'function') {
-                    updateDifficultyVisual(difficultySelect);
-                }
-            }
-
-            // Zurücksetzen der gespeicherten Werte
-            this._originalDifficulty = null;
-            this._originalSelectValue = null;
-        }
-
-        // Aktualisiere die Wortliste mit dem aktuellen Schwierigkeitsgrad
-        if (window.gameInstance && window.gameInstance.domElements &&
-            window.gameInstance.domElements.wordList && typeof window.renderWordList === 'function') {
-            const currentDifficulty = window.gameInstance.currentDifficulty || 'easy';
-            console.log(`Aktualisiere Wortliste nach Deaktivierung des Babel-Modus mit Schwierigkeitsgrad '${currentDifficulty}'`);
-
-            // Wichtig: Wir verwenden den aktuellen Schwierigkeitsgrad, der jetzt wieder der ursprüngliche sein sollte
-            window.renderWordList(
-                window.gameInstance.targetWords,
-                window.gameInstance.foundWords,
-                currentDifficulty,
-                window.gameInstance.domElements.wordList,
-                window.localization ? window.localization.translate : null,
-                window.gameInstance.getStemNameKey ? window.gameInstance.getStemNameKey.bind(window.gameInstance) : null
-            );
-
-            // Zurücksetzen des Flags
-            this._wordListUpdated = false;
-        }
+        // Zurücksetzen der gespeicherten Werte (falls sie noch existieren)
+        this._originalDifficulty = null;
+        this._originalSelectValue = null;
+        this._wordListUpdated = false; // Reset flag
     }
 
     /**
@@ -254,20 +217,6 @@ class BabelManager {
                     window.gameInstance.getStemNameKey ? window.gameInstance.getStemNameKey.bind(window.gameInstance) : null
                 );
 
-                // Direkte Manipulation der DOM-Elemente, um sicherzustellen, dass die Wortliste korrekt angezeigt wird
-                setTimeout(() => {
-                    const wordElements = window.gameInstance.domElements.wordList.querySelectorAll('.word:not(.found)');
-                    wordElements.forEach(wordEl => {
-                        // Prüfe, ob das Wort nur den ersten Buchstaben zeigt (Loch in der Tasche Modus)
-                        const originalWord = wordEl.dataset.originalWord;
-                        if (originalWord && wordEl.textContent.length <= originalWord.length &&
-                            wordEl.textContent.includes('•')) { // Bullet-Zeichen
-                            console.log(`Babel-Modus: Korrigiere Wortanzeige für '${originalWord}'`);
-                            wordEl.textContent = originalWord; // Zeige das vollständige Wort
-                        }
-                    });
-                }, 100);
-
                 // Setze ein Flag, um zu markieren, dass wir die Wortliste aktualisiert haben
                 this._wordListUpdated = true;
             }
@@ -288,39 +237,6 @@ class BabelManager {
     }
 }
 
-// Überschreibe die renderWordList-Funktion, um sicherzustellen, dass die Wörter im Babel-Modus korrekt angezeigt werden
-if (typeof window.renderWordList === 'function') {
-    const originalRenderWordList = window.renderWordList;
-    window.renderWordList = function(targetWords, foundWords, difficulty, wordListElement, translateFn, getStemNameKeyFunc) {
-        // Prüfe, ob der Babel-Modus aktiv ist
-        if (window.babelManager && window.babelManager.isActive) {
-            // Erzwinge den Schwierigkeitsgrad 'hard' für den Babel-Modus
-            difficulty = 'hard';
-            console.log("Babel-Modus: Erzwinge Schwierigkeitsgrad 'hard' in renderWordList");
-        }
-
-        // Rufe die ursprüngliche Funktion auf
-        originalRenderWordList(targetWords, foundWords, difficulty, wordListElement, translateFn, getStemNameKeyFunc);
-
-        // Wenn der Babel-Modus aktiv ist, stelle sicher, dass die Wörter vollständig angezeigt werden
-        if (window.babelManager && window.babelManager.isActive) {
-            setTimeout(() => {
-                const wordElements = wordListElement.querySelectorAll('.word:not(.found)');
-                wordElements.forEach(wordEl => {
-                    // Prüfe, ob das Wort nur den ersten Buchstaben zeigt (Loch in der Tasche Modus)
-                    const originalWord = wordEl.dataset.originalWord;
-                    if (originalWord && wordEl.textContent.length <= originalWord.length &&
-                        wordEl.textContent.includes('•')) { // Bullet-Zeichen
-                        console.log(`Babel-Modus: Korrigiere Wortanzeige für '${originalWord}' in renderWordList`);
-                        wordEl.textContent = originalWord; // Zeige das vollständige Wort
-                    }
-                });
-            }, 50);
-        }
-    };
-    console.log("Babel-Modus: renderWordList-Funktion überschrieben");
-}
-
 // Erstelle eine globale Instanz des Babel-Managers
 window.babelManager = new BabelManager();
 
@@ -339,46 +255,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isBabelMode = difficultySelect && difficultySelect.value === 'babel';
 
                 if (isBabelMode) {
-                    // Speichere den ursprünglichen Schwierigkeitsgrad
-                    const originalDifficulty = this.currentDifficulty;
-
-                    // Setze temporär den Schwierigkeitsgrad auf 'hard' für die Initialisierung
+                    // Setze den Schwierigkeitsgrad auf 'hard' NUR für den Babel-Modus
                     this.currentDifficulty = 'hard';
-                    console.log("Babel-Modus: Setze Schwierigkeitsgrad auf 'hard' (Schweres Gepäck)");
-
-                    // Die erlaubten Richtungen werden in initLevel basierend auf dem Schwierigkeitsgrad festgelegt
+                    console.log("Babel-Modus: Setze Schwierigkeitsgrad auf 'hard' (Schweres Gepäck) für die Initialisierung");
                 }
+                // Für andere Modi wird der Schwierigkeitsgrad in der originalen startNewGame Methode gesetzt
 
                 // Rufe die ursprüngliche Methode auf
                 originalStartNewGame.call(this);
 
+                // Aktiviere den Babel-Manager NACH dem Aufruf der originalen Methode, falls nötig
                 if (isBabelMode) {
                     console.log("Aktiviere Babel-Modus");
                     window.babelManager.activate();
-
-                    // Stelle sicher, dass der Schwierigkeitsgrad auf 'hard' bleibt
+                    // Stelle sicher, dass der Schwierigkeitsgrad auf 'hard' bleibt, falls die originale Methode ihn geändert hat
                     this.currentDifficulty = 'hard';
-                    // Die erlaubten Richtungen werden in initLevel basierend auf dem Schwierigkeitsgrad festgelegt
-
-                    // Direkte Manipulation der DOM-Elemente, um sicherzustellen, dass die Wortliste korrekt angezeigt wird
-                    setTimeout(() => {
-                        if (this.domElements && this.domElements.wordList) {
-                            const wordElements = this.domElements.wordList.querySelectorAll('.word:not(.found)');
-                            wordElements.forEach(wordEl => {
-                                // Prüfe, ob das Wort nur den ersten Buchstaben zeigt (Loch in der Tasche Modus)
-                                const originalWord = wordEl.dataset.originalWord;
-                                if (originalWord && wordEl.textContent.length <= originalWord.length &&
-                                    wordEl.textContent.includes('•')) { // Bullet-Zeichen
-                                    console.log(`Babel-Modus: Korrigiere Wortanzeige für '${originalWord}'`);
-                                    wordEl.textContent = originalWord; // Zeige das vollständige Wort
-                                }
-                            });
-                        }
-                    }, 200);
-                } else {
-                    console.log("Deaktiviere Babel-Modus");
-                    window.babelManager.deactivate();
                 }
+                // Kein else-Block mehr nötig, Deaktivierung erfolgt über showStartScreen
             };
 
             // Überschreibe die showStartScreen-Methode, um die ursprüngliche Sprache wiederherzustellen
@@ -466,20 +359,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 window.localization ? window.localization.translate : null,
                                 this.getStemNameKey ? this.getStemNameKey.bind(this) : null
                             );
-
-                            // Direkte Manipulation der DOM-Elemente, um sicherzustellen, dass die Wortliste korrekt angezeigt wird
-                            setTimeout(() => {
-                                const wordElements = this.domElements.wordList.querySelectorAll('.word:not(.found)');
-                                wordElements.forEach(wordEl => {
-                                    // Prüfe, ob das Wort nur den ersten Buchstaben zeigt (Loch in der Tasche Modus)
-                                    const originalWord = wordEl.dataset.originalWord;
-                                    if (originalWord && wordEl.textContent.length <= originalWord.length &&
-                                        wordEl.textContent.includes('•')) { // Bullet-Zeichen
-                                        console.log(`Babel-Modus: Korrigiere Wortanzeige für '${originalWord}'`);
-                                        wordEl.textContent = originalWord; // Zeige das vollständige Wort
-                                    }
-                                });
-                            }, 100);
                         }
                     }
                 };
