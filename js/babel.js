@@ -83,10 +83,28 @@ class BabelManager {
         // Stelle die ursprüngliche Sprache wieder her
         this.restoreOriginalLanguage();
 
-        // Zurücksetzen der gespeicherten Werte (falls sie noch existieren)
+        // BUGFIX: Stelle den ursprünglichen Schwierigkeitsgrad wieder her
+        if (window.gameInstance && this._originalDifficulty) {
+            console.log("Stelle ursprünglichen Schwierigkeitsgrad wieder her:", this._originalDifficulty);
+            window.gameInstance.currentDifficulty = this._originalDifficulty;
+            
+            // Wenn das Select-Element existiert, aktualisiere auch dessen Wert
+            const difficultySelect = document.getElementById('difficultySelect');
+            if (difficultySelect && this._originalSelectValue) {
+                console.log("Stelle ursprünglichen Dropdown-Wert wieder her:", this._originalSelectValue);
+                difficultySelect.value = this._originalSelectValue;
+                
+                // Optional: Visuelles Feedback über die Änderung
+                if (typeof updateDifficultyVisual === 'function' && difficultySelect) {
+                    updateDifficultyVisual(difficultySelect);
+                }
+            }
+        }
+
+        // Zurücksetzen der gespeicherten Werte
         this._originalDifficulty = null;
         this._originalSelectValue = null;
-        this._wordListUpdated = false; // Reset flag
+        this._wordListUpdated = false;
     }
 
     /**
@@ -178,10 +196,17 @@ class BabelManager {
 
         // Stelle sicher, dass der Schwierigkeitsgrad auf "hard" (Schweres Gepäck) gesetzt ist
         if (window.gameInstance) {
-            // Speichere den ursprünglichen Schwierigkeitsgrad für die spätere Wiederherstellung
-            if (!this._originalDifficulty && window.gameInstance.currentDifficulty !== 'hard') {
+            // Speichere den ursprünglichen Schwierigkeitsgrad, wenn noch nicht getan
+            if (!this._originalDifficulty) {
                 this._originalDifficulty = window.gameInstance.currentDifficulty;
                 console.log(`Babel-Modus: Speichere ursprünglichen Schwierigkeitsgrad '${this._originalDifficulty}'`);
+                
+                // Auch den Dropdown-Wert speichern
+                const difficultySelect = document.getElementById('difficultySelect');
+                if (difficultySelect) {
+                    this._originalSelectValue = difficultySelect.value;
+                    console.log(`Babel-Modus: Speichere ursprünglichen Dropdown-Wert '${this._originalSelectValue}'`);
+                }
             }
 
             // Prüfe den aktuellen Schwierigkeitsgrad
@@ -190,16 +215,6 @@ class BabelManager {
 
                 // Setze den Schwierigkeitsgrad auf 'hard'
                 window.gameInstance.currentDifficulty = 'hard';
-
-                // Aktualisiere auch das Dropdown-Menü, falls vorhanden
-                const difficultySelect = document.getElementById('difficultySelect');
-                if (difficultySelect && difficultySelect.value !== 'babel') {
-                    // Speichere den ursprünglichen Wert des Dropdowns
-                    this._originalSelectValue = difficultySelect.value;
-                    console.log(`Babel-Modus: Speichere ursprünglichen Dropdown-Wert '${this._originalSelectValue}'`);
-                }
-
-                // Die erlaubten Richtungen werden in initLevel basierend auf dem Schwierigkeitsgrad festgelegt
             }
 
             // Aktualisiere die Wortliste, um sicherzustellen, dass sie den richtigen Schwierigkeitsgrad verwendet
@@ -207,7 +222,7 @@ class BabelManager {
                 typeof window.renderWordList === 'function') {
                 console.log("Aktualisiere Wortliste für Babel-Modus mit Schwierigkeitsgrad 'hard'");
 
-                // Wichtig: Wir übergeben explizit 'hard' als Schwierigkeitsgrad, nicht window.gameInstance.currentDifficulty
+                // Wichtig: Wir übergeben explizit 'hard' als Schwierigkeitsgrad
                 window.renderWordList(
                     window.gameInstance.targetWords,
                     window.gameInstance.foundWords,
@@ -254,76 +269,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 const difficultySelect = document.getElementById('difficultySelect');
                 const isBabelMode = difficultySelect && difficultySelect.value === 'babel';
 
-                if (isBabelMode) {
-                    // Setze den Schwierigkeitsgrad auf 'hard' NUR für den Babel-Modus
-                    this.currentDifficulty = 'hard';
-                    console.log("Babel-Modus: Setze Schwierigkeitsgrad auf 'hard' (Schweres Gepäck) für die Initialisierung");
-                }
-                // Für andere Modi wird der Schwierigkeitsgrad in der originalen startNewGame Methode gesetzt
-
-                // Rufe die ursprüngliche Methode auf
+                // Rufe die ursprüngliche Methode ZUERST auf
+                // Diese setzt this.currentDifficulty basierend auf dem Dropdown
                 originalStartNewGame.call(this);
 
-                // Aktiviere den Babel-Manager NACH dem Aufruf der originalen Methode, falls nötig
+                // Prüfe NACHHER, ob Babel aktiviert oder deaktiviert werden muss
                 if (isBabelMode) {
+                    // Babel wurde ausgewählt
                     console.log("Aktiviere Babel-Modus");
-                    window.babelManager.activate();
-                    // Stelle sicher, dass der Schwierigkeitsgrad auf 'hard' bleibt, falls die originale Methode ihn geändert hat
+                    // Stelle sicher, dass der interne Schwierigkeitsgrad 'hard' ist
                     this.currentDifficulty = 'hard';
+                    // Aktiviere den Babel-Manager (dieser speichert die Originalsprache etc.)
+                    window.babelManager.activate();
+                } else {
+                    // Ein anderer Modus wurde ausgewählt
+                    // Prüfe, ob Babel vorher aktiv war, um es zu deaktivieren
+                    if (window.babelManager.isActive) {
+                        console.log("Deaktiviere Babel-Modus, da anderer Schwierigkeitsgrad gewählt wurde.");
+                        // Stelle die Originalsprache wieder her
+                        window.babelManager.restoreOriginalLanguage();
+                        // Deaktiviere den Babel-Manager
+                        window.babelManager.deactivate();
+                    }
+                    // Der Schwierigkeitsgrad wurde bereits korrekt von originalStartNewGame gesetzt
                 }
-                // Kein else-Block mehr nötig, Deaktivierung erfolgt über showStartScreen
             };
 
-            // Überschreibe die showStartScreen-Methode, um die ursprüngliche Sprache wiederherzustellen
+            // Überschreibe die showStartScreen-Methode (vereinfacht, keine Babel-Deaktivierung hier)
             if (typeof window.gameInstance.showStartScreen === 'function') {
                 const originalShowStartScreen = window.gameInstance.showStartScreen;
                 window.gameInstance.showStartScreen = function() {
-                    // Stelle die ursprüngliche Sprache wieder her, wenn der Babel-Modus aktiv ist
-                    if (window.babelManager && window.babelManager.isActive) {
-                        console.log("Babel-Modus: Rückkehr zum Startbildschirm, stelle ursprüngliche Einstellungen wieder her");
-
-                        // Stelle die ursprüngliche Sprache wieder her
-                        window.babelManager.restoreOriginalLanguage();
-
-                        // Deaktiviere den Babel-Modus, um sicherzustellen, dass alle Einstellungen zurückgesetzt werden
-                        window.babelManager.deactivate();
-
-                        // Stelle sicher, dass der Schwierigkeitsgrad im Dropdown-Menü korrekt angezeigt wird
-                        const difficultySelect = document.getElementById('difficultySelect');
-                        if (difficultySelect) {
-                            // Aktualisiere die visuelle Darstellung des Dropdowns
-                            if (typeof updateDifficultyVisual === 'function') {
-                                updateDifficultyVisual(difficultySelect);
-                            }
-                        }
-                    }
-
-                    // Rufe die ursprüngliche Methode auf
+                    // Rufe einfach die ursprüngliche Methode auf
+                    // Die Aktivierung/Deaktivierung von Babel wird jetzt in startNewGame gehandhabt
                     originalShowStartScreen.call(this);
-
-                    // Zusätzliche Prüfung nach dem Aufruf der ursprünglichen Methode
-                    if (window.gameInstance && window.gameInstance.currentDifficulty === 'loose' &&
-                        window.gameInstance.domElements && window.gameInstance.domElements.difficultySelect &&
-                        window.gameInstance.domElements.difficultySelect.value !== 'loose') {
-
-                        console.log("Babel-Modus: Korrigiere Inkonsistenz im Schwierigkeitsgrad");
-
-                        // Setze den Schwierigkeitsgrad auf den Wert des Dropdowns
-                        window.gameInstance.currentDifficulty = window.gameInstance.domElements.difficultySelect.value;
-
-                        // Aktualisiere die Wortliste, falls sie existiert
-                        if (window.gameInstance.domElements.wordList && typeof window.renderWordList === 'function') {
-                            console.log(`Aktualisiere Wortliste mit korrigiertem Schwierigkeitsgrad '${window.gameInstance.currentDifficulty}'`);
-                            window.renderWordList(
-                                window.gameInstance.targetWords || [],
-                                window.gameInstance.foundWords || new Set(),
-                                window.gameInstance.currentDifficulty,
-                                window.gameInstance.domElements.wordList,
-                                window.localization ? window.localization.translate : null,
-                                window.gameInstance.getStemNameKey ? window.gameInstance.getStemNameKey.bind(window.gameInstance) : null
-                            );
-                        }
-                    }
                 };
             }
 

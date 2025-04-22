@@ -27,6 +27,38 @@ document.addEventListener('DOMContentLoaded', function() {
       );
       
       if (confirmReturn) {
+        // BUGFIX: Prüfen, ob der Babel-Modus aktiv ist, und diesen explizit deaktivieren
+        if (window.babelManager && window.babelManager.isActive) {
+          console.log("Deaktiviere Babel-Modus beim Zurückkehren zum Startbildschirm");
+          
+          // Originalsprache wiederherstellen
+          window.babelManager.restoreOriginalLanguage();
+          
+          // BabelManager explizit deaktivieren
+          window.babelManager.deactivate();
+          
+          // Stellen sicher, dass der Dropdown tatsächlich auf "babel" steht
+          const difficultySelect = document.getElementById('difficultySelect');
+          if (difficultySelect && difficultySelect.value !== 'babel') {
+            difficultySelect.value = 'babel';
+          }
+          
+          // WICHTIG: Stellen sicher, dass der Schwierigkeitsgrad im GameManager zurückgesetzt wird
+          if (window.gameInstance) {
+            // Originalwert aus dem gespeicherten Wert im babelManager verwenden, wenn vorhanden
+            if (window.babelManager._originalDifficulty) {
+              window.gameInstance.currentDifficulty = window.babelManager._originalDifficulty;
+              console.log("Schwierigkeitsgrad zurückgesetzt auf:", window.babelManager._originalDifficulty);
+            } else {
+              // Fallback: Setze auf den Wert des Dropdown-Menüs
+              if (difficultySelect) {
+                window.gameInstance.currentDifficulty = difficultySelect.value;
+                console.log("Schwierigkeitsgrad zurückgesetzt auf Dropdown-Wert:", difficultySelect.value);
+              }
+            }
+          }
+        }
+        
         // Spielfortschritt speichern, wenn gameInstance verfügbar ist
         if (window.gameInstance && typeof window.gameInstance.saveGameProgress === 'function') {
           window.gameInstance.saveGameProgress();
